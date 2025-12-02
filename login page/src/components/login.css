@@ -56,7 +56,7 @@ body {
 }
 
 .heading-text img {
-    width: 70px;
+    width: 100px;
 }
 
 .title {
@@ -100,6 +100,7 @@ body {
     outline: none;
     background-color: var(--input-bg);
     font-size: 14px;
+    color: black;
 }
 
 .filds button {
