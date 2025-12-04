@@ -1,7 +1,12 @@
+@import url("https://fonts.googleapis.com/css2?family=Hanuman:wght@100..900&display=swap");
+
+body {
+  font-family: "Hanuman";
+}
+
 #root {
-  max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  /* padding: 2rem; */
   text-align: center;
 }
 
@@ -39,4 +44,10 @@
 
 .read-the-docs {
   color: #888;
+}
+.page-title {
+  background-image: linear-gradient(to right, #2b308f, #58a7b5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
