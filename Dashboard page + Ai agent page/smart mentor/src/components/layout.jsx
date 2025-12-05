@@ -28,11 +28,12 @@ import LearningPath from "../assets/book-open.png";
 import AiMentor from "../assets/Lamp_light.png";
 import DashboardIcon from "../assets/Frame.png";
 import Logo from "../assets/Logo.png";
+import "../App.css"; 
 
 const drawerWidth = 262;
 
 export default function Layout() {
-  
+
   const navigate = useNavigate();
   const [alignment, setAlignment] = useState("Dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -85,9 +86,10 @@ export default function Layout() {
           {menuItems.map((item) => (
             <ListItem key={item.name} disablePadding sx={{ mb: 1 }}>
               <ToggleButton
+                onClick={handleDrawerClose} // Close the menu after selecting 
                 value={item.name}
                 sx={{
-                  "&.Mui-selected": {
+                  "&.MuiToggleButton-root.Mui-selected": { // The selected menuItem stays blue on hover
                     backgroundColor: "#0A5ADB",
                     color: "white",
                   },
@@ -102,20 +104,21 @@ export default function Layout() {
                 }}
               >
                 <ListItemIcon sx={{ minWidth: "40px" }}>
-                  <img 
-                    src={item.image} 
-                    alt="" 
-                    style={{ width: "24px", height: "24px" }} 
+                  <img
+                    src={item.image}
+                    alt=""
+                    style={{ width: "24px", height: "24px" }}
                   />
                 </ListItemIcon>
-                <ListItemText 
-                  primary={item.name} 
-                  sx={{ 
+                <ListItemText
+                  primary={item.name}
+                  sx={{
                     "& .MuiTypography-root": {
+                      fontFamily: "Hanuman",
                       fontSize: "16px",
-                      fontWeight: 500
-                    }
-                  }} 
+                      fontWeight: 500,
+                    },
+                  }}
                 />
               </ToggleButton>
             </ListItem>
@@ -137,38 +140,41 @@ export default function Layout() {
           bgcolor: "white",
           boxShadow: "none",
           borderBottom: "1.48px solid #0000001f",
-          height: "65px"
+          height: "65px",
         }}
       >
-        <Toolbar sx={{ 
-          display: "flex", 
-          justifyContent: "space-between",
-          alignItems: "center",
-          height: "65px",
-          px: { xs: 2, sm: 3 }
-        }}>
+        <Toolbar
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            height: "65px",
+            px: { xs: 2, sm: 3 },
+          }}
+        >
           <Box display={"flex"} alignItems={"center"} gap={2}>
             <IconButton
-              sx={{ 
-                display: { sm: "none" }, 
+              sx={{
+                display: { sm: "none" },
                 color: "#00000066",
-                p: 1
+                p: 1,
               }}
               onClick={handleDrawerToggle}
             >
               <MenuIcon />
             </IconButton>
-            <img 
-              src={Logo} 
-              alt="Logo" 
-              style={{ width: "70px", height: "70px" }} 
+            <img
+              src={Logo}
+              alt="Logo"
+              style={{ width: "70px", height: "70px" }}
             />
-            <Typography 
-              sx={{ 
-                fontFamily: "Haettenschweiler", 
+            <Typography
+              className="page-title" // Page-title gradient
+              sx={{
+                fontFamily: "Haettenschweiler",
                 fontSize: { xs: "32px", sm: "46px" },
-                color: "black",
-                lineHeight: 1
+                // color: "black",
+                lineHeight: 1,
               }}
             >
               SmartMentor
@@ -176,15 +182,15 @@ export default function Layout() {
           </Box>
 
           <Box>
-            <img 
-              src={Profile} 
-              alt="Profile" 
-              style={{ 
-                width: "40px", 
+            <img
+              src={Profile}
+              alt="Profile"
+              style={{
+                width: "40px",
                 height: "40px",
                 borderRadius: "50%",
-                objectFit: "cover"
-              }} 
+                objectFit: "cover",
+              }}
             />
           </Box>
         </Toolbar>
@@ -204,7 +210,7 @@ export default function Layout() {
               width: drawerWidth,
               borderRight: "1.48px solid #0000001f",
               bgcolor: "#FAFAFA",
-              marginTop:"20px"
+              marginTop: "20px",
             },
           }}
           open
@@ -226,13 +232,13 @@ export default function Layout() {
             bgcolor: "#FAFAFA",
           },
         }}
-        ModalProps={{ 
+        ModalProps={{
           keepMounted: true,
           sx: {
             "& .MuiBackdrop-root": {
-              backgroundColor: "rgba(0, 0, 0, 0.2)"
-            }
-          }
+              backgroundColor: "rgba(0, 0, 0, 0.2)",
+            },
+          },
         }}
       >
         {drawer}
@@ -246,7 +252,7 @@ export default function Layout() {
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           mt: "65px",
           minHeight: "calc(100vh - 65px)",
-          bgcolor: "#f9f9f9"
+          bgcolor: "#f9f9f9",
         }}
       >
         <Outlet />

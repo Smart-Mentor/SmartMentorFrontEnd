@@ -27,7 +27,7 @@ const Dashboard = () => {
       }}
     >
       {/* HEADER */}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 3, textAlign: "start"}}>
         <h1 style={{ fontSize: "32px", fontWeight: 700 }}>Welcome back, Ahmed! 👋</h1>
         <p style={{ fontSize: "16px", color: "#555" }}>
           Here's your learning progress overview
