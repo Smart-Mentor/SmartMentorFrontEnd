@@ -1,0 +1,162 @@
+/* ================== Login Page Wrapper ================== */
+.login-page {
+    min-height: 100vh;
+    background-color: #eff6fe;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-page * {
+    box-sizing: border-box;
+}
+
+
+/* ================== Variables ================== */
+.login-page {
+    --bg-white: #ffffff;
+    --input-bg: #F9FAFB;
+    --input-border: #eee;
+    --blue-main: #0A5ADB;
+    --blue-dark: #08419e;
+    --gradient-start: #2B308F;
+    --gradient-end: #58A7B5;
+    --text-muted: #8d8d8d;
+    --border-radius: 20px;
+}
+
+/* ================== Container ================== */
+.login-page .container {
+    background-color: var(--bg-white);
+    padding: 30px 25px;
+    border-radius: var(--border-radius);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 400px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+/* ================== Heading ================== */
+.login-page .heading-text {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.login-page .heading-text h1 {
+    margin: 0;
+    font-size: 32px;
+    background: linear-gradient(
+        to right,
+        var(--gradient-start),
+        var(--gradient-end)
+    );
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.login-page .heading-text h2 {
+    margin: 5px 0 15px;
+    font-weight: 500;
+    color: #000;
+}
+
+.login-page .heading-text img {
+    width: 100px;
+}
+
+.login-page .title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ================== Form ================== */
+.login-page .fields {
+    width: 100%;
+}
+
+.login-page .fields label {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 5px;
+    color: var(--text-muted);
+    padding-left: 10px;
+}
+
+.login-page .fields input {
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 13px 15px;
+    border: 1px solid var(--input-border);
+    border-radius: 7px;
+    outline: none;
+    background-color: var(--input-bg);
+    font-size: 14px;
+    color: black;
+}
+
+.login-page .fields button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 7px;
+    border: none;
+    background-color: var(--blue-main);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.login-page .fields button:hover {
+    background-color: var(--blue-dark);
+}
+
+
+/* ================== Password Field ================== */
+.login-page .password-field {
+    position: relative;
+    width: 100%;
+}
+
+.login-page .password-field input {
+    width: 100%;
+    padding-right: 40px;
+}
+
+.login-page .password-field i {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 18px;
+}
+
+
+/* ================== Footer ================== */
+.login-page .footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin-top: 15px;
+}
+
+.login-page .footer p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.login-page .footer a {
+    text-decoration: none;
+    color: var(--blue-main);
+}
+
+.login-page .footer a:hover {
+    color: var(--blue-dark);
+}
