@@ -51,6 +51,12 @@ body {
   background-clip: text;
   color: transparent;
 }
+.Success {
+  background-image: linear-gradient(to right, #136c73, #23cbd9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
 
 .checkbox-label:has(input:checked) {
   text-decoration: line-through;

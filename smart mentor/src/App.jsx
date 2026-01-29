@@ -5,15 +5,19 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Aiagent from "./pages/Aiagent";
 import LearningPath from "./pages/LearningPath";
+import Home from "./pages/Home";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* ROOT -> LOGIN */}
-        <Route path="/" element={<Navigate to="/login" />} />
+        {/* ROOT -> HOME */}
+        <Route path="/" element={<Navigate to="/home" />} />
 
+        {/* Home Page */}
+        <Route path="/home" element={<Home />} />
+        
         {/* Login Page */}
         <Route path="/login" element={<Login />} />
 
