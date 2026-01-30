@@ -9,10 +9,10 @@ export default function NavBtn({
     <div>
       <Button
         style={{
-          width: "188.16146850585938px",
-          height: "66.67138671875px",
+          maxWidth: "188.16146850585938px",
+          maxHeight: "66.67138671875px",
           fontFamily: "Halant",
-          fontSize: "33px",
+          fontSize: "20px",
           border: "1.48px solid #00000033",
           borderRadius: "20px",
           textTransform: "none",

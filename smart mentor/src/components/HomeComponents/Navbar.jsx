@@ -32,7 +32,7 @@ export default function Navbar() {
             }}
           />
           <p
-            style={{ fontFamily: "Haettenschweiler", fontSize: "53.34px" }}
+            style={{ fontFamily: "Haettenschweiler", fontSize: "40px" }}
             className="page-title"
           >
             SmartMentor
