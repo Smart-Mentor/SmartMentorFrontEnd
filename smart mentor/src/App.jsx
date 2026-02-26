@@ -6,6 +6,8 @@ import Dashboard from "./pages/Dashboard";
 import Aiagent from "./pages/Aiagent";
 import LearningPath from "./pages/LearningPath";
 import Home from "./pages/Home";
+import Signup from "./pages/Signup";
+import CompleteProfile from "./pages/CompleteProfile";
 
 function App() {
   return (
@@ -20,6 +22,12 @@ function App() {
         
         {/* Login Page */}
         <Route path="/login" element={<Login />} />
+
+        {/* Signup Page */}
+        <Route path="/signup" element={<Signup />} />
+
+        {/* CompleteProfile Page */}
+        <Route path="/completeprofile" element={<CompleteProfile />} />
 
         {/* App Layout (after login) */}
         <Route element={<Layout />}>

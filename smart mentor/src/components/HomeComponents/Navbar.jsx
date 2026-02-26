@@ -47,9 +47,11 @@ export default function Navbar() {
           }}
         >
           <Link to={"/login"}>
-          <NavBtn name={"Login"} color="black"/>
+            <NavBtn name={"Login"} color="black" />
           </Link>
-          <NavBtn name={"Get Started"} bgcolor="#2563EB" color="white" />
+          <Link to={"/signup"}>
+            <NavBtn name={"Get Started"} bgcolor="#2563EB" color="white" />
+          </Link>
         </div>
       </div>
     </div>

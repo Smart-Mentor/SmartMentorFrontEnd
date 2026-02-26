@@ -3,51 +3,47 @@ import { useState } from "react";
 import "./login.css";
 import logo from "../assets/sign in logo.png";
 
-export default function Login() {
+export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="login-page">
       <div className="container">
-
         <div className="heading-text">
           <div className="title">
             <img src={logo} alt="SmartMentor Logo" />
             <h1>SmartMentor</h1>
           </div>
 
-          <h2>Welcome Back</h2>
-          <p>Sign in to continue your learning journey</p>
+          <h2>Create Your Account</h2>
+          <p>Start your journey to career success</p>
         </div>
 
         <div className="fields">
+          <label htmlFor="fullname">Full Name</label>
+          <input id="fullname" type="text" />
+
           <label htmlFor="email">Email</label>
           <input id="email" type="email" />
 
           <label htmlFor="password">Password</label>
 
           <div className="password-field">
-            <input
-              id="password"
-              type={showPassword ? "text" : "password"}
-            />
+            <input id="password" type={showPassword ? "text" : "password"} />
 
             <i
-              className={`fa-solid ${
-                showPassword ? "fa-eye" : "fa-eye-slash"
-              }`}
+              className={`fa-solid ${showPassword ? "fa-eye" : "fa-eye-slash"}`}
               onClick={() => setShowPassword(!showPassword)}
             ></i>
           </div>
 
-          <button>Sign in</button>
+          <button>Create Account</button>
         </div>
 
         <div className="footer">
-          <p>Don't have an account?</p>
-          <Link to={"/signup"}>Sign Up</Link>
+          <p>Do You have an account?</p>
+          <Link to={"/login"}>Login</Link>
         </div>
-
       </div>
     </div>
   );
