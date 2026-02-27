@@ -1,50 +1,111 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import "./login.css";
 import logo from "../assets/sign in logo.png";
 
 export default function Signup() {
-  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+    confirmPassword: "",
+    role: "student",
+  });
+  const [error, setError] = useState("");
+
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    }
+  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (formData.password != formData.confirmPassword) {
+      setError("Passwords don't match");
+      return;
+    }
+    setError("");
+    navigate("/login");
+  };
 
   return (
-    <div className="login-page">
-      <div className="container">
-        <div className="heading-text">
-          <div className="title">
-            <img src={logo} alt="SmartMentor Logo" />
-            <h1>SmartMentor</h1>
+    <form onSubmit={handleSubmit}>
+      <div className="login-page">
+        <div className="container">
+          <div className="heading-text">
+            <div className="title">
+              <img src={logo} alt="SmartMentor Logo" />
+              <h1>SmartMentor</h1>
+            </div>
+
+            <h2>Create Your Account</h2>
+            <p>Start your journey to career success</p>
           </div>
 
-          <h2>Create Your Account</h2>
-          <p>Start your journey to career success</p>
-        </div>
+          <div className="fields">
+            <label>First Name</label>
+            <input
+              type="text"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+            />
 
-        <div className="fields">
-          <label htmlFor="fullname">Full Name</label>
-          <input id="fullname" type="text" />
+            <label>Last Name</label>
+            <input
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+            />
 
-          <label htmlFor="email">Email</label>
-          <input id="email" type="email" />
+            <label>Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+            />
 
-          <label htmlFor="password">Password</label>
+            <label>Phone Number</label>
+            <input
+              type="tel"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+            />
 
-          <div className="password-field">
-            <input id="password" type={showPassword ? "text" : "password"} />
+            <label>Password</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+            />
 
-            <i
-              className={`fa-solid ${showPassword ? "fa-eye" : "fa-eye-slash"}`}
-              onClick={() => setShowPassword(!showPassword)}
-            ></i>
+            <label>Confirm Password</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+            />
+
+            {error && <p style={{ color: "red" }}>{error}</p>}
+
+            <button type="submit">Create Account</button>
           </div>
 
-          <button>Create Account</button>
-        </div>
-
-        <div className="footer">
-          <p>Do You have an account?</p>
-          <Link to={"/login"}>Login</Link>
+          <div className="footer">
+            <p>Do You have an account?</p>
+            <Link to={"/login"}>Login</Link>
+          </div>
         </div>
       </div>
-    </div>
+    </form>
   );
 }
