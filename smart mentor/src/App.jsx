@@ -8,18 +8,19 @@ import LearningPath from "./pages/LearningPath";
 import Home from "./pages/Home";
 import Signup from "./pages/Signup";
 import CompleteProfile from "./pages/CompleteProfile";
+import ProgressTracking from "./pages/ProgressTracking";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-
         {/* ROOT -> HOME */}
         <Route path="/" element={<Navigate to="/home" />} />
 
         {/* Home Page */}
         <Route path="/home" element={<Home />} />
-        
+
         {/* Login Page */}
         <Route path="/login" element={<Login />} />
 
@@ -29,16 +30,19 @@ function App() {
         {/* CompleteProfile Page */}
         <Route path="/completeprofile" element={<CompleteProfile />} />
 
+        {/* Progress Tracking Page */}
+        <Route path="/progresstracking" element={<ProgressTracking />} />
+
         {/* App Layout (after login) */}
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/aimentor" element={<Aiagent />} />
           <Route path="/learningpath" element={<LearningPath />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
 
         {/* Any wrong route */}
         <Route path="*" element={<Navigate to="/login" />} />
-
       </Routes>
     </BrowserRouter>
   );
