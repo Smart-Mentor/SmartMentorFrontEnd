@@ -1,4 +1,4 @@
-import { Avatar, Button } from "@mui/material";
+import { Avatar, Button, Typography } from "@mui/material";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -73,68 +73,54 @@ export default function Profile() {
 
   return (
     <>
-    <div
-      style={{
-        border: "1px solid #00000066",
-        borderRadius: "12px",
-        width: "94%",
-        margin: "5px auto",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          padding: "15px",
-          alignItems: "center",
-          gap: "20px",
-        }}
-      >
-        <Avatar
-          {...stringAvatar(`${name}`)}
-          style={{
-            width: "88px",
-            height: "88px",
-            color: "#000000CC",
-            fontSize: "44px",
-          }}
-        />
-        <div style={{ textAlign: "start" }}>
-          <h1>{name}</h1>
-          <p style={{ marginTop: "-25px" }}>Frontend Developer</p>
-        </div>
-      </div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "40px",
-          flexWrap: "wrap",
-          marginLeft: "12%",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <MailOutlineIcon />
-          <p>ahmed.samy@example.com</p>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <LocationOnOutlinedIcon />
-          <p>Cairo, Egypt</p>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <CalendarTodayIcon />
-          <p>Joined January 2025</p>
-        </div>
-      </div>
-    </div>
+    <Box
+  sx={{
+    border: "1px solid #00000066",
+    borderRadius: 2,
+    width: { xs: "95%", sm: "90%", md: "92.5%" },
+    margin: "10px auto",
+    p: 2,
+  }}
+>
+  <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: "center", gap: 2 }}>
+    <Avatar
+      {...stringAvatar(name)}
+      sx={{ width: 88, height: 88, fontSize: 44, color: "#000000CC" }}
+    />
+    <Box sx={{ textAlign: { xs: "center", sm: "start" } }}>
+      <Typography variant="h5">{name}</Typography>
+      <Typography variant="body2">Frontend Developer</Typography>
+    </Box>
+  </Box>
 
-        <div style={{display:"flex", justifyContent:"space-evenly", flexWrap:"wrap", marginTop:"20px", gap:"20px"}}>
-          {stats.map((label,index)=>(
-            <div key={index} style={{border: "1px solid #00000066", borderRadius:"12px", minWidth:"20%", width:"150px"}}>
-        <p>{label.name}</p>
-        <h1>{label.num}</h1>
-    </div>
-          ))}
-    </div>
+  {/* Contact Info */}
+  <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: { xs: "center", sm: "flex-start" }, gap: 4, mt: 2 }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <MailOutlineIcon /> <Typography>ahmed.samy@example.com</Typography>
+    </Box>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <LocationOnOutlinedIcon /> <Typography>Cairo, Egypt</Typography>
+    </Box>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <CalendarTodayIcon /> <Typography>Joined January 2025</Typography>
+    </Box>
+  </Box>
+</Box>
+
+        <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 2, mt: 2 }}>
+  {stats.map((item, index) => (
+    <Box key={index} sx={{
+      border: "1px solid #00000066",
+      borderRadius: 2,
+      width: { xs: "45%", sm: "22%" },
+      p: 2,
+      textAlign: "center"
+    }}>
+      <Typography>{item.name}</Typography>
+      <Typography variant="h5">{item.num}</Typography>
+    </Box>
+  ))}
+</Box>
 
       <TabContext value={value}>
   <Box
@@ -143,7 +129,7 @@ export default function Profile() {
       borderRadius: "8px",
       bgcolor: "#CECECE",
       minidth:"100%",
-      maxWidth: "400px",
+      maxWidth: "520px",
       marginTop:"20px",
       marginLeft:"3%",
     }}
@@ -178,16 +164,16 @@ export default function Profile() {
 
   <TabPanel value="1">
 
-    <div style={{display:"flex", justifyContent:"space-around", flexWrap:"wrap", gap:"50px"}}>
+     <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 3 }}>
 
-    <div style={{border: "1px solid #00000066" , borderRadius:"8px", minWidth:"45%", width:"300px"}}>
-      <div style={{display:"flex", alignItems:"center", gap:"10px", padding:"10px", marginLeft:"10px"}}>
+    <Box sx={{ border: "1px solid #00000066", borderRadius: 2, minWidth: 280, flex: 1, maxWidth: 500 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, p: 1 }}>
         <img src={Progress_img}/>
         <div style={{textAlign:"start"}}>
           <h4>Roadmap Progress</h4>
           <p style={{marginTop:"-20px"}}>Frontend Developer Path</p>
         </div>
-      </div>
+      </Box>
 
       <div style={{marginBottom:"30px"}}>
         {progress.map((label,index)=>(
@@ -217,28 +203,28 @@ export default function Profile() {
         </div>
         ))}
       </div>
-    </div>
+    </Box>
 
-    <div style={{border: "1px solid #00000066" , borderRadius:"8px", minWidth:"45%", width:"300px"}}>
+    <Box sx={{ border: "1px solid #00000066", borderRadius: 2, minWidth: 280, flex: 1, maxWidth: 500, p: 1 }}>
       <div style={{textAlign:"start" , padding:"10px", marginLeft:"10px"}}>
         <h4>Saved Projects</h4>
         <p style={{marginTop:"-20px"}}>Your project bookmarks</p>
       </div>
       {projects.map((label,index)=>(
-        <div key={index} style={{border: "0.5px solid #00000066" , borderRadius:"12px", textAlign:"start", width:"90%", margin:"auto", marginBottom:"10px"}}>
+        <Box key={index} style={{border: "0.5px solid #00000066" , borderRadius:"12px", textAlign:"start", width:"90%", margin:"auto", marginBottom:"10px"}}>
         <h4 style={{marginLeft:"15px"}}>{label.name}</h4>
-        <div style={{display:"flex", alignItems:"center", marginTop:"-30px", gap:"15px", marginLeft:"15px"}}>
-          <div style={{border: "0.5px solid #00000066" , borderRadius:"12px", width:"25%", textAlign:"center"}}>
-            <span>{label.level}</span>
+        <Box sx={{display:"flex", alignItems:"center", marginTop:"-30px", gap:"15px", marginLeft:"15px"}}>
+          <div style={{border: "0.5px solid #00000066" , borderRadius:"12px", padding:"3px", textAlign:"center"}}>
+            {label.level}
           </div>
           <p style={{color:"#0A5ADB"}}>{label.statue}</p>
-        </div>
-      </div>
+        </Box>
+      </Box>
       ))}
-    </div>
-    </div>
+    </Box>
+    </Box>
 
-        <div style={{border: "1px solid #00000066",borderRadius: "12px",width: "97%",margin: "30px auto"}}>
+        <Box sx={{ border: "1px solid #00000066", borderRadius: 2, width: "98%", mx: "auto", mt: 3 }}>
           <div style={{display:"flex", alignItems:"center", gap:"10px", padding:"10px", marginLeft:"10px"}}>
             <img src={Document_img}/>
             <div style={{textAlign:"start"}}>
@@ -246,7 +232,7 @@ export default function Profile() {
               <p style={{marginTop:"-20px"}}>Your uploaded documents</p>
             </div>
           </div>
-          <div style={{border: "1px solid #00000066", borderRadius:"8px",width: "90%",margin: "5px auto", display:"flex", alignItems:"center", justifyContent:"space-between"}}>
+          <div style={{border: "1px solid #00000066", borderRadius:"8px",margin: "5px 30px", display:"flex", alignItems:"center", justifyContent:"space-between"}}>
             <div style={{display:"flex", alignItems:"center", gap:"10px", padding:"10px", marginLeft:"10px"}}>
               <img src={Document_img} style={{width:"28px", height:"28px"}}/>
               <div style={{textAlign:"start"}}>
@@ -267,7 +253,7 @@ export default function Profile() {
           </Button>
           </div>
           <br />
-        </div>
+        </Box>
 
   </TabPanel>
 
