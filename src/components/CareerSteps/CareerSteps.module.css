@@ -1,0 +1,273 @@
+/* Container */
+.career_steps_container {
+  position: relative;
+  padding: 40px 20px;
+  overflow-x: hidden;
+}
+
+/* Background Elements */
+.bg_elements {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.bg_circle_1 {
+  position: absolute;
+  top: 10%;
+  left: 5%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.05), transparent);
+  border-radius: 50%;
+  animation: float 8s ease-in-out infinite;
+}
+
+.bg_circle_2 {
+  position: absolute;
+  bottom: 10%;
+  right: 5%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(79, 172, 254, 0.05), transparent);
+  border-radius: 50%;
+  animation: float 10s ease-in-out infinite reverse;
+}
+
+.bg_circle_3 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(240, 147, 251, 0.03), transparent);
+  border-radius: 50%;
+  animation: pulse 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-20px) translateX(10px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+/* Connecting Line */
+.connecting_line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent,
+    rgba(102, 126, 234, 0.3),
+    rgba(240, 147, 251, 0.3),
+    rgba(79, 172, 254, 0.3),
+    transparent
+  );
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+/* Steps Grid */
+.steps_grid {
+  display: flex;
+  justify-content: space-around;
+  gap: 40px;
+  position: relative;
+  z-index: 2;
+  flex-wrap: wrap;
+}
+
+.step_wrapper {
+  flex: 1;
+  min-width: 280px;
+  opacity: 0;
+  transform: translateY(50px);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.step_wrapper.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Arrows between steps (desktop only) */
+.arrows {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 120px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.arrow {
+  font-size: 40px;
+  color: rgba(10, 90, 219, 0.2);
+  animation: bounce 2s ease-in-out infinite;
+}
+
+.arrow:first-child {
+  animation-delay: 0s;
+}
+
+.arrow:last-child {
+  animation-delay: 0.5s;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateX(0);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translateX(10px);
+    opacity: 0.5;
+  }
+}
+
+/* Particles */
+.particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 50%;
+  opacity: 0;
+  animation: particleFloat 8s ease-in-out infinite;
+}
+
+.particle:nth-child(1) {
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.particle:nth-child(2) {
+  top: 70%;
+  left: 85%;
+  animation-delay: 1s;
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+}
+
+.particle:nth-child(3) {
+  top: 40%;
+  left: 50%;
+  animation-delay: 2s;
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+}
+
+.particle:nth-child(4) {
+  top: 80%;
+  left: 20%;
+  animation-delay: 3s;
+}
+
+.particle:nth-child(5) {
+  top: 15%;
+  left: 75%;
+  animation-delay: 4s;
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.5;
+  }
+  90% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-100px) translateX(50px) scale(0);
+    opacity: 0;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .arrows {
+    display: none;
+  }
+  
+  .connecting_line {
+    display: none;
+  }
+  
+  .steps_grid {
+    gap: 30px;
+  }
+  
+  .step_wrapper {
+    min-width: 260px;
+  }
+}
+
+@media (max-width: 768px) {
+  .career_steps_container {
+    padding: 30px 16px;
+  }
+  
+  .steps_grid {
+    gap: 24px;
+  }
+  
+  .step_wrapper {
+    min-width: 100%;
+  }
+  
+  .bg_circle_1,
+  .bg_circle_2,
+  .bg_circle_3 {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .career_steps_container {
+    padding: 20px 12px;
+  }
+  
+  .steps_grid {
+    gap: 20px;
+  }
+  
+  .particles {
+    display: none;
+  }
+}

@@ -1,0 +1,627 @@
+/* Dashboard Container */
+.dashboard_container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #eff6fe 0%, #e8f0fa 100%);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Background Blurs */
+.bg_blur_1 {
+  position: fixed;
+  top: -100px;
+  right: -100px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(10, 90, 219, 0.15), transparent);
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: float 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.bg_blur_2 {
+  position: fixed;
+  bottom: -100px;
+  left: -100px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(88, 167, 181, 0.15), transparent);
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: float 10s ease-in-out infinite reverse;
+  pointer-events: none;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-30px) translateX(20px);
+  }
+}
+
+.dashboard_content {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* Header Section */
+.header_section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcome_title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 8px;
+}
+
+.wave {
+  display: inline-block;
+  animation: wave 1s ease-in-out infinite;
+}
+
+@keyframes wave {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(20deg); }
+}
+
+.welcome_subtitle {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+.header_stats {
+  display: flex;
+  gap: 12px;
+}
+
+.stat_badge {
+  background: white;
+  padding: 8px 16px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.stat_badge_icon {
+  font-size: 16px;
+}
+
+.stat_badge_text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+/* Progress Cards Section */
+.cards_section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.progress_card {
+  background: white;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+@keyframes slideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.progress_card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+.card_header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.card_icon {
+  font-size: 28px;
+}
+
+.card_title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #555;
+}
+
+.card_percentage {
+  margin-bottom: 16px;
+}
+
+.percentage_value {
+  font-size: 36px;
+  font-weight: 700;
+  color: #0A5ADB;
+  margin: 0;
+}
+
+.progress_bar_container {
+  background: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 10px;
+  margin-bottom: 12px;
+}
+
+.progress_bar {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 1s ease;
+  animation: fillBar 1s ease-out;
+}
+
+@keyframes fillBar {
+  from {
+    width: 0;
+  }
+}
+
+.card_footer {
+  text-align: right;
+}
+
+.card_status {
+  font-size: 12px;
+  color: #888;
+}
+
+/* Two Column Layout */
+.two_column_layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+/* Next Steps Section */
+.next_steps_section,
+.activity_section,
+.trends_section {
+  background: white;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.next_steps_section:hover,
+.activity_section:hover,
+.trends_section:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+.section_header {
+  margin-bottom: 24px;
+}
+
+.section_title_wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.section_icon {
+  font-size: 24px;
+}
+
+.section_title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.section_subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* Steps List */
+.steps_list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.step_card {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.step_card:hover {
+  background: #f0f0f0;
+  transform: translateX(5px);
+}
+
+.step_icon_wrapper {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, rgba(10, 90, 219, 0.1), rgba(88, 167, 181, 0.1));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step_icon {
+  font-size: 24px;
+}
+
+.step_content {
+  flex: 1;
+}
+
+.step_title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0 0 4px;
+}
+
+.step_description {
+  font-size: 13px;
+  color: #666;
+  margin: 0 0 8px;
+}
+
+.step_button {
+  background: none;
+  border: none;
+  color: #0A5ADB;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.3s ease;
+}
+
+.step_button:hover {
+  color: #58A7B5;
+}
+
+/* Activity Section */
+.activity_list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.activity_item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.activity_item:hover {
+  background: #f0f0f0;
+  transform: translateX(5px);
+}
+
+.activity_dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.activity_dot.success {
+  background: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.activity_dot.info {
+  background: #0A5ADB;
+  box-shadow: 0 0 0 3px rgba(10, 90, 219, 0.2);
+}
+
+.activity_dot.warning {
+  background: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.activity_content {
+  flex: 1;
+}
+
+.activity_action {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a2e;
+  margin: 0 0 4px;
+}
+
+.activity_date {
+  font-size: 12px;
+  color: #888;
+}
+
+.view_all_button {
+  width: 100%;
+  padding: 10px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0A5ADB;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.view_all_button:hover {
+  background: #e0e0e0;
+  transform: translateY(-2px);
+}
+
+/* Trends Section */
+.trends_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.view_trends_button {
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #0A5ADB, #58A7B5);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.view_trends_button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(10, 90, 219, 0.3);
+}
+
+.skills_grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.skill_card {
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.skill_card:hover {
+  background: #f0f0f0;
+  transform: translateY(-2px);
+}
+
+.skill_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.skill_name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.skill_demand {
+  font-size: 12px;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.skill_bar {
+  background: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 6px;
+}
+
+.skill_bar_fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+.trends_footer {
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.trends_stats {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 20px;
+}
+
+.trend_stat {
+  text-align: center;
+}
+
+.trend_stat_value {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: #0A5ADB;
+}
+
+.trend_stat_label {
+  font-size: 12px;
+  color: #666;
+}
+
+.trend_divider {
+  width: 1px;
+  height: 30px;
+  background: #e0e0e0;
+}
+
+/* Quote Section */
+.quote_section {
+  margin-top: 32px;
+  padding: 30px;
+  background: linear-gradient(135deg, rgba(10, 90, 219, 0.05), rgba(88, 167, 181, 0.05));
+  border-radius: 24px;
+  text-align: center;
+  border: 1px solid rgba(10, 90, 219, 0.1);
+}
+
+.quote_icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.quote_text {
+  font-size: 18px;
+  font-weight: 500;
+  color: #1a1a2e;
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+.quote_author {
+  font-size: 14px;
+  color: #0A5ADB;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .two_column_layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .cards_section {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard_content {
+    padding: 16px;
+  }
+  
+  .header_section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .welcome_title {
+    font-size: 24px;
+  }
+  
+  .section_title {
+    font-size: 20px;
+  }
+  
+  .trends_header {
+    flex-direction: column;
+  }
+  
+  .trends_stats {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .trend_divider {
+    width: 80%;
+    height: 1px;
+  }
+  
+  .skills_grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard_content {
+    padding: 12px;
+  }
+  
+  .welcome_title {
+    font-size: 20px;
+  }
+  
+  .progress_card {
+    padding: 16px;
+  }
+  
+  .percentage_value {
+    font-size: 28px;
+  }
+  
+  .section_title {
+    font-size: 18px;
+  }
+  
+  .quote_text {
+    font-size: 14px;
+  }
+}
