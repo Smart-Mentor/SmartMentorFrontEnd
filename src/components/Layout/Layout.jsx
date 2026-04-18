@@ -1,9 +1,10 @@
 import PropTypes from "prop-types";
 import { useState, useEffect, useCallback } from "react";
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import styles from "./Layout.module.css";
 
 export default function Layout() {
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isTablet, setIsTablet] = useState(window.innerWidth <= 1024);
 
@@ -47,6 +48,11 @@ export default function Layout() {
     setMobileOpen(false);
   }, []);
 
+  const handleLogoClick = useCallback(() => {
+    navigate('/');
+    handleDrawerClose();
+  }, [navigate, handleDrawerClose]);
+
   const menuItems = [
     { name: "Dashboard", icon: "fa-solid fa-table-columns fa-xl", path: "/dashboard" },
     { name: "AI Mentor", icon: "fa-solid fa-robot fa-xl", path: "/aimentor" },
@@ -62,7 +68,7 @@ export default function Layout() {
 
   const drawer = (
     <div className={styles.drawer_container}>
-      <div className={styles.logo_container}>
+      <div className={styles.logo_container} onClick={handleLogoClick} style={{ cursor: 'pointer' }}>
         <i className="fas fa-graduation-cap" style={{color: '#258eff'}}></i>
         <h1 className={styles.logo_text}>SmartMentor</h1>
       </div>
