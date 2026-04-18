@@ -2,16 +2,13 @@ import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { Box } from "@mui/material";
 import styles from "./Aiagent.module.css";
+
 import AnalyzeSkills from "../../assets/AnalyzeSkills.png";
 import CareerAdvice from "../../assets/CareerAdvice.png";
 import GenerateRoadmap from "../../assets/GenerateRoadmap.png";
 import ReviewCV from "../../assets/ReviewCV.png";
 import SendBtn from "../../assets/send.png";
 import LampLight from "../../assets/Lamp_light2.png";
-import Like from "../../assets/thumb_up.png";
-import Dislike from "../../assets/thumb_down.png";
-
-const drawerWidth = 262;
 
 const quickActions = [
   { img: AnalyzeSkills, text: "Analyze Skills", icon: "📊", color: "#0A5ADB" },
@@ -25,23 +22,32 @@ const Aiagent = () => {
   const [chat, setChat] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [selectedAction, setSelectedAction] = useState(null);
+  const [sessionId, setSessionId] = useState(null);   // مهم جداً
+
   const chatEndRef = useRef(null);
 
+  // Scroll to bottom
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chat]);
 
+  // Initialize session on first load
+  useEffect(() => {
+    if (!sessionId) {
+      const newSessionId = "session_" + Date.now();
+      setSessionId(newSessionId);
+    }
+  }, []);
+
   const handleQuickAction = (actionText) => {
     setMessage(actionText);
     setSelectedAction(actionText);
-    setTimeout(() => {
-      sendMessage(actionText);
-    }, 100);
+    setTimeout(() => sendMessage(actionText), 100);
   };
 
   const sendMessage = async (customMessage = null) => {
     const msgToSend = customMessage || message;
-    if (!msgToSend.trim()) return;
+    if (!msgToSend.trim() || !sessionId) return;
 
     const userMsg = { sender: "user", text: msgToSend, timestamp: new Date() };
     setChat((prev) => [...prev, userMsg]);
@@ -49,30 +55,36 @@ const Aiagent = () => {
     setIsTyping(true);
 
     try {
-      const res = await axios.post(
-        "https://wish-abacus-barterer.ngrok-free.dev/chat",
-        { message: msgToSend }
-      );
+      const res = await axios.post("https://wish-abacus-barterer.ngrok-free.dev/chat", {
+        message: msgToSend,
+        session_id: sessionId
+      });
 
       const data = res.data;
 
-      let botText = "No courses found";
+      const botMsg = { 
+        sender: "bot", 
+        text: data.message, 
+        courses: data.courses || [], 
+        timestamp: new Date() 
+      };
 
-      if (data.courses && data.courses.length > 0) {
-        botText = data.courses
-          .map(
-            (c) => `🎓 **${c.course_title}**\n📚 Level: ${c.level}\n🔗 ${c.url}`
-          )
-          .join("\n\n");
+      setChat((prev) => [...prev, botMsg]);
+
+      // Update session_id if backend returned a new one
+      if (data.session_id && data.session_id !== sessionId) {
+        setSessionId(data.session_id);
       }
 
-      const botMsg = { sender: "bot", text: botText, timestamp: new Date() };
-      setChat((prev) => [...prev, botMsg]);
     } catch (err) {
       console.error(err);
       setChat((prev) => [
         ...prev,
-        { sender: "bot", text: "❌ Error connecting to server. Please try again.", timestamp: new Date() },
+        { 
+          sender: "bot", 
+          text: "❌ Error connecting to server. Please make sure the backend is running.", 
+          timestamp: new Date() 
+        }
       ]);
     } finally {
       setIsTyping(false);
@@ -89,13 +101,12 @@ const Aiagent = () => {
 
   return (
     <Box component="main" className={styles.aiagent_container}>
-      {/* Background decorative elements */}
       <div className={styles.bg_blur_1}></div>
       <div className={styles.bg_blur_2}></div>
       <div className={styles.bg_blur_3}></div>
 
       <div className={styles.aiagent_content}>
-        {/* Quick Actions Section */}
+        {/* Quick Actions */}
         <div className={styles.quick_actions_section}>
           <div className={styles.section_header}>
             <div className={styles.header_icon_wrapper}>
@@ -130,21 +141,9 @@ const Aiagent = () => {
               </div>
             ))}
           </div>
-
-          <div className={styles.stats_badge}>
-            <div className={styles.stats_item}>
-              <span className={styles.stats_number}>1,234+</span>
-              <span className={styles.stats_label}>Conversations</span>
-            </div>
-            <div className={styles.stats_divider}></div>
-            <div className={styles.stats_item}>
-              <span className={styles.stats_number}>98%</span>
-              <span className={styles.stats_label}>Satisfaction</span>
-            </div>
-          </div>
         </div>
 
-        {/* AI Mentor Chat Section */}
+        {/* Chat Section */}
         <div className={styles.chat_section}>
           <div className={styles.chat_header}>
             <div className={styles.chat_header_left}>
@@ -163,74 +162,58 @@ const Aiagent = () => {
             </div>
           </div>
 
-          {/* Chat Messages */}
+          {/* Messages Area */}
           <div className={styles.chat_messages}>
             {chat.length === 0 ? (
               <div className={styles.welcome_message}>
                 <div className={styles.welcome_icon}>🤖</div>
                 <h3 className={styles.welcome_title}>Hello! I'm your AI Career Mentor</h3>
                 <p className={styles.welcome_text}>
-                  Ask me about courses like "python backend" or "frontend react".<br />
-                  I can help you with career advice, skill analysis, and learning paths.
+                  Ask me about courses like "React", "Python backend", "Data Science beginner", or "Flutter".
                 </p>
                 <div className={styles.example_questions}>
-                  <span className={styles.example_badge}>What courses for React?</span>
-                  <span className={styles.example_badge}>Best Python resources</span>
-                  <span className={styles.example_badge}>Career path for AI</span>
+                  <span className={styles.example_badge}>React courses</span>
+                  <span className={styles.example_badge}>Python backend</span>
+                  <span className={styles.example_badge}>Data Science beginner</span>
                 </div>
               </div>
             ) : (
-              <>
-                {chat.map((msg, i) => (
-                  <div
-                    key={i}
-                    className={`${styles.message} ${msg.sender === "user" ? styles.user_message : styles.bot_message}`}
-                  >
-                    <div className={styles.message_avatar}>
-                      {msg.sender === "user" ? "👤" : "🤖"}
+              chat.map((msg, i) => (
+                <div
+                  key={i}
+                  className={`${styles.message} ${msg.sender === "user" ? styles.user_message : styles.bot_message}`}
+                >
+                  <div className={styles.message_avatar}>
+                    {msg.sender === "user" ? "👤" : "🤖"}
+                  </div>
+                  <div className={styles.message_content}>
+                    <div className={styles.message_text}>
+                      {msg.text.split('\n').map((line, idx) => (
+                        <React.Fragment key={idx}>
+                          {line}
+                          {idx < msg.text.split('\n').length - 1 && <br />}
+                        </React.Fragment>
+                      ))}
                     </div>
-                    <div className={styles.message_content}>
-                      <div className={styles.message_text}>
-                        {msg.text.split('\n').map((line, idx) => (
-                          <React.Fragment key={idx}>
-                            {line}
-                            {idx < msg.text.split('\n').length - 1 && <br />}
-                          </React.Fragment>
-                        ))}
-                      </div>
-                      <div className={styles.message_time}>
-                        {msg.timestamp?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </div>
+                    <div className={styles.message_time}>
+                      {msg.timestamp?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
-                ))}
-                {isTyping && (
-                  <div className={`${styles.message} ${styles.bot_message}`}>
-                    <div className={styles.message_avatar}>🤖</div>
-                    <div className={styles.message_content}>
-                      <div className={styles.typing_indicator}>
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                      </div>
-                    </div>
+                </div>
+              ))
+            )}
+
+            {isTyping && (
+              <div className={`${styles.message} ${styles.bot_message}`}>
+                <div className={styles.message_avatar}>🤖</div>
+                <div className={styles.message_content}>
+                  <div className={styles.typing_indicator}>
+                    <span></span><span></span><span></span>
                   </div>
-                )}
-              </>
+                </div>
+              </div>
             )}
             <div ref={chatEndRef} />
-          </div>
-
-          {/* Like / Dislike Buttons */}
-          <div className={styles.feedback_buttons}>
-            <button className={styles.feedback_btn}>
-              <img src={Like} alt="Like" />
-              <span>Helpful</span>
-            </button>
-            <button className={styles.feedback_btn}>
-              <img src={Dislike} alt="Dislike" />
-              <span>Not Helpful</span>
-            </button>
           </div>
 
           {/* Input Area */}
@@ -241,7 +224,7 @@ const Aiagent = () => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Ask me about courses, career advice, or skill development..."
+                placeholder="Type here... (e.g. React, Python, Data Science...)"
                 rows={1}
               />
               <button 
