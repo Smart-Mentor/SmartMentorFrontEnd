@@ -26,6 +26,38 @@ import Community from "../../assets/users_blue.png";
 import Portfolio from "../../assets/File_dock.png";
 import Badge from "../../assets/Flag_alt.png";
 
+// Validation functions
+const validateName = (name) => {
+  const trimmedName = name.trim();
+  const nameParts = trimmedName.split(/\s+/);
+  
+  // Check if name has exactly 2 parts (first and last name)
+  if (nameParts.length !== 2) {
+    return { isValid: false, message: "Please enter both first name and last name" };
+  }
+  
+  // Check if both parts contain only letters (and optionally hyphens/apostrophes)
+  const nameRegex = /^[A-Za-z]+(?:[-'][A-Za-z]+)?$/;
+  if (!nameRegex.test(nameParts[0]) || !nameRegex.test(nameParts[1])) {
+    return { isValid: false, message: "Names should only contain letters" };
+  }
+  
+  // Check minimum length (at least 2 characters each)
+  if (nameParts[0].length < 2 || nameParts[1].length < 2) {
+    return { isValid: false, message: "Each name should be at least 2 characters long" };
+  }
+  
+  return { isValid: true, message: "" };
+};
+
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return { isValid: false, message: "Please enter a valid email address (e.g., name@example.com)" };
+  }
+  return { isValid: true, message: "" };
+};
+
 function stringAvatar(name) {
   const names = name.split(" ");
   if (names.length >= 2) {
@@ -148,11 +180,14 @@ export default function Profile() {
 
   // Save name
   const handleUpdateName = () => {
-    if (tempName.trim()) {
-      setUserData({...userData, name: tempName});
+    const validation = validateName(tempName);
+    if (validation.isValid) {
+      setUserData({...userData, name: tempName.trim()});
       setIsEditing(false);
       saveData();
       showNotification("Name updated successfully!", "success");
+    } else {
+      showNotification(validation.message, "error");
     }
   };
 
@@ -171,6 +206,13 @@ export default function Profile() {
 
   // Save contact
   const handleUpdateContact = () => {
+    const emailValidation = validateEmail(tempEmail);
+    
+    if (!emailValidation.isValid) {
+      showNotification(emailValidation.message, "error");
+      return;
+    }
+    
     setUserData({
       ...userData,
       email: tempEmail,
@@ -322,6 +364,7 @@ export default function Profile() {
                       value={tempName} 
                       onChange={(e) => setTempName(e.target.value)}
                       className={styles.edit_input}
+                      placeholder="First Last"
                       autoFocus
                     />
                     <button onClick={handleUpdateName} className={styles.save_btn}>

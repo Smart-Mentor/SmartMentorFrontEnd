@@ -195,15 +195,6 @@
   outline: none;
 }
 
-.save_btn {
-  padding: 6px 16px;
-  background: #0A5ADB;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
 .user_title {
   font-size: 16px !important;
   color: #666 !important;
@@ -928,6 +919,23 @@
   outline: none;
 }
 
+.edit_input[type="email"],
+.contact_input[type="email"] {
+  width: 100%;
+}
+
+/* Visual feedback for invalid input */
+.edit_input:invalid,
+.contact_input:invalid {
+  border-color: #ef4444;
+}
+
+.edit_input:invalid:focus,
+.contact_input:invalid:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
 .save_btn,
 .cancel_btn {
   width: 36px;
@@ -1304,5 +1312,13 @@ select.project_status.completed {
   
   .contact_input {
     width: 100%;
+  }
+}
+
+/* Animation for fade out */
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
   }
 }
