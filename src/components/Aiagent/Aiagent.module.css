@@ -687,3 +687,132 @@
     height: 1px;
   }
 }
+/* Add this to your existing CSS file */
+
+/* Clickable Links in Messages */
+.message_link {
+  color: #0A5ADB;
+  text-decoration: underline;
+  word-break: break-all;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+.message_link:hover {
+  color: #58A7B5;
+  text-decoration: none;
+}
+
+/* For user messages, links should be white */
+.user_message .message_link {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.user_message .message_link:hover {
+  color: #e0e0e0;
+  text-decoration: none;
+}
+
+/* Course Cards - if you want to display courses as cards */
+.courses_container {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.course_card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(10, 90, 219, 0.2);
+}
+
+.course_card:hover {
+  transform: translateX(5px);
+  background: rgba(10, 90, 219, 0.05);
+  border-color: rgba(10, 90, 219, 0.5);
+}
+
+.user_message .course_card {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.course_title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: inherit;
+}
+
+.course_details {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 8px;
+}
+
+.course_link {
+  display: inline-block;
+  font-size: 12px;
+  color: #0A5ADB;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.user_message .course_link {
+  color: #ffffff;
+}
+
+.course_link:hover {
+  text-decoration: underline;
+}
+
+/* Optional: Add a "Copy Link" button for URLs */
+.link_copy_btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  padding: 2px 6px;
+  background: rgba(10, 90, 219, 0.1);
+  border: none;
+  border-radius: 4px;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.link_copy_btn:hover {
+  background: rgba(10, 90, 219, 0.2);
+}
+
+/* Tooltip for copied links */
+.copy_tooltip {
+  position: fixed;
+  background: #333;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 1000;
+  pointer-events: none;
+  animation: fadeOut 1.5s ease-out forwards;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  70% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+    visibility: hidden;
+  }
+}

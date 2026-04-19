@@ -17,6 +17,101 @@ const quickActions = [
   { img: ReviewCV, text: "Review CV", icon: "📄", color: "#f59e0b" },
 ];
 
+// Helper function to convert text with URLs to clickable links
+const formatMessageWithLinks = (text) => {
+  if (!text) return text;
+  
+  // Regular expression to match URLs
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  
+  // Split text into parts (text and URLs)
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+  
+  while ((match = urlRegex.exec(text)) !== null) {
+    // Add text before the URL
+    if (match.index > lastIndex) {
+      parts.push({
+        type: 'text',
+        content: text.substring(lastIndex, match.index)
+      });
+    }
+    
+    // Add the URL as a link
+    parts.push({
+      type: 'link',
+      content: match[0],
+      url: match[0]
+    });
+    
+    lastIndex = match.index + match[0].length;
+  }
+  
+  // Add remaining text after the last URL
+  if (lastIndex < text.length) {
+    parts.push({
+      type: 'text',
+      content: text.substring(lastIndex)
+    });
+  }
+  
+  // If no URLs found, return the original text
+  if (parts.length === 0) {
+    return text;
+  }
+  
+  return parts;
+};
+
+// Component to render message with clickable links
+const MessageWithLinks = ({ text }) => {
+  const formattedContent = formatMessageWithLinks(text);
+  
+  if (typeof formattedContent === 'string') {
+    // If no links, render as plain text with line breaks
+    return (
+      <>
+        {text.split('\n').map((line, idx) => (
+          <React.Fragment key={idx}>
+            {line}
+            {idx < text.split('\n').length - 1 && <br />}
+          </React.Fragment>
+        ))}
+      </>
+    );
+  }
+  
+  // Render with clickable links
+  return (
+    <>
+      {formattedContent.map((part, idx) => {
+        if (part.type === 'link') {
+          return (
+            <a
+              key={idx}
+              href={part.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.message_link}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {part.content}
+            </a>
+          );
+        }
+        // Split text content by newlines
+        return part.content.split('\n').map((line, lineIdx) => (
+          <React.Fragment key={`${idx}-${lineIdx}`}>
+            {line}
+            {lineIdx < part.content.split('\n').length - 1 && <br />}
+          </React.Fragment>
+        ));
+      })}
+    </>
+  );
+};
+
 const Aiagent = () => {
   const [message, setMessage] = useState("");
   const [chat, setChat] = useState([]);
@@ -188,12 +283,16 @@ const Aiagent = () => {
                   </div>
                   <div className={styles.message_content}>
                     <div className={styles.message_text}>
-                      {msg.text.split('\n').map((line, idx) => (
-                        <React.Fragment key={idx}>
-                          {line}
-                          {idx < msg.text.split('\n').length - 1 && <br />}
-                        </React.Fragment>
-                      ))}
+                      {msg.sender === "bot" ? (
+                        <MessageWithLinks text={msg.text} />
+                      ) : (
+                        msg.text.split('\n').map((line, idx) => (
+                          <React.Fragment key={idx}>
+                            {line}
+                            {idx < msg.text.split('\n').length - 1 && <br />}
+                          </React.Fragment>
+                        ))
+                      )}
                     </div>
                     <div className={styles.message_time}>
                       {msg.timestamp?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

@@ -16,7 +16,7 @@
     "@mui/icons-material": "^9.0.0",
     "@mui/lab": "^9.0.0-beta.2",
     "@mui/material": "^9.0.0",
-    "axios": "^1.13.2",
+    "axios": "^1.15.0",
     "bootstrap": "^5.3.8",
     "formik": "^2.4.9",
     "generate-react-cli": "^11.0.4",
