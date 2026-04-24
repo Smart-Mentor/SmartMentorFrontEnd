@@ -10,6 +10,8 @@ import CompleteProfile from "./components/CompleteProfile/CompleteProfile";
 import Profile from "./components/Profile/Profile";
 import NotFound from "./components/NotFound/NotFound";
 import Skills from "./components/Skills/Skills";
+import StudyPlanner from "./components/StudyPlanner/StudyPlanner";
+import Projects from "./components/Projects/Projects";
 
 function App() {
   return (
@@ -40,6 +42,8 @@ function App() {
           <Route path="/learningpath" element={<LearningPath />} />
           <Route path="/Skills" element={<Skills />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/studyplanner" element={<StudyPlanner />} />
         </Route>
 
         {/* Any wrong route */}
