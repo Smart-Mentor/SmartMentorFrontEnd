@@ -1,0 +1,518 @@
+/* ================== Layout Container ================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f9f9f9;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* ================== Sidebar ================== */
+.sidebar {
+  width: 280px;
+  min-width: 280px;
+  max-width: 280px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: white;
+  position: fixed;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+/* Scrollbar styling for sidebar */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* ================== Logo Container ================== */
+.logo_container {
+  padding: 30px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 20px;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.logo_container:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.logo_container:active {
+  transform: scale(0.98);
+}
+
+.logo_container i {
+  font-size: 40px;
+  color: white;
+  transition: transform 0.3s ease;
+}
+
+.logo_container:hover i {
+  transform: rotate(5deg) scale(1.05);
+}
+
+.logo_text {
+  font-size: 24px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #0A5ADB 0%, #58A7B5 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin: 0;
+  white-space: nowrap;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.logo_container:hover .logo_text {
+  background: linear-gradient(135deg, #58A7B5 0%, #0A5ADB 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ================== Navigation Menu ================== */
+.nav_menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px;
+  width: 100%;
+}
+
+.nav_item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  font-size: 15px;
+  font-weight: 500;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+}
+
+.nav_item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  transform: translateX(5px);
+}
+
+.nav_item_active {
+  background: linear-gradient(135deg, #0A5ADB 0%, #58A7B5 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(10, 90, 219, 0.3);
+}
+
+.nav_item_active .nav_icon {
+  color: white;
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+}
+
+/* FontAwesome icon styling */
+.nav_icon {
+  width: 22px;
+  font-size: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.nav_item:hover .nav_icon {
+  color: white;
+  transform: scale(1.1);
+}
+
+.nav_label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 18px;
+}
+
+/* ================== Main Content ================== */
+.main_content {
+  flex: 1;
+  margin-left: 280px;
+  min-height: 100vh;
+  background-color: #f9f9f9;
+  width: calc(100% - 280px);
+  max-width: calc(100% - 280px);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* ================== Mobile/Tablet Menu Button ================== */
+.menu_button {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1001;
+  background: #0A5ADB;
+  color: white;
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  font-size: 24px;
+  cursor: pointer;
+  display: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.menu_button:hover {
+  background: #08419e;
+  transform: scale(1.05);
+}
+
+.menu_button:active {
+  transform: scale(0.95);
+}
+
+.menu_icon {
+  display: inline-block;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+/* ================== Mobile/Tablet Sidebar ================== */
+.mobile_sidebar {
+  position: fixed;
+  top: 0;
+  left: -280px;
+  width: 280px;
+  max-width: 280px;
+  height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  z-index: 1002;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.mobile_sidebar_open {
+  left: 0;
+}
+
+.mobile_sidebar_header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.close_button {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.close_button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
+}
+
+.close_button:active {
+  transform: rotate(90deg) scale(0.95);
+}
+
+/* Overlay for mobile/tablet */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1001;
+  animation: fadeIn 0.3s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ================== Responsive Design ================== */
+
+/* Tablet and Mobile (screens up to 1024px) */
+@media (max-width: 1024px) {
+  .sidebar {
+    display: none;
+  }
+  
+  .menu_button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .main_content {
+    margin-left: 0;
+    width: 100%;
+    max-width: 100%;
+    padding-top: 70px;
+  }
+}
+
+/* Mobile Landscape */
+@media (max-width: 768px) {
+  .menu_button {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .menu_icon {
+    font-size: 24px;
+  }
+  
+  .nav_item {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+  
+  .nav_icon {
+    font-size: 16px;
+  }
+  
+  .nav_label {
+    font-size: 16px;
+  }
+  
+  .nav_item_active .nav_label {
+    font-size: 18px;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+  .menu_button {
+    width: 40px;
+    height: 40px;
+    top: 12px;
+    left: 12px;
+  }
+  
+  .menu_icon {
+    font-size: 22px;
+  }
+  
+  .mobile_sidebar {
+    width: 260px;
+  }
+  
+  .logo_container {
+    padding: 20px 16px;
+  }
+  
+  .logo_text {
+    font-size: 20px;
+  }
+  
+  .logo_container i {
+    font-size: 28px;
+  }
+  
+  .nav_menu {
+    padding: 0 12px;
+  }
+  
+  .nav_item {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+  .nav_icon {
+    font-size: 14px;
+  }
+  
+  .nav_label {
+    font-size: 14px;
+  }
+  
+  .nav_item_active .nav_label {
+    font-size: 16px;
+  }
+}
+
+/* iPad Pro and larger tablets */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .menu_button {
+    width: 55px;
+    height: 55px;
+  }
+  
+  .menu_icon {
+    font-size: 30px;
+  }
+  
+  .logo_container {
+    padding: 25px 20px;
+  }
+  
+  .logo_text {
+    font-size: 22px;
+  }
+  
+  .logo_container i {
+    font-size: 35px;
+  }
+}
+
+/* Prevent horizontal scroll on all elements */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* Ensure buttons are always clickable */
+button {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Improve touch targets for mobile/tablet */
+@media (max-width: 1024px) {
+  .nav_item {
+    padding: 14px 16px;
+    margin: 4px 0;
+  }
+  
+  .close_button {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .logo_container {
+    cursor: pointer;
+  }
+}
+
+/* Animation for nav items */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.nav_item {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Active nav item text styling */
+.nav_item_active .nav_label {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  font-size: 20px;
+}
+
+/* Ripple effect for logo click */
+.logo_container {
+  position: relative;
+  overflow: hidden;
+}
+
+.logo_container::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+  pointer-events: none;
+}
+
+.logo_container:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Print styles */
+@media print {
+  .sidebar,
+  .menu_button,
+  .mobile_sidebar,
+  .overlay {
+    display: none;
+  }
+  
+  .main_content {
+    margin-left: 0;
+    width: 100%;
+  }
+}

@@ -1,0 +1,115 @@
+/*======================
+    404 page
+=======================*/
+
+/* Layout classes */
+.container {
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -15px;
+  margin-left: -15px;
+}
+
+/* Column classes */
+.col_sm_12 {
+  width: 100%;
+  position: relative;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+.col_sm_10 {
+  width: 83.33333333%;
+  position: relative;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+.col_sm_offset_1 {
+  margin-left: 8.33333333%;
+}
+
+/* Text alignment */
+.text_center {
+  text-align: center;
+}
+
+/* Main 404 page styles */
+.page_404 {
+  padding: 40px 0;
+  background: #fff;
+  font-family: 'Arvo', serif;
+  min-height: 100vh;
+}
+
+.four_zero_four_bg {
+  background-image: url("https://cdn.dribbble.com/users/285475/screenshots/2083086/dribbble_1.gif");
+  height: 400px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.four_zero_four_bg h1 {
+  font-size: 60px;
+}
+
+.link_404 {
+  color: #fff !important;
+  padding: 10px 25px;
+  background: #39ac31;
+  margin: 20px 0;
+  display: inline-block;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.link_404:hover {
+  background: #2d8f28;
+}
+
+.contant_box_404 {
+  margin-top: -50px;
+}
+
+.h2 {
+  font-size: 30px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.redirect_text {
+  margin-top: 20px;
+  font-size: 16px;
+  color: #666;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .four_zero_four_bg {
+    height: 250px;
+  }
+
+  .four_zero_four_bg h1 {
+    font-size: 50px;
+  }
+  
+  .col_sm_10 {
+    width: 100%;
+    margin-left: 0;
+  }
+  
+  .h2 {
+    font-size: 24px;
+  }
+}
