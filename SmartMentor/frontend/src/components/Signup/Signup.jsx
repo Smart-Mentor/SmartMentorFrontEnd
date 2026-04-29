@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import styles from "./Signup.module.css";
 import logo from "../../assets/sign in logo.png";
-import { registerUser, verifyEmail, resendCode } from "../../api/authenticationService";
+import { registerUser, verifyEmail, resendVerificationCode } from "../../api/authenticationService";
 
 export default function Signup() {
 
@@ -140,7 +140,7 @@ export default function Signup() {
       setVerifyError("");
       setVerifySuccess("");
 
-      const res = await resendCode(token);
+      const res = await resendVerificationCode(token);
 
       if (res?.isSuccessful || res?.message?.toLowerCase().includes("sent")) {
         setVerifySuccess("📩 New code sent!");
@@ -213,7 +213,7 @@ export default function Signup() {
 
         localStorage.setItem("tempEmail", formData.email);
         localStorage.setItem("verificationToken", token);
-        await resendCode(token);
+        const res = await resendVerificationCode(token);
         setSuccess("📩 New code sent!");
         setTimeout(() => openVerifyPopup(), 800);
         return;
@@ -455,7 +455,7 @@ export default function Signup() {
 
               {verifyError && (
                 <div className={`${styles.error_message} ${styles.error_message_animated}`}>
-                  <i className="fas fa-exclamation-circle"></i>
+                  <i className={`fas fa-exclamation-circle ${styles.error_icon}`}></i>
                   {verifyError}
                 </div>
               )}
