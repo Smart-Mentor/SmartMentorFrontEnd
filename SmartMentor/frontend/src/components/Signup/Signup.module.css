@@ -500,7 +500,10 @@
   gap: 10px;
   font-weight: 500;
 }
-
+.error_icon {
+  margin-right: 12px; /* المسافة بين الأيقونة والكلام */
+  font-size: 16px;
+}
 .popup_success {
   background: #ECFDF5;
   color: #065F46;
@@ -692,7 +695,7 @@
 
 .popup_icon_error {
   color: #EF4444;
-  padding-right: 10px;
+  margin-right: 30px;
 }
 
 .popup_icon_success {
