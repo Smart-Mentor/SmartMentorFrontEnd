@@ -1,18 +1,37 @@
 import React, { useEffect, useState } from "react";
-import { Box } from "@mui/material";
+import { Box, CircularProgress, Alert } from "@mui/material";
+import { getCurrentUser } from "../../api/authenticationService"; 
 import styles from "./Dashboard.module.css";
 
 const Dashboard = () => {
   const [animate, setAnimate] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     setAnimate(true);
+    fetchUserData();
   }, []);
 
+  const fetchUserData = async () => {
+    try {
+      setLoading(true);
+      const userData = await getCurrentUser();
+      setUser(userData);
+      setError(null);
+    } catch (err) {
+      console.error("Failed to fetch user data:", err);
+      setError(err.message || "Failed to load user data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const progressCards = [
-    { title: "Profile Completion", percent: 75, icon: "👤", color: "#0A5ADB" },
-    { title: "Career Readiness", percent: 62, icon: "🎯", color: "#58A7B5" },
-    { title: "Learning Progress", percent: 45, icon: "📚", color: "#667eea" },
+    { title: "Profile Completion", percent: user?.profileCompletion || 75, icon: "👤", color: "#0A5ADB" },
+    { title: "Career Readiness", percent: user?.careerReadiness || 62, icon: "🎯", color: "#58A7B5" },
+    { title: "Learning Progress", percent: user?.learningProgress || 45, icon: "📚", color: "#667eea" },
   ];
 
   const nextSteps = [
@@ -20,19 +39,22 @@ const Dashboard = () => {
       title: "Complete Gap Analysis", 
       desc: "Identify missing skills for your target career",
       icon: "📊",
-      button: "Start Analysis"
+      button: "Start Analysis",
+      link: "/gap-analysis"
     },
     { 
       title: "Update Your Skills", 
       desc: "Add your latest accomplishments",
       icon: "⭐",
-      button: "Update Now"
+      button: "Update Now",
+      link: "/profile"
     },
     { 
       title: "Explore Job Trends", 
       desc: "See what's in demand in Egyptian tech market",
       icon: "📈",
-      button: "Explore Trends"
+      button: "Explore Trends",
+      link: "/trends"
     },
   ];
 
@@ -45,11 +67,47 @@ const Dashboard = () => {
     { name: "Docker", demand: "+30%", color: "#2496ED" },
   ];
 
-  const recentActivities = [
+  const recentActivities = user?.recentActivities || [
     { action: "Completed React Basics", date: "2 hours ago", type: "success" },
     { action: "Updated career profile", date: "Yesterday", type: "info" },
     { action: "Started Python course", date: "3 days ago", type: "warning" },
   ];
+
+  // Function to get user's display name
+  const getDisplayName = () => {
+    if (!user) return "Learner";
+    return user.firstName || user.fullName || user.username || user.email?.split('@')[0] || "Learner";
+  };
+
+  // Function to get user's streak or level
+  const getUserStreak = () => user?.streakDays || 15;
+  const getUserLevel = () => user?.level || "Intermediate";
+
+  if (loading) {
+    return (
+      <Box className={styles.dashboard_container}>
+        <Box className={styles.loading_container}>
+          <CircularProgress sx={{ color: "#0A5ADB" }} />
+          <p className={styles.loading_text}>Loading your dashboard...</p>
+        </Box>
+      </Box>
+    );
+  }
+
+  if (error && !user) {
+    return (
+      <Box className={styles.dashboard_container}>
+        <Box className={styles.error_container}>
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+          <button onClick={fetchUserData} className={styles.retry_button}>
+            Try Again
+          </button>
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <Box component="main" className={styles.dashboard_container}>
@@ -62,21 +120,27 @@ const Dashboard = () => {
         <div className={`${styles.header_section} ${animate ? styles.fade_in : ""}`}>
           <div className={styles.header_welcome}>
             <h1 className={styles.welcome_title}>
-              Welcome back, Fathy! <span className={styles.wave}>👋</span>
+              Welcome back, {getDisplayName()}! <span className={styles.wave}>👋</span>
             </h1>
             <p className={styles.welcome_subtitle}>
-              Here's your learning progress overview
+              {user?.tagline || "Here's your learning progress overview"}
             </p>
           </div>
           <div className={styles.header_stats}>
             <div className={styles.stat_badge}>
               <span className={styles.stat_badge_icon}>🔥</span>
-              <span className={styles.stat_badge_text}>15 Day Streak</span>
+              <span className={styles.stat_badge_text}>{getUserStreak()} Day Streak</span>
             </div>
             <div className={styles.stat_badge}>
               <span className={styles.stat_badge_icon}>⭐</span>
-              <span className={styles.stat_badge_text}>Level 3 Learner</span>
+              <span className={styles.stat_badge_text}>Level {getUserLevel()}</span>
             </div>
+            {user?.role && (
+              <div className={styles.stat_badge}>
+                <span className={styles.stat_badge_icon}>👔</span>
+                <span className={styles.stat_badge_text}>{user.role}</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -127,7 +191,7 @@ const Dashboard = () => {
 
             <div className={styles.steps_list}>
               {nextSteps.map((step, i) => (
-                <div key={i} className={styles.step_card}>
+                <div key={i} className={styles.step_card} onClick={() => window.location.href = step.link}>
                   <div className={styles.step_icon_wrapper}>
                     <span className={styles.step_icon}>{step.icon}</span>
                   </div>

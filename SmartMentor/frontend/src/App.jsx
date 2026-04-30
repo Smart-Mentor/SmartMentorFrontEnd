@@ -67,7 +67,7 @@ function App() {
         </Route>
 
         {/* ❌ أي حاجة غلط */}
-        <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="*" element={<NotFound />} />
 
       </Routes>
     </BrowserRouter>

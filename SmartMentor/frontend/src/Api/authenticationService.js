@@ -16,6 +16,41 @@ const handleResponse = async (response) => {
 };
 
 /**
+ * 🔹 Get authentication token from localStorage
+ */
+const getAuthToken = () => {
+  // Try multiple possible token storage keys
+  const token = localStorage.getItem('authToken') || 
+                localStorage.getItem('token') || 
+                sessionStorage.getItem('authToken') ||
+                sessionStorage.getItem('token');
+  
+  if (!token) {
+    throw new Error("No authentication token found");
+  }
+  
+  return token;
+};
+
+/**
+ * 🔹 Authenticated fetch helper
+ */
+const authFetch = async (endpoint, options = {}) => {
+  const token = getAuthToken();
+  
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+  return handleResponse(response);
+};
+
+/**
  * 🔹 Register new user
  */
 export const registerUser = async (userData) => {
@@ -47,7 +82,15 @@ export const loginUser = async (loginData) => {
       body: JSON.stringify(loginData),
     });
 
-    return await handleResponse(response);
+    const data = await handleResponse(response);
+    
+    // Store token if returned from login
+    if (data.token) {
+      localStorage.setItem('authToken', data.token);
+      localStorage.setItem('userData', JSON.stringify(data.user || {}));
+    }
+    
+    return data;
   } catch (error) {
     throw new Error(error.message || "Network error");
   }
@@ -126,4 +169,46 @@ export const resetPassword = async (data) => {
   } catch (error) {
     throw new Error(error.message || "Network error");
   }
+};
+
+/**
+ * 🔹 Get current authenticated user info
+ */
+export const getCurrentUser = async () => {
+  try {
+    return await authFetch('/Auth/me', { method: "GET" });
+  } catch (error) {
+    // If token is invalid, clear it
+    if (error.message === "No authentication token found" || error.message.includes("401")) {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+    }
+    throw new Error(error.message || "Network error");
+  }
+};
+
+/**
+ * 🔹 Update user profile
+ */
+export const updateUserProfile = async (profileData) => {
+  try {
+    return await authFetch('/Auth/profile', {
+      method: "PUT",
+      body: JSON.stringify(profileData),
+    });
+  } catch (error) {
+    throw new Error(error.message || "Network error");
+  }
+};
+
+/**
+ * 🔹 Logout user
+ */
+export const logoutUser = () => {
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('token');
+  localStorage.removeItem('userData');
+  sessionStorage.removeItem('authToken');
+  sessionStorage.removeItem('token');
 };
