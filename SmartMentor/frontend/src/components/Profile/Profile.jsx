@@ -2,9 +2,6 @@ import { Avatar, Button, Typography } from "@mui/material";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import EditIcon from "@mui/icons-material/Edit";
-import SaveIcon from "@mui/icons-material/Save";
-import CancelIcon from "@mui/icons-material/Cancel";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useState, useEffect } from "react";
@@ -27,35 +24,6 @@ import Community from "../../assets/users_blue.png";
 import Portfolio from "../../assets/File_dock.png";
 import Badge from "../../assets/Flag_alt.png";
 
-// Validation functions
-const validateName = (name) => {
-  const trimmedName = name.trim();
-  const nameParts = trimmedName.split(/\s+/);
-  
-  if (nameParts.length !== 2) {
-    return { isValid: false, message: "Please enter both first name and last name" };
-  }
-  
-  const nameRegex = /^[A-Za-z]+(?:[-'][A-Za-z]+)?$/;
-  if (!nameRegex.test(nameParts[0]) || !nameRegex.test(nameParts[1])) {
-    return { isValid: false, message: "Names should only contain letters" };
-  }
-  
-  if (nameParts[0].length < 2 || nameParts[1].length < 2) {
-    return { isValid: false, message: "Each name should be at least 2 characters long" };
-  }
-  
-  return { isValid: true, message: "" };
-};
-
-const validateEmail = (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return { isValid: false, message: "Please enter a valid email address (e.g., name@example.com)" };
-  }
-  return { isValid: true, message: "" };
-};
-
 function stringAvatar(name) {
   const names = name.split(" ");
   if (names.length >= 2) {
@@ -72,13 +40,9 @@ export default function Profile() {
   const navigate = useNavigate();
   const [value, setValue] = useState('1');
   const [animate, setAnimate] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isEditingContact, setIsEditingContact] = useState(false);
-  const [tempName, setTempName] = useState("");
-  const [tempEmail, setTempEmail] = useState("");
-  const [tempLocation, setTempLocation] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [notification, setNotification] = useState(null);
   
   const [userData, setUserData] = useState({
     name: "",
@@ -109,7 +73,6 @@ export default function Profile() {
 
   const [newSkill, setNewSkill] = useState({ name: "", percentage: 0 });
   const [showAddSkill, setShowAddSkill] = useState(false);
-  const [notification, setNotification] = useState(null);
 
   // Fetch user data on mount
   useEffect(() => {
@@ -124,20 +87,20 @@ export default function Profile() {
       
       // Map API response to component state
       setUserData({
-        name: data.fullName || data.firstName + " " + data.lastName || data.username || "Learner",
-        title: data.title || "Frontend Developer",
+        name: data.fullName || data.firstName + " " + data.lastName || data.username || data.name || "Learner",
+        title: data.title || data.jobTitle || "Frontend Developer",
         email: data.email || "",
-        location: data.location || "Egypt",
+        location: data.location || data.city || "Egypt",
         joined: data.joinedDate ? new Date(data.joinedDate).toLocaleString('default', { month: 'long', year: 'numeric' }) : "2026",
-        bio: data.bio || "Passionate developer dedicated to continuous learning and building impactful applications."
+        bio: data.bio || data.about || "Passionate developer dedicated to continuous learning and building impactful applications."
       });
 
       // Update stats from API data
       setStats([
-        { name: "Courses Completed", num: data.coursesCompleted || 0, icon: "📚", color: "#0A5ADB" },
-        { name: "Projects Done", num: data.projectsCompleted || 0, icon: "🚀", color: "#58A7B5" },
-        { name: "Community Points", num: data.communityPoints || 0, icon: "⭐", color: "#667eea" },
-        { name: "Badges Earned", num: data.badgesEarned || 0, icon: "🏆", color: "#f59e0b" },
+        { name: "Courses Completed", num: data.coursesCompleted || data.totalCourses || 0, icon: "📚", color: "#0A5ADB" },
+        { name: "Projects Done", num: data.projectsCompleted || data.totalProjects || 0, icon: "🚀", color: "#58A7B5" },
+        { name: "Community Points", num: data.communityPoints || data.points || 0, icon: "⭐", color: "#667eea" },
+        { name: "Badges Earned", num: data.badgesEarned || data.totalBadges || 0, icon: "🏆", color: "#f59e0b" },
       ]);
 
       // Update progress from API
@@ -154,7 +117,7 @@ export default function Profile() {
         setSkills(data.skills.map((skill, index) => ({
           id: index + 1,
           name: skill.name,
-          percentage: skill.proficiency || 0,
+          percentage: skill.proficiency || skill.level || 0,
           color: getSkillColor(skill.name),
           projects: skill.projectsCount || 0
         })));
@@ -278,58 +241,6 @@ export default function Profile() {
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
-  };
-
-  const startEditName = () => {
-    setTempName(userData.name);
-    setIsEditing(true);
-  };
-
-  const handleUpdateName = () => {
-    const validation = validateName(tempName);
-    if (validation.isValid) {
-      setUserData({...userData, name: tempName.trim()});
-      setIsEditing(false);
-      saveDataToLocal();
-      showNotification("Name updated successfully!", "success");
-    } else {
-      showNotification(validation.message, "error");
-    }
-  };
-
-  const cancelEditName = () => {
-    setIsEditing(false);
-    setTempName("");
-  };
-
-  const startEditContact = () => {
-    setTempEmail(userData.email);
-    setTempLocation(userData.location);
-    setIsEditingContact(true);
-  };
-
-  const handleUpdateContact = () => {
-    const emailValidation = validateEmail(tempEmail);
-    
-    if (!emailValidation.isValid) {
-      showNotification(emailValidation.message, "error");
-      return;
-    }
-    
-    setUserData({
-      ...userData,
-      email: tempEmail,
-      location: tempLocation
-    });
-    setIsEditingContact(false);
-    saveDataToLocal();
-    showNotification("Contact information updated!", "success");
-  };
-
-  const cancelEditContact = () => {
-    setIsEditingContact(false);
-    setTempEmail("");
-    setTempLocation("");
   };
 
   const limitPercentage = (value) => {
@@ -490,32 +401,13 @@ export default function Profile() {
                 />
               </div>
               <div className={styles.user_info}>
-                {isEditing ? (
-                  <div className={styles.edit_name_container}>
-                    <input 
-                      type="text" 
-                      value={tempName} 
-                      onChange={(e) => setTempName(e.target.value)}
-                      className={styles.edit_input}
-                      placeholder="First Last"
-                      autoFocus
-                    />
-                    <button onClick={handleUpdateName} className={styles.save_btn}>
-                      <SaveIcon />
-                    </button>
-                    <button onClick={cancelEditName} className={styles.cancel_btn}>
-                      <CancelIcon />
-                    </button>
-                  </div>
-                ) : (
-                  <div className={styles.name_wrapper}>
-                    <Typography variant="h5" className={styles.user_name}>{userData.name}</Typography>
-                    <button className={styles.edit_name_btn} onClick={startEditName}>
-                      <EditIcon />
-                    </button>
-                  </div>
-                )}
+                {/* Name - Read only */}
+                <Typography variant="h5" className={styles.user_name}>{userData.name}</Typography>
+                
+                {/* Title - Read only (no edit button) */}
                 <Typography variant="body2" className={styles.user_title}>{userData.title}</Typography>
+                
+                {/* Bio - Read only (no edit button) */}
                 <p className={styles.user_bio}>{userData.bio}</p>
               </div>
             </div>
@@ -529,50 +421,21 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* Contact Info */}
+          {/* Contact Info - Read only */}
           <div className={styles.contact_info}>
-            {isEditingContact ? (
-              <div className={styles.edit_contact_container}>
-                <input 
-                  type="email" 
-                  value={tempEmail} 
-                  onChange={(e) => setTempEmail(e.target.value)}
-                  placeholder="Email"
-                  className={styles.contact_input}
-                />
-                <input 
-                  type="text" 
-                  value={tempLocation} 
-                  onChange={(e) => setTempLocation(e.target.value)}
-                  placeholder="Location"
-                  className={styles.contact_input}
-                />
-                <button onClick={handleUpdateContact} className={styles.save_btn}>
-                  <SaveIcon />
-                </button>
-                <button onClick={cancelEditContact} className={styles.cancel_btn}>
-                  <CancelIcon />
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className={styles.contact_item}>
-                  <EmailOutlinedIcon />
-                  <Typography>{userData.email}</Typography>
-                  <button className={styles.edit_contact_btn} onClick={startEditContact}>
-                    <EditIcon />
-                  </button>
-                </div>
-                <div className={styles.contact_item}>
-                  <LocationOnOutlinedIcon />
-                  <Typography>{userData.location}</Typography>
-                </div>
-                <div className={styles.contact_item}>
-                  <CalendarTodayIcon />
-                  <Typography>Joined {userData.joined}</Typography>
-                </div>
-              </>
-            )}
+            <div className={styles.contact_item}>
+              <EmailOutlinedIcon />
+              <Typography>{userData.email}</Typography>
+              <span className={styles.read_only_badge}>Verified</span>
+            </div>
+            <div className={styles.contact_item}>
+              <LocationOnOutlinedIcon />
+              <Typography>{userData.location}</Typography>
+            </div>
+            <div className={styles.contact_item}>
+              <CalendarTodayIcon />
+              <Typography>Joined {userData.joined}</Typography>
+            </div>
           </div>
 
           {/* Stats Cards */}
@@ -605,7 +468,7 @@ export default function Profile() {
               </TabList>
             </Box>
 
-            {/* Overview Tab - Keep existing JSX but with mapped data */}
+            {/* Overview Tab */}
             <TabPanel value="1" className={styles.tab_panel}>
               <div className={styles.overview_grid}>
                 {/* Roadmap Progress */}

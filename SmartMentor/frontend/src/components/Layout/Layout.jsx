@@ -54,6 +54,7 @@ export default function Layout() {
   }, [navigate, handleDrawerClose]);
 
   const menuItems = [
+    { name: "Home", icon: "fa-solid fa-house fa-xl", path: "/home" },
     { name: "Dashboard", icon: "fa-solid fa-table-columns fa-xl", path: "/dashboard" },
     { name: "AI Mentor", icon: "fa-solid fa-robot fa-xl", path: "/aimentor" },
     { name: "Learning Path", icon: "fa-solid fa-road-circle-check fa-xl", path: "/learningpath" },

@@ -16,7 +16,7 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Check authentication status and fetch user data
+
   useEffect(() => {
     checkAuthAndFetchUser();
   }, [location]);
@@ -58,7 +58,6 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -69,23 +68,40 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Close mobile menu when route changes
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setIsDropdownOpen(false);
   }, [location]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userData');
-    localStorage.removeItem('profileData');
-    
-    setIsLoggedIn(false);
-    setUser(null);
-    setIsDropdownOpen(false);
-    
-    navigate('/');
-  };
+const handleLogout = () => {
+  const authToken = localStorage.getItem('authToken');
+  const userData = localStorage.getItem('userData');
+  
+  console.log('Clearing tokens:', { authToken: !!authToken, userData: !!userData });
+
+  localStorage.clear();
+
+  sessionStorage.clear();
+  
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('userData');
+  localStorage.removeItem('refreshToken'); 
+  sessionStorage.removeItem('authToken');
+  sessionStorage.removeItem('userData');
+
+  setIsLoggedIn(false);
+  setUser(null);
+  setIsDropdownOpen(false);
+  setIsMobileMenuOpen(false); 
+
+  if (window.axios) {
+    delete window.axios.defaults.headers.common["Authorization"];
+  }
+
+  delete window.authToken;
+
+  navigate("/", { replace: true });
+};
 
   const getUserInitials = () => {
     if (!user) return "U";
@@ -102,10 +118,10 @@ export default function Navbar() {
   const getUserName = () => {
     if (!user) return "User";
     return user.fullName || 
-           (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : null) ||
-           user.username || 
-           user.email?.split('@')[0] || 
-           "User";
+          (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : null) ||
+          user.username || 
+          user.email?.split('@')[0] || 
+          "User";
   };
 
   const getUserEmail = () => user?.email || "";
