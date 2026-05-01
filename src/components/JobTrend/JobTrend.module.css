@@ -1,0 +1,394 @@
+/* ================== Container ================== */
+.job_trends_container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #eff6fe 0%, #e8f0fa 100%);
+  position: relative;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* ================== Background Blurs ================== */
+.bg_blur_1 {
+  position: fixed;
+  top: -100px;
+  right: -100px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(10, 90, 219, 0.15), transparent);
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: float 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.bg_blur_2 {
+  position: fixed;
+  bottom: -100px;
+  left: -100px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(88, 167, 181, 0.15), transparent);
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: float 10s ease-in-out infinite reverse;
+  pointer-events: none;
+}
+
+.bg_blur_3 {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(10, 90, 219, 0.05), transparent);
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-30px) translateX(20px);
+  }
+}
+
+/* ================== Header Section - Minimal ================== */
+.header_section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: white;
+  margin: 16px 24px 0 24px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  z-index: 2;
+}
+
+.header_left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header_icon_wrapper {
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, rgba(10, 90, 219, 0.1), rgba(88, 167, 181, 0.1));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header_icon_wrapper i {
+  font-size: 24px;
+  color: #0A5ADB;
+}
+
+.header_title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 2px;
+}
+
+.header_subtitle {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+}
+
+.header_buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.newtab_btn {
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: linear-gradient(135deg, #0A5ADB, #58A7B5);
+  color: white;
+}
+
+.newtab_btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(10, 90, 219, 0.3);
+}
+
+/* ================== Iframe Section - Full Height ================== */
+.iframe_section {
+  position: relative;
+  flex: 1;
+  margin: 0 24px 24px 24px;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  min-height: 0;
+}
+
+.trends_iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: white;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* ================== Loading Overlay ================== */
+.loading_overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.98);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 10;
+}
+
+.loading_spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #0A5ADB;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading_overlay p {
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ================== Error Overlay ================== */
+.error_overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.98);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 10;
+  text-align: center;
+  padding: 40px;
+}
+
+.error_overlay i {
+  font-size: 48px;
+  color: #ef4444;
+}
+
+.error_overlay h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.error_overlay p {
+  font-size: 14px;
+  color: #666;
+  max-width: 400px;
+}
+
+.error_buttons {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.open_btn {
+  padding: 10px 24px;
+  border-radius: 40px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: linear-gradient(135deg, #0A5ADB, #58A7B5);
+  color: white;
+}
+
+.open_btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(10, 90, 219, 0.3);
+}
+
+/* ================== Responsive Design ================== */
+@media (max-width: 1024px) {
+  .header_section {
+    margin: 12px 16px 0 16px;
+    padding: 12px 20px;
+  }
+  
+  .iframe_section {
+    margin: 0 16px 16px 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .job_trends_container {
+    height: 100vh;
+  }
+  
+  .header_section {
+    flex-direction: column;
+    gap: 12px;
+    margin: 12px 12px 0 12px;
+    padding: 12px 16px;
+  }
+  
+  .header_left {
+    width: 100%;
+  }
+  
+  .header_buttons {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .header_title {
+    font-size: 18px;
+  }
+  
+  .header_icon_wrapper {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .header_icon_wrapper i {
+    font-size: 20px;
+  }
+  
+  .iframe_section {
+    margin: 0 12px 12px 12px;
+  }
+  
+  .newtab_btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header_section {
+    margin: 8px 8px 0 8px;
+    padding: 10px 12px;
+  }
+  
+  .header_left {
+    gap: 10px;
+  }
+  
+  .header_icon_wrapper {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .header_icon_wrapper i {
+    font-size: 18px;
+  }
+  
+  .header_title {
+    font-size: 16px;
+  }
+  
+  .header_subtitle {
+    font-size: 11px;
+  }
+  
+  .newtab_btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .iframe_section {
+    margin: 0 8px 8px 8px;
+  }
+  
+  .loading_spinner {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .error_overlay i {
+    font-size: 40px;
+  }
+  
+  .error_overlay h3 {
+    font-size: 18px;
+  }
+}
+
+/* ================== Animations ================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.iframe_section {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* ================== Custom Scrollbar ================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #0A5ADB, #58A7B5);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0A5ADB;
+}
