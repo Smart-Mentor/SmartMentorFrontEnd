@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
-import axios from "axios";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Box } from "@mui/material";
 import styles from "./Aiagent.module.css";
 
@@ -7,339 +7,202 @@ import AnalyzeSkills from "../../assets/AnalyzeSkills.png";
 import CareerAdvice from "../../assets/CareerAdvice.png";
 import GenerateRoadmap from "../../assets/GenerateRoadmap.png";
 import ReviewCV from "../../assets/ReviewCV.png";
-import SendBtn from "../../assets/send.png";
 import LampLight from "../../assets/Lamp_light2.png";
 
-const quickActions = [
-  { img: AnalyzeSkills, text: "Analyze Skills", icon: "📊", color: "#0A5ADB" },
-  { img: CareerAdvice, text: "Career Advice", icon: "💼", color: "#58A7B5" },
-  { img: GenerateRoadmap, text: "Generate Roadmap", icon: "🗺️", color: "#667eea" },
-  { img: ReviewCV, text: "Review CV", icon: "📄", color: "#f59e0b" },
+const aiModels = [
+  { 
+    id: "recommendation", 
+    name: "Course Navigator", 
+    img: AnalyzeSkills, 
+    icon: "📚", 
+    color: "#0A5ADB",
+    gradient: "linear-gradient(135deg, #0A5ADB, #2E7EB8)",
+    description: "Discover personalized courses tailored to your career goals",
+    features: [
+      "Smart course matching",
+      "Skill-based recommendations",
+      "Learning path optimization"
+    ],
+    route: "/aimentor/recommendation",
+    tag: "Most Popular"
+  },
+  { 
+    id: "roadmap", 
+    name: "Path Weaver", 
+    img: GenerateRoadmap, 
+    icon: "🗺️", 
+    color: "#58A7B5",
+    gradient: "linear-gradient(135deg, #58A7B5, #3D8B99)",
+    description: "Create your personalized journey to career success",
+    features: [
+      "Step-by-step roadmap",
+      "Timeline visualization",
+      "Resource curation"
+    ],
+    route: "/aimentor/roadmap",
+    tag: "New"
+  },
+  { 
+    id: "cv-analysis", 
+    name: "Profile Optimizer", 
+    img: ReviewCV, 
+    icon: "⚡", 
+    color: "#f59e0b",
+    gradient: "linear-gradient(135deg, #f59e0b, #e67e22)",
+    description: "AI-powered CV analysis and job matching",
+    features: [
+      "CV optimization tips",
+      "Job market matching",
+      "Skill gap analysis"
+    ],
+    route: "/aimentor/cv-analysis",
+    tag: "AI Enhanced"
+  }
 ];
 
-// Helper function to convert text with URLs to clickable links
-const formatMessageWithLinks = (text) => {
-  if (!text) return text;
-  
-  // Regular expression to match URLs
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  
-  // Split text into parts (text and URLs)
-  const parts = [];
-  let lastIndex = 0;
-  let match;
-  
-  while ((match = urlRegex.exec(text)) !== null) {
-    // Add text before the URL
-    if (match.index > lastIndex) {
-      parts.push({
-        type: 'text',
-        content: text.substring(lastIndex, match.index)
-      });
-    }
-    
-    // Add the URL as a link
-    parts.push({
-      type: 'link',
-      content: match[0],
-      url: match[0]
-    });
-    
-    lastIndex = match.index + match[0].length;
-  }
-  
-  // Add remaining text after the last URL
-  if (lastIndex < text.length) {
-    parts.push({
-      type: 'text',
-      content: text.substring(lastIndex)
-    });
-  }
-  
-  // If no URLs found, return the original text
-  if (parts.length === 0) {
-    return text;
-  }
-  
-  return parts;
-};
+export default function Aiagent() {
+  const navigate = useNavigate();
+  const [hoveredCard, setHoveredCard] = useState(null);
 
-// Component to render message with clickable links
-const MessageWithLinks = ({ text }) => {
-  const formattedContent = formatMessageWithLinks(text);
-  
-  if (typeof formattedContent === 'string') {
-    // If no links, render as plain text with line breaks
-    return (
-      <>
-        {text.split('\n').map((line, idx) => (
-          <React.Fragment key={idx}>
-            {line}
-            {idx < text.split('\n').length - 1 && <br />}
-          </React.Fragment>
-        ))}
-      </>
-    );
-  }
-  
-  // Render with clickable links
-  return (
-    <>
-      {formattedContent.map((part, idx) => {
-        if (part.type === 'link') {
-          return (
-            <a
-              key={idx}
-              href={part.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.message_link}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {part.content}
-            </a>
-          );
-        }
-        // Split text content by newlines
-        return part.content.split('\n').map((line, lineIdx) => (
-          <React.Fragment key={`${idx}-${lineIdx}`}>
-            {line}
-            {lineIdx < part.content.split('\n').length - 1 && <br />}
-          </React.Fragment>
-        ));
-      })}
-    </>
-  );
-};
-
-const Aiagent = () => {
-  const [message, setMessage] = useState("");
-  const [chat, setChat] = useState([]);
-  const [isTyping, setIsTyping] = useState(false);
-  const [selectedAction, setSelectedAction] = useState(null);
-  const [sessionId, setSessionId] = useState(null);   // مهم جداً
-
-  const chatEndRef = useRef(null);
-
-  // Scroll to bottom
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chat]);
-
-  // Initialize session on first load
-  useEffect(() => {
-    if (!sessionId) {
-      const newSessionId = "session_" + Date.now();
-      setSessionId(newSessionId);
-    }
-  }, []);
-
-  const handleQuickAction = (actionText) => {
-    setMessage(actionText);
-    setSelectedAction(actionText);
-    setTimeout(() => sendMessage(actionText), 100);
-  };
-
-  const sendMessage = async (customMessage = null) => {
-    const msgToSend = customMessage || message;
-    if (!msgToSend.trim() || !sessionId) return;
-
-    const userMsg = { sender: "user", text: msgToSend, timestamp: new Date() };
-    setChat((prev) => [...prev, userMsg]);
-    setMessage("");
-    setIsTyping(true);
-
-    try {
-      const res = await axios.post("https://wish-abacus-barterer.ngrok-free.dev/chat", {
-        message: msgToSend,
-        session_id: sessionId
-      });
-
-      const data = res.data;
-
-      const botMsg = { 
-        sender: "bot", 
-        text: data.message, 
-        courses: data.courses || [], 
-        timestamp: new Date() 
-      };
-
-      setChat((prev) => [...prev, botMsg]);
-
-      // Update session_id if backend returned a new one
-      if (data.session_id && data.session_id !== sessionId) {
-        setSessionId(data.session_id);
-      }
-
-    } catch (err) {
-      console.error(err);
-      setChat((prev) => [
-        ...prev,
-        { 
-          sender: "bot", 
-          text: "❌ Error connecting to server. Please make sure the backend is running.", 
-          timestamp: new Date() 
-        }
-      ]);
-    } finally {
-      setIsTyping(false);
-      setSelectedAction(null);
-    }
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+  const handleModelSelect = (route) => {
+    navigate(route);
   };
 
   return (
     <Box component="main" className={styles.aiagent_container}>
+      {/* Animated background elements */}
       <div className={styles.bg_blur_1}></div>
       <div className={styles.bg_blur_2}></div>
       <div className={styles.bg_blur_3}></div>
+      <div className={styles.particle_1}></div>
+      <div className={styles.particle_2}></div>
+      <div className={styles.particle_3}></div>
+      <div className={styles.particle_4}></div>
+      <div className={styles.particle_5}></div>
+
+      <div className={styles.floating_orb}></div>
+      <div className={styles.floating_orb_2}></div>
 
       <div className={styles.aiagent_content}>
-        {/* Quick Actions */}
-        <div className={styles.quick_actions_section}>
-          <div className={styles.section_header}>
-            <div className={styles.header_icon_wrapper}>
-              <span className={styles.header_icon}>⚡</span>
-            </div>
-            <h2 className={styles.section_title}>Quick Actions</h2>
-            <p className={styles.section_subtitle}>Start with one click</p>
+        {/* Hero Section */}
+        <div className={styles.hero_section}>
+          <div className={styles.hero_badge}>
+            <span className={styles.badge_pulse}></span>
+            <span>✨ AI-Powered Career Assistant</span>
           </div>
+          <div className={styles.hero_title_wrapper}>
+            <div className={styles.hero_icon}>
+              <img src={LampLight} alt="AI Mentor" />
+            </div>
+            <h1 className={styles.hero_title}>
+              Your Intelligent<br />
+              <span className={styles.gradient_text}>Career Companion</span>
+            </h1>
+          </div>
+          <p className={styles.hero_description}>
+            Experience the future of career guidance with our advanced AI models designed to help you succeed
+          </p>
+        </div>
 
-          <div className={styles.actions_grid}>
-            {quickActions.map((item, idx) => (
-              <div
-                key={idx}
-                className={`${styles.action_card} ${selectedAction === item.text ? styles.action_card_selected : ""}`}
-                onClick={() => handleQuickAction(item.text)}
-                style={{ borderBottomColor: item.color }}
-              >
-                <div className={styles.action_icon_wrapper} style={{ background: `${item.color}15` }}>
-                  <span className={styles.action_emoji}>{item.icon}</span>
-                  <img src={item.img} alt={item.text} className={styles.action_img} />
-                </div>
-                <div className={styles.action_content}>
-                  <h3 className={styles.action_title}>{item.text}</h3>
-                  <p className={styles.action_description}>
-                    {item.text === "Analyze Skills" && "Evaluate your current skill set"}
-                    {item.text === "Career Advice" && "Get personalized career guidance"}
-                    {item.text === "Generate Roadmap" && "Create your learning path"}
-                    {item.text === "Review CV" && "Improve your resume with AI"}
-                  </p>
-                </div>
-                <div className={styles.action_arrow}>→</div>
+        {/* Section Title */}
+        <div className={styles.section_title_container}>
+          <div className={styles.section_title_line}></div>
+          <h2 className={styles.section_title}>Choose Your AI Assistant</h2>
+          <div className={styles.section_title_line}></div>
+        </div>
+
+        {/* AI Models Grid */}
+        <div className={styles.models_grid}>
+          {aiModels.map((model, index) => (
+            <div
+              key={model.id}
+              className={`${styles.model_card} ${hoveredCard === index ? styles.hovered : ""}`}
+              onClick={() => handleModelSelect(model.route)}
+              onMouseEnter={() => setHoveredCard(index)}
+              onMouseLeave={() => setHoveredCard(null)}
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <div className={styles.card_glow} style={{ background: model.gradient }}></div>
+              
+              <div className={styles.card_badge} style={{ background: model.gradient }}>
+                {model.tag}
               </div>
-            ))}
+              
+              <div className={styles.card_icon_wrapper}>
+                <div className={styles.icon_background} style={{ background: `${model.color}15` }}>
+                  <span className={styles.card_icon}>{model.icon}</span>
+                </div>
+              </div>
+              
+              <h3 className={styles.card_title}>{model.name}</h3>
+              <p className={styles.card_description}>{model.description}</p>
+              
+              <div className={styles.card_features}>
+                {model.features.map((feature, idx) => (
+                  <div key={idx} className={styles.feature_item}>
+                    <svg className={styles.feature_check} viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    <span>{feature}</span>
+                  </div>
+                ))}
+              </div>
+              
+              <button className={styles.card_button} style={{ background: model.gradient }}>
+                <span>Launch Assistant</span>
+                <svg className={styles.button_arrow} viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Features Section - No Stats, No Feedback */}
+        <div className={styles.features_section}>
+          <div className={styles.feature_card}>
+            <div className={styles.feature_icon}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+            </div>
+            <h4>Real-time AI Processing</h4>
+            <p>Get instant responses powered by advanced language models</p>
+          </div>
+          <div className={styles.feature_card}>
+            <div className={styles.feature_icon}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+            </div>
+            <h4>Secure & Private</h4>
+            <p>Your data is encrypted and never shared with third parties</p>
+          </div>
+          <div className={styles.feature_card}>
+            <div className={styles.feature_icon}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <h4>24/7 Availability</h4>
+            <p>Access your AI mentor anytime, anywhere, on any device</p>
           </div>
         </div>
 
-        {/* Chat Section */}
-        <div className={styles.chat_section}>
-          <div className={styles.chat_header}>
-            <div className={styles.chat_header_left}>
-              <div className={styles.chat_icon_wrapper}>
-                <img src={LampLight} alt="AI Mentor" className={styles.chat_icon} />
-                <div className={styles.chat_icon_pulse}></div>
-              </div>
-              <div>
-                <h2 className={styles.chat_title}>AI Mentor Chat</h2>
-                <p className={styles.chat_subtitle}>Your personal career assistant</p>
-              </div>
-            </div>
-            <div className={styles.chat_status}>
-              <span className={styles.status_dot}></span>
-              <span className={styles.status_text}>Online</span>
-            </div>
-          </div>
-
-          {/* Messages Area */}
-          <div className={styles.chat_messages}>
-            {chat.length === 0 ? (
-              <div className={styles.welcome_message}>
-                <div className={styles.welcome_icon}>🤖</div>
-                <h3 className={styles.welcome_title}>Hello! I'm your AI Career Mentor</h3>
-                <p className={styles.welcome_text}>
-                  Ask me about courses like "React", "Python backend", "Data Science beginner", or "Flutter".
-                </p>
-                <div className={styles.example_questions}>
-                  <span className={styles.example_badge}>React courses</span>
-                  <span className={styles.example_badge}>Python backend</span>
-                  <span className={styles.example_badge}>Data Science beginner</span>
-                </div>
-              </div>
-            ) : (
-              chat.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`${styles.message} ${msg.sender === "user" ? styles.user_message : styles.bot_message}`}
-                >
-                  <div className={styles.message_avatar}>
-                    {msg.sender === "user" ? "👤" : "🤖"}
-                  </div>
-                  <div className={styles.message_content}>
-                    <div className={styles.message_text}>
-                      {msg.sender === "bot" ? (
-                        <MessageWithLinks text={msg.text} />
-                      ) : (
-                        msg.text.split('\n').map((line, idx) => (
-                          <React.Fragment key={idx}>
-                            {line}
-                            {idx < msg.text.split('\n').length - 1 && <br />}
-                          </React.Fragment>
-                        ))
-                      )}
-                    </div>
-                    <div className={styles.message_time}>
-                      {msg.timestamp?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-
-            {isTyping && (
-              <div className={`${styles.message} ${styles.bot_message}`}>
-                <div className={styles.message_avatar}>🤖</div>
-                <div className={styles.message_content}>
-                  <div className={styles.typing_indicator}>
-                    <span></span><span></span><span></span>
-                  </div>
-                </div>
-              </div>
-            )}
-            <div ref={chatEndRef} />
-          </div>
-
-          {/* Input Area */}
-          <div className={styles.input_area}>
-            <div className={styles.input_wrapper}>
-              <textarea
-                className={styles.chat_input}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type here... (e.g. React, Python, Data Science...)"
-                rows={1}
-              />
-              <button 
-                className={styles.send_button}
-                onClick={() => sendMessage()}
-                disabled={!message.trim()}
-              >
-                <img src={SendBtn} alt="Send" />
-                <span>Send</span>
-              </button>
-            </div>
+        {/* CTA Section */}
+        <div className={styles.cta_section}>
+          <div className={styles.cta_content}>
+            <h3>Ready to Accelerate Your Career?</h3>
+            <p>Join thousands of successful professionals who achieved their goals with SmartMentor</p>
+            <button className={styles.cta_button} onClick={() => handleModelSelect("/aimentor/recommendation")}>
+              Get Started Now
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
     </Box>
   );
-};
-
-export default Aiagent;
+}
