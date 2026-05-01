@@ -12,31 +12,39 @@ import NotFound from "./components/NotFound/NotFound";
 import Skills from "./components/Skills/Skills";
 import StudyPlanner from "./components/StudyPlanner/StudyPlanner";
 import Projects from "./components/Projects/Projects";
+import JobTrends from "./components/JobTrend/JobTrend";
+import RecommendationCourses from "./components/RecommendationCourses/RecommendationCourses";
+import RoadmapAI from "./components/RoadmapAI/RoadmapAI";
+import CVAnalysis from "./components/CVAnalysis/CVAnalysis";
+
+
+function ProtectedRoute({ children }) {
+  const token = localStorage.getItem("token");
+  const verificationToken = localStorage.getItem("verificationToken");
+
+  if (!token) return <Navigate to="/login" replace />;
+
+  if (verificationToken) return <Navigate to="/verify-email" replace />;
+
+  return children;
+}
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* ROOT -> HOME */}
         <Route path="/" element={<Navigate to="/home" />} />
 
-        {/* Home Page */}
         <Route path="/home" element={<Home />} />
 
-        {/* Login Page */}
         <Route path="/login" element={<Login />} />
 
-        {/* Signup Page */}
         <Route path="/signup" element={<Signup />} />
 
-        {/* CompleteProfile Page */}
-        <Route path="/completeprofile" element={<CompleteProfile />} />
-
-        {/* Progress Tracking Page */}
-        {/* <Route path="/progresstracking" element={<ProgressTracking />} /> */}
+        <Route path="/completeprofile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
 
         {/* App Layout (after login) */}
-        <Route element={<Layout />}>
+        <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/aimentor" element={<Aiagent />} />
           <Route path="/learningpath" element={<LearningPath />} />
@@ -44,9 +52,13 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/studyplanner" element={<StudyPlanner />} />
+          <Route path="/jobtrends" element={<JobTrends />} />
+          <Route path="/aimentor" element={<Aiagent />} />
+          <Route path="/aimentor/recommendation" element={<RecommendationCourses />} />
+          <Route path="/aimentor/roadmap" element={<RoadmapAI />} />
+          <Route path="/aimentor/cv-analysis" element={<CVAnalysis />} />
         </Route>
 
-        {/* Any wrong route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
