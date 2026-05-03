@@ -13,6 +13,7 @@ import Skills from "./components/Skills/Skills";
 import StudyPlanner from "./components/StudyPlanner/StudyPlanner";
 import Projects from "./components/Projects/Projects";
 import JobTrends from "./components/JobTrend/JobTrend";
+import GapAnalysis from "./components/GapAnalysis/GapAnalysis";
 import RecommendationCourses from "./components/RecommendationCourses/RecommendationCourses";
 import RoadmapAI from "./components/RoadmapAI/RoadmapAI";
 import CVAnalysis from "./components/CVAnalysis/CVAnalysis";
@@ -53,6 +54,7 @@ function App() {
           <Route path="/projects" element={<Projects />} />
           <Route path="/studyplanner" element={<StudyPlanner />} />
           <Route path="/jobtrends" element={<JobTrends />} />
+          <Route path="/gapanalysis" element={<GapAnalysis />} />
           <Route path="/aimentor" element={<Aiagent />} />
           <Route path="/aimentor/recommendation" element={<RecommendationCourses />} />
           <Route path="/aimentor/roadmap" element={<RoadmapAI />} />
