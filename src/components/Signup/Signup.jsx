@@ -160,6 +160,8 @@ export default function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    console.log("Selected role:", formData.role);
+
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords don't match");
       return;
@@ -353,34 +355,6 @@ export default function Signup() {
                     <i className={`fa-solid ${showConfirmPassword ? "fa-eye" : "fa-eye-slash"}`}></i>
                   </button>
                 </div>
-              </div>
-            </div>
-
-            <div className={styles.role_section}>
-              <label>I am a:</label>
-              <div className={styles.role_options}>
-                <label className={styles.role_label}>
-                  <input
-                    type="radio"
-                    name="role"
-                    value="student"
-                    checked={formData.role === "student"}
-                    onChange={handleChange}
-                    disabled={loading}
-                  />
-                  <span>Student</span>
-                </label>
-                <label className={styles.role_label}>
-                  <input
-                    type="radio"
-                    name="role"
-                    value="professional"
-                    checked={formData.role === "professional"}
-                    onChange={handleChange}
-                    disabled={loading}
-                  />
-                  <span>Professional</span>
-                </label>
               </div>
             </div>
 
