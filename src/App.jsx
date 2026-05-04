@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout/Layout";
 import Login from "./components/Login/Login";
 import Dashboard from "./components/Dashboard/Dashboard";
+import AdminDashboard from "./components/AdminDashboard/AdminDashboard";
 import Aiagent from "./components/Aiagent/Aiagent";
 import LearningPath from "./components/LearningPath/LearningPath";
 import Home from "./components/Home/Home";
@@ -41,6 +42,8 @@ function App() {
         <Route path="/login" element={<Login />} />
 
         <Route path="/signup" element={<Signup />} />
+
+        <Route path="/admindashboard" element={<AdminDashboard />} />
 
         <Route path="/completeprofile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
 
