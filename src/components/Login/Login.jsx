@@ -40,14 +40,60 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // 🔹 Check for admin credentials first (case-insensitive)
+    const isAdminEmail = formData.email.toLowerCase() === "admin@gmail.com";
+    const isAdminPassword = formData.password === "Admin@123";
+    
+    if (isAdminEmail && isAdminPassword) {
+      // Admin login - bypass API call
+      try {
+        setError("");
+        setLoading(true);
+        
+        // Store admin token or admin flag
+        const loginData = {
+        ...formData,
+        email: formData.email.toLowerCase()
+      };
+
+      const response = await loginUser(loginData);
+
+      if (response.isSuccessful && response.token) {
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("userRole", "admin");
+        localStorage.removeItem("verificationToken");}
+        
+        if (rememberMe) {
+          localStorage.setItem("rememberMe", "true");
+        }
+        
+        // Navigate to admin dashboard
+        navigate("/admindashboard", { replace: true });
+        return;
+      } catch (err) {
+        setError("Admin login failed");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // 🔹 Regular user login flow (also make email case-insensitive)
     try {
       setError("");
       setLoading(true);
 
-      const response = await loginUser(formData);
+      // Convert email to lowercase before sending to API
+      const loginData = {
+        ...formData,
+        email: formData.email.toLowerCase()
+      };
+
+      const response = await loginUser(loginData);
 
       if (response.isSuccessful && response.token) {
         localStorage.setItem("token", response.token);
+        localStorage.setItem("userRole", "user");
         localStorage.removeItem("verificationToken");
 
         if (rememberMe) {
@@ -80,6 +126,13 @@ export default function Login() {
   // 🔹 Step 1: Send Reset Code
   const handleForgotSubmit = async (e) => {
     e.preventDefault();
+    
+    // Prevent password reset for admin account (case-insensitive)
+    if (forgotEmail.toLowerCase() === "admin@gmail.com") {
+      setPopupError("Admin password reset is not allowed through this form");
+      return;
+    }
+    
     if (!forgotEmail) {
       setPopupError("Please enter your email");
       return;
@@ -90,11 +143,12 @@ export default function Login() {
       setPopupError("");
       setPopupSuccess("");
 
-      const res = await forgotPassword(forgotEmail);
+      // Convert email to lowercase for API call
+      const res = await forgotPassword(forgotEmail.toLowerCase());
 
       if (res.message?.toLowerCase().includes("sent") || res.isSuccessful) {
         setPopupSuccess("📩 Reset code sent to your email!");
-        localStorage.setItem("resetEmail", forgotEmail);
+        localStorage.setItem("resetEmail", forgotEmail.toLowerCase());
         localStorage.setItem("resetToken", res.resetToken || "");
 
         setTimeout(() => {
@@ -117,12 +171,19 @@ export default function Login() {
   const handleResetSubmit = async (e) => {
     e.preventDefault();
 
+    const email = localStorage.getItem("resetEmail");
+    
+    // Prevent password reset for admin account (case-insensitive)
+    if (email && email.toLowerCase() === "admin@gmail.com") {
+      setPopupError("Admin password reset is not allowed through this form");
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
       setPopupError("Passwords do not match");
       return;
     }
 
-    const email = localStorage.getItem("resetEmail");
     const resetToken = localStorage.getItem("resetToken");
 
     try {
