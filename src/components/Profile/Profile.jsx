@@ -2,9 +2,6 @@ import { Avatar, Button, Typography } from "@mui/material";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import EditIcon from "@mui/icons-material/Edit";
-import SaveIcon from "@mui/icons-material/Save";
-import CancelIcon from "@mui/icons-material/Cancel";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useState, useEffect } from "react";
@@ -16,6 +13,7 @@ import TabPanel from '@mui/lab/TabPanel';
 import DownloadIcon from "@mui/icons-material/Download";
 import ShareIcon from "@mui/icons-material/Share";
 import { useNavigate } from "react-router-dom";
+import { getCurrentUser } from "../../api/authenticationService"; 
 import styles from "./Profile.module.css";
 
 // Import images
@@ -25,38 +23,6 @@ import Fundementals from "../../assets/book-open_.png";
 import Community from "../../assets/users_blue.png";
 import Portfolio from "../../assets/File_dock.png";
 import Badge from "../../assets/Flag_alt.png";
-
-// Validation functions
-const validateName = (name) => {
-  const trimmedName = name.trim();
-  const nameParts = trimmedName.split(/\s+/);
-  
-  // Check if name has exactly 2 parts (first and last name)
-  if (nameParts.length !== 2) {
-    return { isValid: false, message: "Please enter both first name and last name" };
-  }
-  
-  // Check if both parts contain only letters (and optionally hyphens/apostrophes)
-  const nameRegex = /^[A-Za-z]+(?:[-'][A-Za-z]+)?$/;
-  if (!nameRegex.test(nameParts[0]) || !nameRegex.test(nameParts[1])) {
-    return { isValid: false, message: "Names should only contain letters" };
-  }
-  
-  // Check minimum length (at least 2 characters each)
-  if (nameParts[0].length < 2 || nameParts[1].length < 2) {
-    return { isValid: false, message: "Each name should be at least 2 characters long" };
-  }
-  
-  return { isValid: true, message: "" };
-};
-
-const validateEmail = (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return { isValid: false, message: "Please enter a valid email address (e.g., name@example.com)" };
-  }
-  return { isValid: true, message: "" };
-};
 
 function stringAvatar(name) {
   const names = name.split(" ");
@@ -74,84 +40,189 @@ export default function Profile() {
   const navigate = useNavigate();
   const [value, setValue] = useState('1');
   const [animate, setAnimate] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isEditingContact, setIsEditingContact] = useState(false);
-  const [tempName, setTempName] = useState("");
-  const [tempEmail, setTempEmail] = useState("");
-  const [tempLocation, setTempLocation] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [notification, setNotification] = useState(null);
   
   const [userData, setUserData] = useState({
-    name: "Kareem Nabil",
+    name: "",
     title: "Frontend Developer",
-    email: "kareem.nabil@example.com",
-    location: "Tanta, Egypt",
-    joined: "January 2026",
-    bio: "Passionate frontend developer with 3+ years of experience building responsive web applications."
+    email: "",
+    location: "",
+    joined: "",
+    bio: "Passionate developer dedicated to continuous learning and building impactful applications."
   });
 
   const [stats, setStats] = useState([
-    { name: "Courses Completed", num: 10, icon: "📚", color: "#0A5ADB" },
-    { name: "Projects Done", num: 8, icon: "🚀", color: "#58A7B5" },
-    { name: "Community Points", num: 247, icon: "⭐", color: "#667eea" },
-    { name: "Badges Earned", num: 5, icon: "🏆", color: "#f59e0b" },
+    { name: "Courses Completed", num: 0, icon: "📚", color: "#0A5ADB" },
+    { name: "Projects Done", num: 0, icon: "🚀", color: "#58A7B5" },
+    { name: "Community Points", num: 0, icon: "⭐", color: "#667eea" },
+    { name: "Badges Earned", num: 0, icon: "🏆", color: "#f59e0b" },
   ]);
 
   const [progress, setProgress] = useState([
-    { name: "Fundamentals", percentage: 80, color: "#0A5ADB" },
-    { name: "Core Skills", percentage: 45, color: "#58A7B5" },
-    { name: "Advanced", percentage: 20, color: "#667eea" },
+    { name: "Fundamentals", percentage: 0, color: "#0A5ADB" },
+    { name: "Core Skills", percentage: 0, color: "#58A7B5" },
+    { name: "Advanced", percentage: 0, color: "#667eea" },
   ]);
 
-  const [projects, setProjects] = useState([
-    { id: 1, name: "E-commerce Platform", level: "Intermediate", status: "In Progress", progress: 65, color: "#0A5ADB" },
-    { id: 2, name: "Weather Dashboard", level: "Beginner", status: "Completed", progress: 100, color: "#10b981" },
-    { id: 3, name: "Social Media App", level: "Advanced", status: "Not Started", progress: 0, color: "#f59e0b" },
-  ]);
-
-  const [skills, setSkills] = useState([
-    { id: 1, name: "React", percentage: 80, color: "#61DAFB", projects: 5 },
-    { id: 2, name: "Node.js", percentage: 70, color: "#68A063", projects: 4 },
-    { id: 3, name: "TypeScript", percentage: 60, color: "#3178C6", projects: 3 },
-    { id: 4, name: "MongoDB", percentage: 50, color: "#47A248", projects: 3 },
-  ]);
-
-  const [badges, setBadges] = useState([
-    { id: 1, badge: "🎯", heading: "First Steps", content: "Completed profile setup", points: 100, date: "Jan 2025", earned: true },
-    { id: 2, badge: "⚡", heading: "Quick Learner", content: "Finished 5 courses", points: 250, date: "Feb 2025", earned: true },
-    { id: 3, badge: "🤝", heading: "Community Helper", content: "Helped 10 people", points: 150, date: "Mar 2025", earned: true },
-    { id: 4, badge: "🏆", heading: "Project Master", content: "Completed 3 projects", points: 500, date: "Mar 2025", earned: true },
-    { id: 5, badge: "💪", heading: "Consistency King", content: "30 day learning streak", points: 300, date: "Pending", earned: false, required: "30 day streak" },
-  ]);
-
-  const [activities, setActivities] = useState([
-    { id: 1, logo: Fundementals, title: "Completed React Fundamentals", history: "2 hours ago", type: "course" },
-    { id: 2, logo: Community, title: "Answered question in Community", history: "Yesterday", type: "community" },
-    { id: 3, logo: Portfolio, title: "Updated Portfolio Project", history: "2 days ago", type: "project" },
-    { id: 4, logo: Badge, title: "Earned Quick Learner Badge", history: "3 days ago", type: "badge" },
-  ]);
+  const [projects, setProjects] = useState([]);
+  const [skills, setSkills] = useState([]);
+  const [badges, setBadges] = useState([]);
+  const [activities, setActivities] = useState([]);
 
   const [newSkill, setNewSkill] = useState({ name: "", percentage: 0 });
   const [showAddSkill, setShowAddSkill] = useState(false);
-  const [notification, setNotification] = useState(null);
 
+  // Fetch user data on mount
   useEffect(() => {
     setAnimate(true);
-    loadSavedData();
+    fetchUserData();
   }, []);
 
-  const loadSavedData = () => {
-    const savedData = localStorage.getItem('profileData');
-    if (savedData) {
-      const data = JSON.parse(savedData);
-      setUserData(data.userData || userData);
-      setStats(data.stats || stats);
-      setProgress(data.progress || progress);
-      setProjects(data.projects || projects);
-      setSkills(data.skills || skills);
+  const fetchUserData = async () => {
+    try {
+      setLoading(true);
+      const data = await getCurrentUser();
+      
+      // Map API response to component state
+      setUserData({
+        name: data.fullName || data.firstName + " " + data.lastName || data.username || data.name || "Learner",
+        title: data.title || data.jobTitle || "Frontend Developer",
+        email: data.email || "",
+        location: data.location || data.city || "Egypt",
+        joined: data.joinedDate ? new Date(data.joinedDate).toLocaleString('default', { month: 'long', year: 'numeric' }) : "2026",
+        bio: data.bio || data.about || "Passionate developer dedicated to continuous learning and building impactful applications."
+      });
+
+      // Update stats from API data
+      setStats([
+        { name: "Courses Completed", num: data.coursesCompleted || data.totalCourses || 0, icon: "📚", color: "#0A5ADB" },
+        { name: "Projects Done", num: data.projectsCompleted || data.totalProjects || 0, icon: "🚀", color: "#58A7B5" },
+        { name: "Community Points", num: data.communityPoints || data.points || 0, icon: "⭐", color: "#667eea" },
+        { name: "Badges Earned", num: data.badgesEarned || data.totalBadges || 0, icon: "🏆", color: "#f59e0b" },
+      ]);
+
+      // Update progress from API
+      if (data.progress) {
+        setProgress([
+          { name: "Fundamentals", percentage: data.progress.fundamentals || 0, color: "#0A5ADB" },
+          { name: "Core Skills", percentage: data.progress.coreSkills || 0, color: "#58A7B5" },
+          { name: "Advanced", percentage: data.progress.advanced || 0, color: "#667eea" },
+        ]);
+      }
+
+      // Update skills from API
+      if (data.skills && data.skills.length > 0) {
+        setSkills(data.skills.map((skill, index) => ({
+          id: index + 1,
+          name: skill.name,
+          percentage: skill.proficiency || skill.level || 0,
+          color: getSkillColor(skill.name),
+          projects: skill.projectsCount || 0
+        })));
+      } else {
+        // Default skills if none from API
+        setSkills([
+          { id: 1, name: "React", percentage: 0, color: "#61DAFB", projects: 0 },
+          { id: 2, name: "Node.js", percentage: 0, color: "#68A063", projects: 0 },
+          { id: 3, name: "TypeScript", percentage: 0, color: "#3178C6", projects: 0 },
+        ]);
+      }
+
+      // Update projects from API
+      if (data.projects && data.projects.length > 0) {
+        setProjects(data.projects.map((project, index) => ({
+          id: index + 1,
+          name: project.name,
+          level: project.level || "Beginner",
+          status: project.status || "Not Started",
+          progress: project.progress || 0,
+          color: getProjectColor(project.status)
+        })));
+      } else {
+        // Default projects if none from API
+        setProjects([
+          { id: 1, name: "Sample Project", level: "Beginner", status: "Not Started", progress: 0, color: "#0A5ADB" }
+        ]);
+      }
+
+      // Update badges from API
+      if (data.badges && data.badges.length > 0) {
+        setBadges(data.badges.map((badge, index) => ({
+          id: index + 1,
+          badge: badge.icon || "🏆",
+          heading: badge.name,
+          content: badge.description,
+          points: badge.points || 0,
+          date: badge.earnedDate ? new Date(badge.earnedDate).toLocaleString('default', { month: 'short', year: 'numeric' }) : "Pending",
+          earned: badge.earned || false,
+          required: badge.requirement
+        })));
+      } else {
+        // Default badges if none from API
+        setBadges([
+          { id: 1, badge: "🎯", heading: "First Steps", content: "Complete profile setup", points: 100, date: "Pending", earned: false },
+          { id: 2, badge: "⚡", heading: "Quick Learner", content: "Finish 5 courses", points: 250, date: "Pending", earned: false },
+        ]);
+      }
+
+      // Update activities from API
+      if (data.recentActivities && data.recentActivities.length > 0) {
+        setActivities(data.recentActivities.map((activity, index) => ({
+          id: index + 1,
+          logo: getActivityLogo(activity.type),
+          title: activity.title,
+          history: activity.timeAgo || activity.date,
+          type: activity.type
+        })));
+      }
+
+      setError(null);
+    } catch (err) {
+      console.error("Failed to fetch user data:", err);
+      setError(err.message || "Failed to load profile data");
+      showNotification("Failed to load profile data", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const saveData = () => {
+  // Helper function to get skill color
+  const getSkillColor = (skillName) => {
+    const colors = {
+      "React": "#61DAFB",
+      "Node.js": "#68A063",
+      "TypeScript": "#3178C6",
+      "Python": "#3776AB",
+      "JavaScript": "#F7DF1E",
+      "MongoDB": "#47A248",
+      "Docker": "#2496ED",
+      "AWS": "#FF9900"
+    };
+    return colors[skillName] || "#0A5ADB";
+  };
+
+  // Helper function to get project color based on status
+  const getProjectColor = (status) => {
+    switch(status) {
+      case "Completed": return "#10b981";
+      case "In Progress": return "#f59e0b";
+      default: return "#0A5ADB";
+    }
+  };
+
+  // Helper function to get activity logo
+  const getActivityLogo = (type) => {
+    switch(type) {
+      case "course": return Fundementals;
+      case "community": return Community;
+      case "project": return Portfolio;
+      default: return Badge;
+    }
+  };
+
+  const saveDataToLocal = () => {
     const dataToSave = {
       userData,
       stats,
@@ -160,7 +231,7 @@ export default function Profile() {
       skills,
     };
     localStorage.setItem('profileData', JSON.stringify(dataToSave));
-    showNotification("Profile saved successfully!", "success");
+    showNotification("Profile saved locally!", "success");
   };
 
   const showNotification = (message, type) => {
@@ -172,65 +243,6 @@ export default function Profile() {
     setValue(newValue);
   };
 
-  // Start editing name
-  const startEditName = () => {
-    setTempName(userData.name);
-    setIsEditing(true);
-  };
-
-  // Save name
-  const handleUpdateName = () => {
-    const validation = validateName(tempName);
-    if (validation.isValid) {
-      setUserData({...userData, name: tempName.trim()});
-      setIsEditing(false);
-      saveData();
-      showNotification("Name updated successfully!", "success");
-    } else {
-      showNotification(validation.message, "error");
-    }
-  };
-
-  // Cancel name edit
-  const cancelEditName = () => {
-    setIsEditing(false);
-    setTempName("");
-  };
-
-  // Start editing contact
-  const startEditContact = () => {
-    setTempEmail(userData.email);
-    setTempLocation(userData.location);
-    setIsEditingContact(true);
-  };
-
-  // Save contact
-  const handleUpdateContact = () => {
-    const emailValidation = validateEmail(tempEmail);
-    
-    if (!emailValidation.isValid) {
-      showNotification(emailValidation.message, "error");
-      return;
-    }
-    
-    setUserData({
-      ...userData,
-      email: tempEmail,
-      location: tempLocation
-    });
-    setIsEditingContact(false);
-    saveData();
-    showNotification("Contact information updated!", "success");
-  };
-
-  // Cancel contact edit
-  const cancelEditContact = () => {
-    setIsEditingContact(false);
-    setTempEmail("");
-    setTempLocation("");
-  };
-
-  // Limit percentage between 0 and 100
   const limitPercentage = (value) => {
     return Math.min(100, Math.max(0, value));
   };
@@ -242,12 +254,12 @@ export default function Profile() {
         id: newId, 
         name: newSkill.name, 
         percentage: limitPercentage(newSkill.percentage), 
-        color: "#0A5ADB", 
+        color: getSkillColor(newSkill.name), 
         projects: 0 
       }]);
       setNewSkill({ name: "", percentage: 0 });
       setShowAddSkill(false);
-      saveData();
+      saveDataToLocal();
       showNotification(`${newSkill.name} added to your skills!`, "success");
     } else {
       showNotification("Please enter a valid skill name and percentage (1-100)", "error");
@@ -256,14 +268,14 @@ export default function Profile() {
 
   const handleDeleteSkill = (id) => {
     setSkills(skills.filter(s => s.id !== id));
-    saveData();
+    saveDataToLocal();
     showNotification("Skill removed", "info");
   };
 
   const handleUpdateSkill = (id, newPercentage) => {
     const limitedPercentage = limitPercentage(newPercentage);
     setSkills(skills.map(s => s.id === id ? { ...s, percentage: limitedPercentage } : s));
-    saveData();
+    saveDataToLocal();
   };
 
   const handleAddProject = () => {
@@ -276,7 +288,7 @@ export default function Profile() {
       color: "#0A5ADB"
     };
     setProjects([...projects, newProject]);
-    saveData();
+    saveDataToLocal();
     showNotification("New project added!", "success");
   };
 
@@ -284,20 +296,21 @@ export default function Profile() {
     setProjects(projects.map(p => p.id === id ? { 
       ...p, 
       status: newStatus, 
-      progress: newStatus === "Completed" ? 100 : p.progress 
+      progress: newStatus === "Completed" ? 100 : p.progress,
+      color: getProjectColor(newStatus)
     } : p));
-    saveData();
+    saveDataToLocal();
     showNotification(`Project status updated to ${newStatus}`, "success");
   };
 
   const handleUpdateProjectName = (id, newName) => {
     setProjects(projects.map(p => p.id === id ? { ...p, name: newName } : p));
-    saveData();
+    saveDataToLocal();
   };
 
   const handleDeleteProject = (id) => {
     setProjects(projects.filter(p => p.id !== id));
-    saveData();
+    saveDataToLocal();
     showNotification("Project removed", "info");
   };
 
@@ -306,9 +319,8 @@ export default function Profile() {
     const updatedProgress = [...progress];
     updatedProgress[index].percentage = limitedPercentage;
     setProgress(updatedProgress);
-    saveData();
+    saveDataToLocal();
     
-    // Update overall stats based on progress
     const avgProgress = Math.round(updatedProgress.reduce((acc, p) => acc + p.percentage, 0) / updatedProgress.length);
     setStats(stats.map(s => 
       s.name === "Courses Completed" ? { ...s, num: Math.floor(avgProgress / 10) } : s
@@ -328,8 +340,40 @@ export default function Profile() {
   };
 
   const totalPoints = badges.filter(b => b.earned).reduce((acc, b) => acc + b.points, 0);
-  const averageSkill = Math.round(skills.reduce((acc, s) => acc + s.percentage, 0) / skills.length);
+  const averageSkill = skills.length > 0 ? Math.round(skills.reduce((acc, s) => acc + s.percentage, 0) / skills.length) : 0;
   const completedProjects = projects.filter(p => p.status === "Completed").length;
+
+  // Update stats when projects or skills change
+  useEffect(() => {
+    setStats(prevStats => prevStats.map(stat => {
+      if (stat.name === "Projects Done") return { ...stat, num: completedProjects };
+      if (stat.name === "Badges Earned") return { ...stat, num: badges.filter(b => b.earned).length };
+      if (stat.name === "Community Points") return { ...stat, num: totalPoints };
+      return stat;
+    }));
+  }, [completedProjects, badges, totalPoints]);
+
+  if (loading) {
+    return (
+      <div className={styles.profile_container}>
+        <div className={styles.loading_container}>
+          <div className={styles.loading_spinner}></div>
+          <p>Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !userData.name) {
+    return (
+      <div className={styles.profile_container}>
+        <div className={styles.error_container}>
+          <p className={styles.error_message}>{error}</p>
+          <button onClick={fetchUserData} className={styles.retry_button}>Try Again</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.profile_container}>
@@ -357,32 +401,13 @@ export default function Profile() {
                 />
               </div>
               <div className={styles.user_info}>
-                {isEditing ? (
-                  <div className={styles.edit_name_container}>
-                    <input 
-                      type="text" 
-                      value={tempName} 
-                      onChange={(e) => setTempName(e.target.value)}
-                      className={styles.edit_input}
-                      placeholder="First Last"
-                      autoFocus
-                    />
-                    <button onClick={handleUpdateName} className={styles.save_btn}>
-                      <SaveIcon />
-                    </button>
-                    <button onClick={cancelEditName} className={styles.cancel_btn}>
-                      <CancelIcon />
-                    </button>
-                  </div>
-                ) : (
-                  <div className={styles.name_wrapper}>
-                    <Typography variant="h5" className={styles.user_name}>{userData.name}</Typography>
-                    <button className={styles.edit_name_btn} onClick={startEditName}>
-                      <EditIcon />
-                    </button>
-                  </div>
-                )}
+                {/* Name - Read only */}
+                <Typography variant="h5" className={styles.user_name}>{userData.name}</Typography>
+                
+                {/* Title - Read only (no edit button) */}
                 <Typography variant="body2" className={styles.user_title}>{userData.title}</Typography>
+                
+                {/* Bio - Read only (no edit button) */}
                 <p className={styles.user_bio}>{userData.bio}</p>
               </div>
             </div>
@@ -390,56 +415,27 @@ export default function Profile() {
               <button className={styles.share_btn} onClick={handleShareProfile}>
                 <ShareIcon /> Share Profile
               </button>
-              <button className={styles.save_all_btn} onClick={saveData}>
+              <button className={styles.save_all_btn} onClick={saveDataToLocal}>
                 Save All Changes
               </button>
             </div>
           </div>
 
-          {/* Contact Info */}
+          {/* Contact Info - Read only */}
           <div className={styles.contact_info}>
-            {isEditingContact ? (
-              <div className={styles.edit_contact_container}>
-                <input 
-                  type="email" 
-                  value={tempEmail} 
-                  onChange={(e) => setTempEmail(e.target.value)}
-                  placeholder="Email"
-                  className={styles.contact_input}
-                />
-                <input 
-                  type="text" 
-                  value={tempLocation} 
-                  onChange={(e) => setTempLocation(e.target.value)}
-                  placeholder="Location"
-                  className={styles.contact_input}
-                />
-                <button onClick={handleUpdateContact} className={styles.save_btn}>
-                  <SaveIcon />
-                </button>
-                <button onClick={cancelEditContact} className={styles.cancel_btn}>
-                  <CancelIcon />
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className={styles.contact_item}>
-                  <EmailOutlinedIcon />
-                  <Typography>{userData.email}</Typography>
-                  <button className={styles.edit_contact_btn} onClick={startEditContact}>
-                    <EditIcon />
-                  </button>
-                </div>
-                <div className={styles.contact_item}>
-                  <LocationOnOutlinedIcon />
-                  <Typography>{userData.location}</Typography>
-                </div>
-                <div className={styles.contact_item}>
-                  <CalendarTodayIcon />
-                  <Typography>Joined {userData.joined}</Typography>
-                </div>
-              </>
-            )}
+            <div className={styles.contact_item}>
+              <EmailOutlinedIcon />
+              <Typography>{userData.email}</Typography>
+              <span className={styles.read_only_badge}>Verified</span>
+            </div>
+            <div className={styles.contact_item}>
+              <LocationOnOutlinedIcon />
+              <Typography>{userData.location}</Typography>
+            </div>
+            <div className={styles.contact_item}>
+              <CalendarTodayIcon />
+              <Typography>Joined {userData.joined}</Typography>
+            </div>
           </div>
 
           {/* Stats Cards */}
@@ -610,8 +606,8 @@ export default function Profile() {
                   <div className={styles.document_info}>
                     <div className={styles.document_icon}>📄</div>
                     <div>
-                      <h4>Kareem_Nabil_CV.pdf</h4>
-                      <p>Uploaded 2 days ago • 2.4 MB</p>
+                      <h4>{userData.name.replace(' ', '_')}_CV.pdf</h4>
+                      <p>Uploaded recently</p>
                     </div>
                   </div>
                   <Button
@@ -757,7 +753,7 @@ export default function Profile() {
                     <div className={styles.badge_icon}>{badge.badge}</div>
                     <h4>{badge.heading}</h4>
                     <p>{badge.content}</p>
-                    {!badge.earned && <p className={styles.badge_required}>Required: {badge.required}</p>}
+                    {!badge.earned && badge.required && <p className={styles.badge_required}>Required: {badge.required}</p>}
                     <div className={styles.badge_footer}>
                       <span className={styles.badge_points}>+{badge.points} pts</span>
                       <span className={styles.badge_date}>{badge.date}</span>

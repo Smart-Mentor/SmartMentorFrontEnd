@@ -11,7 +11,7 @@
         "style": "Template/TemplateName.module.css"   
       },
 
-      "path": "src/component",
+      "path": "src/components",
       "withStyle": true,
       "withTest": false,
       "withStory": false,

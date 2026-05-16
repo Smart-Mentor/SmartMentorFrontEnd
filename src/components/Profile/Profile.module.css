@@ -128,37 +128,10 @@
   background: linear-gradient(135deg, #0A5ADB, #58A7B5) !important;
 }
 
-.edit_avatar_btn {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 32px;
-  height: 32px;
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.edit_avatar_btn:hover {
-  background: #0A5ADB;
-  color: white;
-}
-
 .user_info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-}
-
-.name_wrapper {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .user_name {
@@ -168,36 +141,19 @@
   margin: 0 !important;
 }
 
-.edit_name_btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #999;
-  transition: color 0.3s ease;
-}
-
-.edit_name_btn:hover {
-  color: #0A5ADB;
-}
-
-.edit_name_container {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.edit_input {
-  padding: 8px 12px;
-  border: 2px solid #0A5ADB;
-  border-radius: 8px;
-  font-size: 24px;
-  font-weight: 700;
-  outline: none;
-}
-
 .user_title {
   font-size: 16px !important;
   color: #666 !important;
+  margin: 0 !important;
+}
+
+.user_bio {
+  margin: 0;
+  line-height: 1.6;
+  color: #666;
+  font-size: 14px;
+  max-width: 500px;
+  word-wrap: break-word;
 }
 
 .header_actions {
@@ -243,6 +199,17 @@
   gap: 8px;
   color: #666;
   font-size: 14px;
+}
+
+.read_only_badge {
+  margin-left: 8px;
+  padding: 2px 8px;
+  background: linear-gradient(135deg, #e8f5e9, #c8e6d9);
+  color: #2e7d32;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
 }
 
 /* Stats Grid */
@@ -401,6 +368,32 @@
   font-weight: 500;
 }
 
+.progress_controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress_btn {
+  padding: 2px 8px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.progress_btn:hover {
+  background: #0A5ADB;
+  color: white;
+}
+
+.progress_btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .progress_bar_container {
   background: #e0e0e0;
   border-radius: 10px;
@@ -433,10 +426,45 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.project_info h4 {
+.project_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.project_name_input {
   font-size: 16px;
   font-weight: 600;
-  margin: 0 0 8px;
+  color: #1a1a2e;
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 4px 8px;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s ease;
+  width: 200px;
+}
+
+.project_name_input:hover {
+  border-color: #e0e0e0;
+}
+
+.project_name_input:focus {
+  border-color: #0A5ADB;
+  background: white;
+}
+
+.delete_btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  transition: color 0.3s ease;
+}
+
+.delete_btn:hover {
+  color: #ef4444;
 }
 
 .project_tags {
@@ -450,6 +478,8 @@
   background: #f0f0f0;
   border-radius: 20px;
   font-size: 12px;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
 }
 
 .project_status {
@@ -457,21 +487,26 @@
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
+  border: 1px solid;
+  cursor: pointer;
 }
 
 .project_status.in_progress {
   background: #fff3e0;
   color: #f59e0b;
+  border-color: #f59e0b;
 }
 
 .project_status.completed {
   background: #e0f5e9;
   color: #10b981;
+  border-color: #10b981;
 }
 
 .project_status.not_started {
   background: #f0f0f0;
   color: #999;
+  border-color: #999;
 }
 
 .project_progress {
@@ -630,9 +665,101 @@
   margin-left: 8px;
 }
 
+.skill_controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .skill_percentage {
   font-weight: 600;
   color: #0A5ADB;
+}
+
+.skill_btn {
+  padding: 2px 8px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.skill_btn:hover {
+  background: #0A5ADB;
+  color: white;
+}
+
+.skill_btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.delete_skill_btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  display: flex;
+  align-items: center;
+  transition: color 0.3s ease;
+}
+
+.delete_skill_btn:hover {
+  color: #ef4444;
+}
+
+/* Add Skill Form */
+.add_skill_form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.skill_input {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  flex: 1;
+}
+
+.skill_input:focus {
+  border-color: #0A5ADB;
+}
+
+.confirm_btn {
+  padding: 8px 16px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.add_skill_btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: #0A5ADB;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.add_skill_btn:hover {
+  background: #58A7B5;
 }
 
 /* Badges Section */
@@ -678,6 +805,11 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
+.badge_card.locked {
+  opacity: 0.6;
+  filter: grayscale(0.2);
+}
+
 .badge_icon {
   font-size: 48px;
   margin-bottom: 16px;
@@ -693,6 +825,12 @@
   font-size: 13px;
   color: #666;
   margin: 0 0 16px;
+}
+
+.badge_required {
+  font-size: 11px;
+  color: #f59e0b;
+  margin-top: 4px;
 }
 
 .badge_footer {
@@ -712,6 +850,21 @@
 .badge_date {
   font-size: 11px;
   color: #999;
+}
+
+.track_btn {
+  padding: 4px 12px;
+  background: #0A5ADB;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.track_btn:hover {
+  background: #58A7B5;
 }
 
 /* Activity Timeline */
@@ -785,81 +938,43 @@
   color: white;
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
-  .overview_grid {
-    grid-template-columns: 1fr;
-  }
+/* Add Button */
+.add_btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: #0A5ADB;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-left: auto;
 }
 
-@media (max-width: 768px) {
-  .profile_container {
-    padding: 16px;
-  }
-  
-  .header_top {
-    flex-direction: column;
-  }
-  
-  .avatar_section {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .user_name {
-    font-size: 24px !important;
-  }
-  
-  .contact_info {
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-  }
-  
-  .stats_grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .skills_stats {
-    grid-template-columns: 1fr;
-  }
-  
-  .tab {
-    padding: 8px 16px !important;
-    font-size: 14px !important;
-  }
-  
-  .badges_grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .document_item {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .document_info {
-    flex-direction: column;
-  }
+.add_btn:hover {
+  background: #58A7B5;
+  transform: scale(1.05);
 }
 
-@media (max-width: 480px) {
-  .stats_grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .project_tags {
-    flex-direction: column;
-  }
-  
-  .activity_item {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .activity_badge {
-    align-self: center;
-  }
+/* Save All Button */
+.save_all_btn {
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.save_all_btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 /* Notification */
@@ -901,42 +1016,14 @@
   }
 }
 
-/* Edit Controls */
-.edit_name_container,
-.edit_contact_container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 
-.edit_input,
-.contact_input {
-  padding: 8px 12px;
-  border: 2px solid #0A5ADB;
-  border-radius: 8px;
-  font-size: 16px;
-  outline: none;
-}
-
-.edit_input[type="email"],
-.contact_input[type="email"] {
-  width: 100%;
-}
-
-/* Visual feedback for invalid input */
-.edit_input:invalid,
-.contact_input:invalid {
-  border-color: #ef4444;
-}
-
-.edit_input:invalid:focus,
-.contact_input:invalid:focus {
-  border-color: #ef4444;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-}
-
-.save_btn,
+/* Cancel Button */
 .cancel_btn {
   width: 36px;
   height: 36px;
@@ -946,265 +1033,134 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-}
-
-.save_btn {
-  background: #10b981;
-  color: white;
-  border: none;
-}
-
-.cancel_btn {
   background: #ef4444;
   color: white;
   border: none;
 }
 
-.save_btn:hover,
 .cancel_btn:hover {
   transform: scale(1.05);
 }
 
-.edit_contact_btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #999;
-  margin-left: 8px;
+/* Loading and Error States */
+.loading_container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
 }
 
-.edit_contact_btn:hover {
-  color: #0A5ADB;
+.loading_spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f0f0f0;
+  border-top-color: #0A5ADB;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
-.user_bio {
-  font-size: 13px;
-  color: #666;
-  margin-top: 8px;
-  max-width: 400px;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.save_all_btn {
-  padding: 8px 20px;
-  background: linear-gradient(135deg, #10b981, #059669);
+.error_container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 20px;
+}
+
+.error_message {
+  font-size: 18px;
+  color: #ef4444;
+  text-align: center;
+}
+
+.retry_button {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #0A5ADB, #58A7B5);
   color: white;
   border: none;
-  border-radius: 50px;
+  border-radius: 10px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.save_all_btn:hover {
+.retry_button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px rgba(10, 90, 219, 0.3);
 }
 
-/* Progress Controls */
-.progress_controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .overview_grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-.progress_btn {
-  padding: 2px 8px;
-  background: #f0f0f0;
-  border: none;
-  border-radius: 6px;
-  font-size: 11px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.progress_btn:hover {
-  background: #0A5ADB;
-  color: white;
-}
-
-/* Add Button */
-.add_btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
-  background: #0A5ADB;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-left: auto;
-}
-
-.add_btn:hover {
-  background: #58A7B5;
-  transform: scale(1.05);
-}
-
-/* Delete Button */
-.delete_btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #999;
-  transition: color 0.3s ease;
-}
-
-.delete_btn:hover {
-  color: #ef4444;
-}
-
-.project_header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* Skill Controls */
-.skill_controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.skill_btn {
-  padding: 2px 8px;
-  background: #f0f0f0;
-  border: none;
-  border-radius: 6px;
-  font-size: 11px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.skill_btn:hover {
-  background: #0A5ADB;
-  color: white;
-}
-
-.delete_skill_btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #999;
-  display: flex;
-  align-items: center;
-  transition: color 0.3s ease;
-}
-
-.delete_skill_btn:hover {
-  color: #ef4444;
-}
-
-/* Add Skill Form */
-.add_skill_form {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  background: #f9f9f9;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.skill_input {
-  padding: 8px 12px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 14px;
-  outline: none;
-  flex: 1;
-}
-
-.skill_input:focus {
-  border-color: #0A5ADB;
-}
-
-.confirm_btn {
-  padding: 8px 16px;
-  background: #10b981;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-/* Add Skill Button */
-.add_skill_btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
-  background: #0A5ADB;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.add_skill_btn:hover {
-  background: #58A7B5;
-}
-
-/* Badges */
-.badge_card.locked {
-  opacity: 0.6;
-  filter: grayscale(0.2);
-}
-
-.badge_required {
-  font-size: 11px;
-  color: #f59e0b;
-  margin-top: 4px;
-}
-
-.track_btn {
-  padding: 4px 12px;
-  background: #0A5ADB;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 11px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.track_btn:hover {
-  background: #58A7B5;
-}
-
-/* Select dropdowns */
-select.project_level,
-select.project_status {
-  padding: 4px 8px;
-  border-radius: 20px;
-  font-size: 12px;
-  border: 1px solid #e0e0e0;
-  background: white;
-  cursor: pointer;
-  outline: none;
-}
-
-select.project_status.in_progress {
-  background: #fff3e0;
-  color: #f59e0b;
-  border-color: #f59e0b;
-}
-
-select.project_status.completed {
-  background: #e0f5e9;
-  color: #10b981;
-  border-color: #10b981;
-}
-
-/* Responsive */
 @media (max-width: 768px) {
+  .profile_container {
+    padding: 16px;
+  }
+  
+  .header_top {
+    flex-direction: column;
+  }
+  
+  .avatar_section {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .user_name {
+    font-size: 24px !important;
+  }
+  
+  .user_bio {
+    max-width: 100%;
+    text-align: center;
+  }
+  
+  .contact_info {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .stats_grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .skills_stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .tab {
+    padding: 8px 16px !important;
+    font-size: 14px !important;
+  }
+  
+  .badges_grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .document_item {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .document_info {
+    flex-direction: column;
+  }
+  
   .skill_controls {
     flex-wrap: wrap;
   }
@@ -1217,11 +1173,6 @@ select.project_status.completed {
     width: 100%;
   }
   
-  .edit_name_container,
-  .edit_contact_container {
-    flex-direction: column;
-  }
-  
   .header_actions {
     flex-direction: column;
     width: 100%;
@@ -1232,93 +1183,28 @@ select.project_status.completed {
     width: 100%;
     justify-content: center;
   }
-}
-
-/* Project Name Input */
-.project_name_input {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a1a2e;
-  background: transparent;
-  border: 1px solid transparent;
-  padding: 4px 8px;
-  border-radius: 8px;
-  outline: none;
-  transition: all 0.3s ease;
-  width: 200px;
-}
-
-.project_name_input:hover {
-  border-color: #e0e0e0;
-}
-
-.project_name_input:focus {
-  border-color: #0A5ADB;
-  background: white;
-}
-
-/* Disabled button styles */
-.progress_btn:disabled,
-.skill_btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.progress_btn:disabled:hover,
-.skill_btn:disabled:hover {
-  background: #f0f0f0;
-  color: inherit;
-}
-
-/* Error notification */
-.notification.error {
-  background: #ef4444;
-  color: white;
-}
-
-/* Contact edit container */
-.edit_contact_container {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  width: 100%;
-}
-
-.contact_input {
-  padding: 8px 12px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 14px;
-  outline: none;
-  transition: all 0.3s ease;
-  flex: 1;
-}
-
-.contact_input:focus {
-  border-color: #0A5ADB;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
+  
   .project_name_input {
     width: 150px;
     font-size: 14px;
   }
+}
+
+@media (max-width: 480px) {
+  .stats_grid {
+    grid-template-columns: 1fr;
+  }
   
-  .edit_contact_container {
+  .project_tags {
     flex-direction: column;
   }
   
-  .contact_input {
-    width: 100%;
+  .activity_item {
+    flex-direction: column;
+    text-align: center;
   }
-}
-
-/* Animation for fade out */
-@keyframes fadeOut {
-  to {
-    opacity: 0;
-    visibility: hidden;
+  
+  .activity_badge {
+    align-self: center;
   }
 }

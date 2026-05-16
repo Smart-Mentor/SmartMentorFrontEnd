@@ -310,7 +310,7 @@
     margin-left: 0;
     width: 100%;
     max-width: 100%;
-    padding-top: 70px;
+    padding-top: 0px;
   }
 }
 
@@ -515,4 +515,15 @@ button {
     margin-left: 0;
     width: 100%;
   }
+}
+
+.menu_button {
+  transition: opacity 0.3s ease, transform 0.3s ease, display 0.3s;
+}
+
+/* Optional: Add a class for hidden state with animation */
+.menu_button-hidden {
+  opacity: 0;
+  transform: translateX(-100%);
+  pointer-events: none;
 }

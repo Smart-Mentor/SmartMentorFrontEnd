@@ -1,12 +1,15 @@
 import PropTypes from "prop-types";
 import { useState, useEffect, useCallback } from "react";
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import styles from "./Layout.module.css";
 
 export default function Layout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isTablet, setIsTablet] = useState(window.innerWidth <= 1024);
+
+  const isAiModelPage = location.pathname.includes('/aimentor/');
 
   useEffect(() => {
     const handleResize = () => {
@@ -54,6 +57,7 @@ export default function Layout() {
   }, [navigate, handleDrawerClose]);
 
   const menuItems = [
+    { name: "Home", icon: "fa-solid fa-house fa-xl", path: "/home" },
     { name: "Dashboard", icon: "fa-solid fa-table-columns fa-xl", path: "/dashboard" },
     { name: "AI Mentor", icon: "fa-solid fa-robot fa-xl", path: "/aimentor" },
     { name: "Learning Path", icon: "fa-solid fa-road-circle-check fa-xl", path: "/learningpath" },
@@ -93,13 +97,15 @@ export default function Layout() {
 
   return (
     <div className={styles.layout}>
-      <button 
-        className={styles.menu_button} 
-        onClick={handleDrawerToggle}
-        aria-label="Toggle menu"
-      >
-        <span className={styles.menu_icon}>☰</span>
-      </button>
+      {!isAiModelPage && (
+        <button 
+          className={styles.menu_button} 
+          onClick={handleDrawerToggle}
+          aria-label="Toggle menu"
+        >
+          <span className={styles.menu_icon}>☰</span>
+        </button>
+      )}
 
       {!isTablet && (
         <aside className={styles.sidebar}>
