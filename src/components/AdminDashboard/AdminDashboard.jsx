@@ -143,48 +143,56 @@ const AdminDashboard = () => {
   
   // GET /api/Admin/users - Fetch all users
   const fetchUsersFromAPI = async () => {
-    try {
-      setLoading(true);
-      const token = getAuthToken();
-      const response = await fetch('https://smartmentorapi.runasp.net/api/Admin/users', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const apiUsers = await response.json();
-        const transformedUsers = apiUsers.map((user, index) => ({
-          id: user.id || user.userId || index,
-          name: user.firstName + " " + user.lastName,
-          skills: user.skills || [],
-          interests: user.interests || [],
-          careerGoal: user.careerGoal || user.careerGoalName || "Not Specified",
+  try {
+    const token = getAuthToken();
+    const response = await fetch('https://smartmentorapi.runasp.net/api/Admin/users/profile-summaries', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      const result = await response.json();
+      if (result.success && result.data) {
+        const transformedUsers = result.data.map((user, index) => ({
+          id: user.userId || index,
+          name: `${user.firstName} ${user.lastName}`,
+          skills: user.skills.map(skill => skill.skillName),
+          interests: user.interests.map(interest => interest.interestName),
+          careerGoal: user.careerGoalName || "Not Specified",
           email: user.email,
-          avatar: (user.firstName + " " + user.lastName || "U").split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
+          avatar: `${user.firstName} ${user.lastName}`.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
           color: getRandomColor(),
-          topSkill: user.topSkill || (user.skills && user.skills[0]) || "General"
+          topSkill: user.skills.length > 0 ? user.skills[0].skillName : "General",
+          // Store additional data for potential future use
+          careerGoalId: user.careerGoalId,
+          skillsWithLevel: user.skills,
+          interestsWithId: user.interests,
+          careerGoalMessage: user.careerGoalMessage,
+          skillsMessage: user.skillsMessage,
+          interestsMessage: user.interestsMessage
         }));
         setUsers(transformedUsers);
-      } else if (response.status === 401) {
-        setAlertTitle("Authentication Error");
-        setAlertMessage("Please log in again to continue.");
-        setShowAlert(true);
-        // Auto logout after 2 seconds on auth error
-        setTimeout(() => {
-          handleLogout();
-        }, 2000);
+        return transformedUsers;
       }
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      setAlertTitle("Error");
-      setAlertMessage("Failed to fetch users from server.");
+    } else if (response.status === 401) {
+      setAlertTitle("Authentication Error");
+      setAlertMessage("Please log in again to continue.");
       setShowAlert(true);
-    } finally {
-      setLoading(false);
+      setTimeout(() => {
+        handleLogout();
+      }, 2000);
     }
-  };
+  } catch (error) {
+    console.error('Error fetching user profile summaries:', error);
+    setAlertTitle("Error");
+    setAlertMessage("Failed to fetch user profiles from server.");
+    setShowAlert(true);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // DELETE /api/Admin/users/{userId} - Delete single user
   const deleteUser = async (userId) => {
@@ -987,18 +995,16 @@ const AdminDashboard = () => {
                   </td>
                   <td>
                     <div className={styles.skills_container}>
-                      {user.skills.slice(0, 2).map((skill, idx) => (
+                      {user.skills.map((skill, idx) => (
                         <span key={idx} className={styles.skill_badge}>{skill}</span>
                       ))}
-                      {user.skills.length > 2 && <span className={styles.skill_count}>+{user.skills.length - 2}</span>}
                     </div>
                   </td>
                   <td>
                     <div className={styles.interests_container}>
-                      {user.interests.slice(0, 2).map((interest, idx) => (
+                      {user.interests.map((interest, idx) => (
                         <span key={idx} className={styles.interest_badge}>{interest}</span>
                       ))}
-                      {user.interests.length > 2 && <span className={styles.interest_count}>+{user.interests.length - 2}</span>}
                     </div>
                   </td>
                   <td><span className={styles.career_badge}>{user.careerGoal}</span></td>
@@ -1505,8 +1511,8 @@ const AdminDashboard = () => {
                 </select>
               </div>
               <div className={styles.form_group}>
-                <label className={styles.form_label}>Required Level (1-5)</label>
-                <input type="number" className={styles.form_input} min="1" max="5" value={skillGoalAssignment.requiredLevel} onChange={(e) => setSkillGoalAssignment({...skillGoalAssignment, requiredLevel: parseInt(e.target.value)})} />
+                <label className={styles.form_label}>Required Level (1-3)</label>
+                <input type="number" className={styles.form_input} min="1" max="3" value={skillGoalAssignment.requiredLevel} onChange={(e) => setSkillGoalAssignment({...skillGoalAssignment, requiredLevel: parseInt(e.target.value)})} />
               </div>
               <div className={styles.form_group}>
                 <label className={styles.form_label}>Priority (1-10)</label>
