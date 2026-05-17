@@ -1,8 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import Logo from "../../assets/Logo.png";
 import NavBtn from "../NavBtn/NavBtn";
-import { getCurrentUser } from "../../api/authenticationService"; 
+import { getCurrentUser, logoutUser } from "../../api/authenticationService"; 
 import styles from "./Navbar.module.css";
 
 export default function Navbar() {
@@ -16,6 +15,13 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     checkAuthAndFetchUser();
@@ -51,14 +57,6 @@ export default function Navbar() {
   };
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
@@ -73,41 +71,29 @@ export default function Navbar() {
     setIsDropdownOpen(false);
   }, [location]);
 
-const handleLogout = () => {
-  const authToken = localStorage.getItem('authToken');
-  const userData = localStorage.getItem('userData');
-  
-  console.log('Clearing tokens:', { authToken: !!authToken, userData: !!userData });
-
-  localStorage.clear();
-
-  sessionStorage.clear();
-  
-  localStorage.removeItem('authToken');
-  localStorage.removeItem('userData');
-  localStorage.removeItem('refreshToken'); 
-  sessionStorage.removeItem('authToken');
-  sessionStorage.removeItem('userData');
-
-  setIsLoggedIn(false);
-  setUser(null);
-  setIsDropdownOpen(false);
-  setIsMobileMenuOpen(false); 
-
-  if (window.axios) {
-    delete window.axios.defaults.headers.common["Authorization"];
-  }
-
-  delete window.authToken;
-
-  navigate("/", { replace: true });
-};
+  const handleLogout = () => {
+    logoutUser();
+    
+    localStorage.removeItem('userCVUrl');
+    localStorage.removeItem('userCVName');
+    localStorage.removeItem('userProjects');
+    localStorage.removeItem('userSkills');
+    localStorage.removeItem('profileCompleted');
+    localStorage.removeItem('profileData');
+    localStorage.removeItem('userProgress');
+    
+    setIsLoggedIn(false);
+    setUser(null);
+    setIsDropdownOpen(false);
+    setIsMobileMenuOpen(false);
+    
+    navigate("/");
+  };
 
   const getUserInitials = () => {
     if (!user) return "U";
-    const fullName = user.fullName || (user.firstName && user.lastName 
-      ? `${user.firstName} ${user.lastName}` 
-      : user.username || "User");
+    const fullName = user.fullName || 
+      (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username || "User");
     const names = fullName.split(" ");
     if (names.length >= 2) {
       return `${names[0][0]}${names[1][0]}`.toUpperCase();
@@ -118,10 +104,10 @@ const handleLogout = () => {
   const getUserName = () => {
     if (!user) return "User";
     return user.fullName || 
-          (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : null) ||
-          user.username || 
-          user.email?.split('@')[0] || 
-          "User";
+      (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : null) ||
+      user.username || 
+      user.email?.split('@')[0] || 
+      "User";
   };
 
   const getUserEmail = () => user?.email || "";
@@ -132,13 +118,13 @@ const handleLogout = () => {
       <nav className={`${styles.navbar} ${isScrolled ? styles.scrolled : ""}`}>
         <div className={styles.nav_container}>
           <Link to="/" className={styles.logo_link}>
-            <div className={styles.logo_wrapper}>
-              <div className={styles.logo_glow}></div>
-              <img src={Logo} alt="SmartMentor" className={styles.logo_image} />
+            <div className={styles.logo_icon}>
+              <i className="fas fa-graduation-cap"></i>
             </div>
-            <div className={styles.logo_text_wrapper}>
-              <span className={styles.logo_text}>SmartMentor</span>
-              <span className={styles.logo_badge}>AI</span>
+            <div className={styles.logo_text}>
+              <span className={styles.logo_smart}>Smart</span>
+              <span className={styles.logo_dot}></span>
+              <span className={styles.logo_mentor}>Mentor</span>
             </div>
           </Link>
           <div className={styles.desktop_buttons}>
@@ -154,13 +140,13 @@ const handleLogout = () => {
       <div className={styles.nav_container}>
         {/* Logo Section */}
         <Link to="/" className={styles.logo_link}>
-          <div className={styles.logo_wrapper}>
-            <div className={styles.logo_glow}></div>
-            <img src={Logo} alt="SmartMentor" className={styles.logo_image} />
+          <div className={styles.logo_icon}>
+            <i className="fas fa-graduation-cap"></i>
           </div>
-          <div className={styles.logo_text_wrapper}>
-            <span className={styles.logo_text}>SmartMentor</span>
-            <span className={styles.logo_badge}>AI</span>
+          <div className={styles.logo_text}>
+            <span className={styles.logo_smart}>Smart</span>
+            <span className={styles.logo_dot}></span>
+            <span className={styles.logo_mentor}>Mentor</span>
           </div>
         </Link>
 
@@ -185,16 +171,10 @@ const handleLogout = () => {
                     </div>
                     <div className={styles.online_indicator}></div>
                   </div>
-                  <svg 
-                    className={`${styles.dropdown_arrow} ${isDropdownOpen ? styles.rotated : ""}`}
-                    width="16" 
-                    height="16" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <div className={styles.user_info}>
+                    <span className={styles.user_name_text}>{getUserName()}</span>
+                  </div>
+                  <i className={`fas fa-chevron-down ${styles.user_arrow}`}></i>
                 </button>
                 
                 {isDropdownOpen && (
@@ -247,18 +227,10 @@ const handleLogout = () => {
           ) : (
             <>
               <Link to="/login">
-                <NavBtn 
-                  name={"Login"} 
-                  variant="outline" 
-                  isScrolled={isScrolled}
-                />
+                <NavBtn name={"Login"} variant="outline" />
               </Link>
               <Link to="/signup">
-                <NavBtn 
-                  name={"Get Started"} 
-                  variant="primary"
-                  isScrolled={isScrolled}
-                />
+                <NavBtn name={"Get Started"} variant="primary" />
               </Link>
             </>
           )}
@@ -280,7 +252,9 @@ const handleLogout = () => {
           <div className={styles.mobile_menu}>
             <div className={styles.mobile_menu_header}>
               <div className={styles.mobile_logo_wrapper}>
-                <img src={Logo} alt="SmartMentor" className={styles.mobile_logo} />
+                <div className={styles.mobile_logo}>
+                  <i className="fas fa-graduation-cap"></i>
+                </div>
                 <span className={styles.mobile_logo_text}>SmartMentor</span>
               </div>
               {isLoggedIn && (
@@ -320,7 +294,7 @@ const handleLogout = () => {
                   </Link>
                   <div className={styles.mobile_divider}></div>
                   <button onClick={handleLogout} className={styles.mobile_logout_btn}>
-                    Logout
+                    🚪 Logout
                   </button>
                 </>
               ) : (
@@ -337,9 +311,6 @@ const handleLogout = () => {
           </div>
         </div>
       </div>
-
-      {/* Decorative line */}
-      <div className={styles.navbar_line}></div>
     </nav>
   );
 }

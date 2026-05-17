@@ -76,12 +76,13 @@ const navigate = useNavigate();
       <div className={styles.bg_elements}>
         <div className={styles.floating_circle}></div>
         <div className={styles.floating_circle_2}></div>
+        <div className={styles.hero_bg}></div>
         <div className={styles.grid_pattern}></div>
       </div>
 
       {/* Hero Section */}
       <section className={`${styles.hero} ${isVisible ? styles.active : ""}`}>
-        <div className={styles.hero_bg}></div>
+
         <div className={styles.container}>
           <div className={styles.badge_wrapper}>
             <span className={styles.badge}>

@@ -121,12 +121,25 @@
   position: relative;
 }
 
-.avatar {
-  width: 100px !important;
-  height: 100px !important;
-  font-size: 48px !important;
-  background: linear-gradient(135deg, #0A5ADB, #58A7B5) !important;
+.avatar_wrapper::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0A5ADB, #58A7B5);
+  z-index: -1;
+  opacity: 0.3;
 }
+
+.avatar {
+  width: 110px !important;
+  height: 110px !important;
+  font-size: 44px !important;
+  font-weight: 700 !important;
+  background: linear-gradient(135deg, #0A5ADB, #3b82f6) !important;
+  box-shadow: 0 8px 24px rgba(10, 90, 219, 0.25);
+}
+
 
 .user_info {
   display: flex;
@@ -142,9 +155,21 @@
 }
 
 .user_title {
-  font-size: 16px !important;
-  color: #666 !important;
+  font-size: 15px !important;
+  color: #0A5ADB !important;
+  font-weight: 600 !important;
   margin: 0 !important;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.user_title::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
 }
 
 .user_bio {
@@ -571,6 +596,8 @@
 .card_footer {
   margin-top: 20px;
   text-align: center;
+  display: flex;
+  justify-content: center ;
 }
 
 .view_btn,
@@ -605,7 +632,7 @@
 
 .skills_stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
 }
 
@@ -1207,4 +1234,215 @@
   .activity_badge {
     align-self: center;
   }
+}
+/* Add to Profile.module.css */
+
+/* Skill Select Wrapper - شكل أحسن للـ Select */
+.skill_select_wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.skill_select {
+  width: 100%;
+  padding: 12px 40px 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
+  background: white;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition: all 0.3s ease;
+}
+
+.skill_select:focus {
+  border-color: #0A5ADB;
+  box-shadow: 0 0 0 3px rgba(10, 90, 219, 0.1);
+}
+
+.select_arrow {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 10px;
+  color: #888;
+}
+
+/* No CV Text */
+.no_cv_text {
+  font-size: 13px;
+  color: #888;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Empty State */
+.empty_state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #888;
+}
+
+.empty_state p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Upload Button */
+.upload_btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #0A5ADB, #58A7B5);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.upload_btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(10, 90, 219, 0.3);
+}
+
+.upload_btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+/* Add to Profile.module.css */
+
+/* Level Badge - عرض الـ level */
+.level_badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  text-transform: capitalize;
+}
+
+/* Level Select Wrapper */
+.level_select_wrapper {
+  position: relative;
+  flex: 0 0 140px;
+}
+
+.level_select {
+  width: 100%;
+  padding: 10px 30px 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  background: white;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition: all 0.3s ease;
+}
+
+.level_select:focus {
+  border-color: #0A5ADB;
+  box-shadow: 0 0 0 3px rgba(10, 90, 219, 0.1);
+}
+
+/* Skill Name */
+.skill_name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+/* Empty State */
+.empty_state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #888;
+}
+
+.empty_state p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* No CV Text */
+.no_cv_text {
+  font-size: 13px;
+  color: #888;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Upload Button */
+.upload_btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #0A5ADB, #58A7B5);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.upload_btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(10, 90, 219, 0.3);
+}
+
+.upload_btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Skill Select Wrapper */
+.skill_select_wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.skill_select {
+  width: 100%;
+  padding: 10px 40px 10px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  background: white;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition: all 0.3s ease;
+}
+
+.skill_select:focus {
+  border-color: #0A5ADB;
+  box-shadow: 0 0 0 3px rgba(10, 90, 219, 0.1);
+}
+
+.select_arrow {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 10px;
+  color: #888;
 }

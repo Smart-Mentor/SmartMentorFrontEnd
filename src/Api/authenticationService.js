@@ -290,16 +290,7 @@ export const completeUserProfile = async (profileData) => {
  * PUT /api/User/update-profile
  * Body: { skills: [{skillId, skillLevel}], interestIds: [], careerGoalId }
  */
-export const updateUserProfile = async (profileData) => {
-  try {
-    return await authFetch('/User/update-profile', {
-      method: "PUT",
-      body: JSON.stringify(profileData),
-    });
-  } catch (error) {
-    throw new Error(error.message || "Failed to update profile");
-  }
-};
+
 
 /**
  * 🔹 Update User Skill Level
@@ -424,5 +415,43 @@ export const getGapAnalysis = async () => {
     return await authFetch('/GapAnalysis/gap-analysis', { method: "GET" });
   } catch (error) {
     throw new Error(error.message || "Failed to fetch gap analysis");
+  }
+};
+// ============================================
+// 🔹 USER - User Profile Endpoints (تحديث)
+// ============================================
+
+/**
+ * 🔹 Update User Profile (مع CV)
+ * PUT /api/User/update-profile
+ */
+export const updateUserProfile = async (profileData) => {
+  try {
+    return await authFetch('/User/update-profile', {
+      method: "PUT",
+      body: JSON.stringify(profileData),
+    });
+  } catch (error) {
+    throw new Error(error.message || "Failed to update profile");
+  }
+};
+
+/**
+ * 🔹 Upload CV
+ * POST /api/User/upload-cv
+ */
+export const uploadCV = async (formData) => {
+  try {
+    const token = getAuthToken();
+    const response = await fetch(`${API_BASE_URL}/User/upload-cv`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+    return await handleResponse(response);
+  } catch (error) {
+    throw new Error(error.message || "Failed to upload CV");
   }
 };

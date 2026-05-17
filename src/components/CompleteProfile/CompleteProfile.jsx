@@ -27,7 +27,15 @@ import {
   getAllInterests, 
   getAllCareerGoals 
 } from "../../api/authenticationService";
-
+// بعد imports الـ function
+const convertFileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+};
 // Transition component for MUI Dialog
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -434,30 +442,42 @@ export default function CompleteProfile() {
   }, [activeSkill]);
 
   // Step 2 Functions
-  const handleFileUpload = useCallback((selectedFile) => {
-    setError("");
-    if (!selectedFile) return;
+const handleFileUpload = useCallback(async (selectedFile) => {
+  setError("");
+  if (!selectedFile) return;
 
-    const ALLOWED_TYPES = [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    ];
-    const MAX_FILE_SIZE = 10 * 1024 * 1024;
+  const ALLOWED_TYPES = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  ];
+  const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-    if (!ALLOWED_TYPES.includes(selectedFile.type)) {
-      setError("Only PDF, .doc and .docx files are allowed");
-      return;
-    }
+  if (!ALLOWED_TYPES.includes(selectedFile.type)) {
+    setError("Only PDF, .doc and .docx files are allowed");
+    return;
+  }
 
-    if (selectedFile.size > MAX_FILE_SIZE) {
-      setError("File size must be less than 10MB");
-      return;
-    }
+  if (selectedFile.size > MAX_FILE_SIZE) {
+    setError("File size must be less than 10MB");
+    return;
+  }
 
-    setFile(selectedFile);
-    showNotification("CV uploaded successfully!", "success");
-  }, []);
+  setFile(selectedFile);
+
+  // ✅ أضف: تحويل وحفظ الـ CV في localStorage
+  try {
+    const base64 = await convertFileToBase64(selectedFile);
+    localStorage.setItem('userCVUrl', base64);
+    localStorage.setItem('userCVName', selectedFile.name);
+    localStorage.setItem('userCVType', selectedFile.type);
+    console.log('✅ CV saved to localStorage');
+  } catch (err) {
+    console.error('❌ Error saving CV:', err);
+  }
+
+  showNotification("CV uploaded successfully!", "success");
+}, []);
 
   const handleDrop = useCallback((e) => {
     e.preventDefault();
@@ -484,11 +504,17 @@ export default function CompleteProfile() {
     }
   }, [handleFileUpload]);
 
-  const removeFile = useCallback(() => {
-    setFile(null);
-    setError("");
-    showNotification("CV removed", "info");
-  }, []);
+const removeFile = useCallback(() => {
+  setFile(null);
+  setError("");
+  
+  // ✅ أضف: حذف الـ CV من localStorage
+  localStorage.removeItem('userCVUrl');
+  localStorage.removeItem('userCVName');
+  localStorage.removeItem('userCVType');
+  
+  showNotification("CV removed", "info");
+}, []);
 
   // Step 4 Functions
   const toggleInterest = useCallback((interestId) => {
