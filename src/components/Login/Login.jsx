@@ -74,7 +74,7 @@ export default function Login() {
         }
         
         // Navigate to admin dashboard
-        navigate("/admindashboard", { replace: true });
+        navigate("/admin/dashboard", { replace: true });
         return;
       } catch (err) {
         setError("Admin login failed");
