@@ -2,6 +2,7 @@ import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import PeopleIcon from '@mui/icons-material/People';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -103,6 +104,14 @@ const AdminLayout = () => {
           >
             <BarChartIcon />
             {!isCollapsed && <span>Analytics Overview</span>}
+          </NavLink>
+
+          <NavLink 
+            to="/admin/usergrowth" 
+            className={({ isActive }) => isActive ? styles.active : styles.nav_link}
+          >
+            <TrendingUpIcon />
+            {!isCollapsed && <span>User Growth</span>}
           </NavLink>
         </nav>
         
