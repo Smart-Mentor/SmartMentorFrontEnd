@@ -2013,3 +2013,10 @@
 .logout_btn svg {
   font-size: 18px;
 }
+
+/* Add this at the top or bottom of your existing CSS file */
+.dashboard_content {
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
