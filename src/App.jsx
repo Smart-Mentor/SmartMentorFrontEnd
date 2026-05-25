@@ -18,10 +18,12 @@ import GapAnalysis from "./components/GapAnalysis/GapAnalysis";
 import RecommendationCourses from "./components/RecommendationCourses/RecommendationCourses";
 import RoadmapAI from "./components/RoadmapAI/RoadmapAI";
 import CVAnalysis from "./components/CVAnalysis/CVAnalysis";
+import AdminLayout from "./components/AdminLayout/AdminLayout";
+import AnalyticsOverview from "./components/AdminOverview/AdminOverview";
 
 
 function ProtectedRoute({ children }) {
-  const token = localStorage.getItem("authToken");
+  const token = localStorage.getItem("token");
   const verificationToken = localStorage.getItem("verificationToken");
 
   if (!token) return <Navigate to="/login" replace />;
@@ -46,6 +48,12 @@ function App() {
         <Route path="/admindashboard" element={<AdminDashboard />} />
 
         <Route path="/completeprofile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
+
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="analytics" element={<AnalyticsOverview />} />
+        </Route>
 
         {/* App Layout (after login) */}
         <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
