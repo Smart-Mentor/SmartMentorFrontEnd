@@ -684,30 +684,6 @@ export default function LearningPath() {
           );
         })}
 
-        {/* Certificate Section */}
-        <div className={styles.certificate_section}>
-          <div className={styles.certificate_content}>
-            <div className={styles.certificate_icon}>🎓</div>
-            <div className={styles.certificate_info}>
-              <h3 className={styles.certificate_title}>Earn Your Certificate</h3>
-              <p className={styles.certificate_text}>
-                Master all skills to receive your {gapAnalysisData.careerGoalName} certificate
-              </p>
-            </div>
-            <button 
-              className={styles.certificate_btn} 
-              disabled={apiProgress < 100}
-              style={{
-                background: apiProgress === 100 
-                  ? "linear-gradient(135deg, #10b981, #059669)" 
-                  : "linear-gradient(135deg, #0A5ADB, #58A7B5)"
-              }}
-            >
-              {apiProgress === 100 ? "🎉 Download Certificate" : `${apiProgress}% Complete`}
-            </button>
-          </div>
-        </div>
-
         {/* Motivation Message */}
         {apiProgress > 0 && apiProgress < 100 && (
           <div className={styles.motivation_section}>
