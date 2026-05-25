@@ -16,7 +16,7 @@ const aiModels = [
     img: AnalyzeSkills, 
     icon: "📚", 
     color: "#0A5ADB",
-    gradient: "linear-gradient(135deg, #0A5ADB, #2E7EB8)",
+    gradient: "linear-gradient(135deg, rgb(22, 73, 129), rgb(50 75 118))",
     description: "Discover personalized courses tailored to your career goals",
     features: [
       "Smart course matching",
@@ -32,7 +32,7 @@ const aiModels = [
     img: GenerateRoadmap, 
     icon: "🗺️", 
     color: "#58A7B5",
-    gradient: "linear-gradient(135deg, #58A7B5, #3D8B99)",
+    gradient: "linear-gradient(135deg, rgb(74, 29, 109), rgb(40 24 69))",
     description: "Create your personalized journey to career success",
     features: [
       "Step-by-step roadmap",
@@ -48,7 +48,7 @@ const aiModels = [
     img: ReviewCV, 
     icon: "⚡", 
     color: "#f59e0b",
-    gradient: "linear-gradient(135deg, #f59e0b, #e67e22)",
+    gradient: "linear-gradient(135deg, rgb(45, 43, 107), rgb(29 29 92))",
     description: "AI-powered CV analysis and job matching",
     features: [
       "CV optimization tips",
