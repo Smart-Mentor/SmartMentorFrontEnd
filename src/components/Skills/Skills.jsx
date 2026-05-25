@@ -605,22 +605,6 @@ const SkillsPage = () => {
             </div>
           </div>
         </div>
-
-        {/* Skill Assessment CTA */}
-        <div className={`${styles.assessment_section} ${animate ? styles.fade_in : ""}`}>
-          <div className={styles.assessment_content}>
-            <div className={styles.assessment_icon}>🎯</div>
-            <div className={styles.assessment_info}>
-              <h3 className={styles.assessment_title}>Skill Assessment</h3>
-              <p className={styles.assessment_text}>
-                Take our comprehensive assessment to get detailed insights about your skills
-              </p>
-            </div>
-            <button className={styles.assessment_btn}>
-              Take Assessment →
-            </button>
-          </div>
-        </div>
       </div>
     </Box>
   );
