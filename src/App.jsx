@@ -20,6 +20,7 @@ import RoadmapAI from "./components/RoadmapAI/RoadmapAI";
 import CVAnalysis from "./components/CVAnalysis/CVAnalysis";
 import AdminLayout from "./components/AdminLayout/AdminLayout";
 import AnalyticsOverview from "./components/AdminOverview/AdminOverview";
+import AdminUserGrowth from "./components/AdminUserGrowth/AdminUserGrowth";
 
 
 function ProtectedRoute({ children }) {
@@ -53,6 +54,7 @@ function App() {
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="analytics" element={<AnalyticsOverview />} />
+          <Route path="usergrowth" element={<AdminUserGrowth />} />
         </Route>
 
         {/* App Layout (after login) */}
