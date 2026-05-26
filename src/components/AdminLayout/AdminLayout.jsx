@@ -1,5 +1,6 @@
+// AdminLayout.jsx
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PeopleIcon from '@mui/icons-material/People';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -13,6 +14,27 @@ const AdminLayout = () => {
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check screen size for responsive behavior
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+      
+      // Auto-close mobile menu when resizing to desktop
+      if (width >= 768) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   const handleLogout = () => {
     // Get tokens before clearing for logging (optional)
@@ -47,6 +69,7 @@ const AdminLayout = () => {
     
     // Update state
     setShowLogoutConfirm(false);
+    setIsMobileMenuOpen(false);
     
     // Remove axios authorization header if axios is used globally
     if (window.axios) {
@@ -70,7 +93,15 @@ const AdminLayout = () => {
   };
 
   const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed);
+    if (isMobile || isTablet) {
+      setIsMobileMenuOpen(!isMobileMenuOpen);
+    } else {
+      setIsCollapsed(!isCollapsed);
+    }
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
   };
 
   return (
@@ -78,11 +109,41 @@ const AdminLayout = () => {
       <div className={styles.bg_blur_1}></div>
       <div className={styles.bg_blur_2}></div>
       
-      <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ""}`}>
-        {/* Toggle Button */}
-        <button className={styles.sidebar_toggle} onClick={toggleSidebar}>
-          {isCollapsed ? <MenuIcon /> : <ChevronLeftIcon />}
+      {/* Menu Button for Mobile/Tablet */}
+      {(isMobile || isTablet) && (
+        <button 
+          className={styles.menu_button} 
+          onClick={toggleSidebar}
+          aria-label="Toggle menu"
+        >
+          <MenuIcon />
         </button>
+      )}
+      
+      {/* Mobile/Tablet Overlay */}
+      {(isMobile || isTablet) && isMobileMenuOpen && (
+        <div className={styles.mobile_overlay} onClick={closeMobileMenu} />
+      )}
+      
+      {/* Sidebar */}
+      <aside className={`${styles.sidebar} 
+        ${isCollapsed && !isMobile && !isTablet ? styles.collapsed : ""} 
+        ${(isMobile || isTablet) && isMobileMenuOpen ? styles.mobile_open : ""}
+        ${(isMobile || isTablet) && !isMobileMenuOpen ? styles.mobile_closed : ""}`}
+      >
+        {/* Close button for mobile/tablet */}
+        {(isMobile || isTablet) && isMobileMenuOpen && (
+          <button className={styles.close_button} onClick={closeMobileMenu}>
+            <CloseIcon />
+          </button>
+        )}
+        
+        {/* Desktop Toggle Button - Only show on desktop */}
+        {!isMobile && !isTablet && (
+          <button className={styles.sidebar_toggle} onClick={toggleSidebar}>
+            {isCollapsed ? <MenuIcon /> : <ChevronLeftIcon />}
+          </button>
+        )}
         
         <div className={styles.logo}>
           <h2>{isCollapsed ? "SM" : "SmartMentor"}</h2>
@@ -93,6 +154,7 @@ const AdminLayout = () => {
           <NavLink 
             to="/admin/dashboard" 
             className={({ isActive }) => isActive ? styles.active : styles.nav_link}
+            onClick={() => (isMobile || isTablet) && closeMobileMenu()}
           >
             <PeopleIcon />
             {!isCollapsed && <span>User Management</span>}
@@ -101,6 +163,7 @@ const AdminLayout = () => {
           <NavLink 
             to="/admin/analytics" 
             className={({ isActive }) => isActive ? styles.active : styles.nav_link}
+            onClick={() => (isMobile || isTablet) && closeMobileMenu()}
           >
             <BarChartIcon />
             {!isCollapsed && <span>Analytics Overview</span>}
@@ -109,6 +172,7 @@ const AdminLayout = () => {
           <NavLink 
             to="/admin/usergrowth" 
             className={({ isActive }) => isActive ? styles.active : styles.nav_link}
+            onClick={() => (isMobile || isTablet) && closeMobileMenu()}
           >
             <TrendingUpIcon />
             {!isCollapsed && <span>User Growth</span>}
@@ -117,15 +181,17 @@ const AdminLayout = () => {
         
         <button onClick={confirmLogout} className={styles.logout_btn}>
           <LogoutIcon />
-          {!isCollapsed && <span>Logout</span>}
+          <span>Logout</span>
         </button>
       </aside>
       
-      <main className={styles.main_content}>
+      <main className={`${styles.main_content} 
+        ${(isMobile || isTablet) && isMobileMenuOpen ? styles.content_blurred : ""}`}
+      >
         <Outlet />
       </main>
 
-      {/* Logout Confirmation Modal - Similar to Navbar style */}
+      {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
         <>
           <div className={styles.modal_overlay} onClick={cancelLogout}>
