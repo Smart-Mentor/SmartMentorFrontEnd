@@ -597,12 +597,6 @@ const SkillsPage = () => {
                 </div>
               ))}
             </div>
-
-            <div className={styles.improve_footer}>
-              <div className={styles.improve_stats}>
-                <span>📊 Estimated improvement: +25% in 3 months</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
