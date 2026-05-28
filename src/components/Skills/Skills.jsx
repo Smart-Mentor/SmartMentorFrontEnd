@@ -568,36 +568,6 @@ const SkillsPage = () => {
               </div>
             )}
           </div>
-
-          {/* Areas to Improve - from weakSkills */}
-          <div className={`${styles.improve_section} ${animate ? styles.slide_up : ""}`}>
-            <div className={styles.section_header}>
-              <div>
-                <h2 className={styles.section_title}>Areas to Improve</h2>
-                <p className={styles.section_subtitle}>
-                  {gapAnalysisLoading ? "Analyzing skill gaps..." : "Focus on these for maximum impact"}
-                </p>
-              </div>
-            </div>
-
-            <div className={styles.improve_list}>
-              {weakSkills.map((item, i) => (
-                <div key={i} className={styles.improve_item}>
-                  <div className={styles.improve_info}>
-                    <span className={styles.improve_name}>{item.name}</span>
-                    <div className={styles.improve_tags}>
-                      <span 
-                        className={`${styles.improve_badge} ${styles[item.level?.toLowerCase()]}`}
-                        style={{ background: getPriorityColor(item.level) }}
-                      >
-                        {item.level} priority
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </Box>
