@@ -15,9 +15,8 @@ import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
 import DownloadIcon from "@mui/icons-material/Download";
 import ShareIcon from "@mui/icons-material/Share";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { useNavigate } from "react-router-dom";
-import { getCurrentUser, getUserProfile, updateUserProfileData } from "../../Api/authenticationService";
+import { getCurrentUser, getUserProfile, updateUserProfileData, getCommunityPostsByCareerGoal } from "../../Api/authenticationService";
 import styles from "./Profile.module.css";
 
 // Import images
@@ -26,7 +25,6 @@ import Document_img from "../../assets/File_dock.png";
 import Fundementals from "../../assets/book-open_.png";
 import Community from "../../assets/users_blue.png";
 import Portfolio from "../../assets/File_dock.png";
-import Badge from "../../assets/Flag_alt.png";
 
 // ---------- Backend static data (from the provided lists) ----------
 const SKILLS_LIST = [
@@ -122,29 +120,8 @@ function stringAvatar(name) {
   };
 }
 
-// ✅ دالة مساعدة لقراءة البيانات من localStorage
-const loadFromLocalStorage = (key, defaultValue = null) => {
-  try {
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : defaultValue;
-  } catch (error) {
-    console.error(`Error loading ${key} from localStorage:`, error);
-    return defaultValue;
-  }
-};
-
-// ✅ دالة مساعدة لحفظ البيانات في localStorage
-const saveToLocalStorage = (key, data) => {
-  try {
-    localStorage.setItem(key, JSON.stringify(data));
-  } catch (error) {
-    console.error(`Error saving ${key} to localStorage:`, error);
-  }
-};
-
 export default function Profile() {
   const navigate = useNavigate();
-  const fileInputRef = useRef(null);
   const [value, setValue] = useState('1');
   const [animate, setAnimate] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -171,9 +148,7 @@ export default function Profile() {
     email: "",
     location: "",
     joined: "",
-    bio: "Passionate developer dedicated to continuous learning and building impactful applications.",
-    cvUrl: null,
-    cvName: null
+    bio: "Passionate developer dedicated to continuous learning and building impactful applications."
   });
 
   const [progress, setProgress] = useState([
@@ -183,9 +158,10 @@ export default function Profile() {
   ]);
 
   const [projects, setProjects] = useState([]);
-  const [badges, setBadges] = useState([]);
   const [activities, setActivities] = useState([]);
-  const [uploading, setUploading] = useState(false);
+  const [userPosts, setUserPosts] = useState([]);
+  const [loadingPosts, setLoadingPosts] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   // Helper: get skill name by ID
   const getSkillName = (skillId) => {
@@ -348,131 +324,167 @@ export default function Profile() {
     );
   };
 
-  const fetchUserData = async () => {
-    try {
-      setLoading(true);
-      const userDataRes = await getCurrentUser();
-      const userProfile = await getUserProfile();
-      const profileResponse = await getUserProfile();
-      const profileData = profileResponse.data || profileResponse;
+const fetchUserData = async () => {
+  try {
+    setLoading(true);
+    const userDataRes = await getCurrentUser();
+    const userProfile = await getUserProfile();
 
-      // ✅ أول حاجة: نقرأ من localStorage (من Complete Profile)
-      const savedCV = localStorage.getItem('userCVUrl');
-      const savedCVName = localStorage.getItem('userCVName');
-      
-      // ✅ ترتيب الأولوية: localStorage أولاً (من Complete Profile) > API
-      const cvUrl = savedCV || profileData?.cvUrl || null;
-      const cvName = savedCVName || profileData?.cvName || null;
+    console.log("User Profile Data:", userProfile.data);
+    console.log("Current User Data:", userDataRes);
 
-      console.log('🔍 CV Debug Info:');
-      console.log('  - savedCV (localStorage):', savedCV ? 'Found ✓' : 'Not found');
-      console.log('  - savedCVName (localStorage):', savedCVName || 'Not found');
-      console.log('  - profileData.cvUrl (API):', profileData?.cvUrl ? 'Found ✓' : 'Not found');
-      console.log('  - profileData.cvName (API):', profileData?.cvName || 'Not found');
-      console.log('  - Final cvUrl:', cvUrl ? 'Will display ✓' : 'No CV');
-      console.log('  - Final cvName:', cvName || 'No name');
-
-      console.log("User Profile Data:", userProfile.data);
-
-      setUserData({
-        name: userDataRes.fullName || userDataRes.firstName + " " + userDataRes.lastName || userDataRes.username || userDataRes.name || "Learner",
-        title: userProfile.data.careerGoalName || "Frontend Developer",
-        email: userDataRes.email || "",
-        location: userDataRes.location || userDataRes.city || "Egypt",
-        joined: userDataRes.joinedDate ? new Date(userDataRes.joinedDate).toLocaleString('default', { month: 'long', year: 'numeric' }) : "2026",
-        bio: userDataRes.bio || userDataRes.about || "Passionate developer dedicated to continuous learning and building impactful applications.",
-        cvUrl: cvUrl,
-        cvName: cvName
-      });
-
-      if (userProfile.data.careerGoalId) {
-        setCareerGoalId(userProfile.data.careerGoalId);
-      } else {
-        const matched = CAREER_GOALS_LIST.find(cg => cg.name === userProfile.data.careerGoalName);
-        if (matched) setCareerGoalId(matched.id);
-      }
-
-      // Set interestIds from backend
-      if (userProfile.data.interestIds && Array.isArray(userProfile.data.interestIds) && userProfile.data.interestIds.length > 0) {
-        console.log("Setting interests from interestIds:", userProfile.data.interestIds);
-        setInterestIds(userProfile.data.interestIds);
-      } else if (userProfile.data.interests && Array.isArray(userProfile.data.interests) && userProfile.data.interests.length > 0) {
-        console.log("Setting interests from interests array:", userProfile.data.interests);
-        const ids = userProfile.data.interests.map(i => i.id || i.interestId).filter(id => id);
-        setInterestIds(ids);
-      } else {
-        console.log("No interests found in API response");
-        setInterestIds([]);
-      }
-
-      // Set skills from backend
-      if (userProfile.data.skills && Array.isArray(userProfile.data.skills) && userProfile.data.skills.length > 0) {
-        console.log("Setting skills from API:", userProfile.data.skills);
-        setUserSkills(userProfile.data.skills);
-      } else {
-        setUserSkills([]);
-      }
-
-      if (userDataRes.progress) {
-        setProgress([
-          { name: "Fundamentals", percentage: userDataRes.progress.fundamentals || 0, color: "#0A5ADB" },
-          { name: "Core Skills", percentage: userDataRes.progress.coreSkills || 0, color: "#58A7B5" },
-          { name: "Advanced", percentage: userDataRes.progress.advanced || 0, color: "#667eea" },
-        ]);
-      }
-
-      if (userProfile.data.projects && userProfile.data.projects.length > 0) {
-        setProjects(userProfile.data.projects.map((project, index) => ({
-          id: index + 1,
-          name: project.name,
-          level: project.level || "Beginner",
-          status: project.status || "Not Started",
-          progress: project.progress || 0,
-          color: getProjectColor(project.status)
-        })));
-      } else {
-        setProjects([
-          { id: 1, name: "Sample Project", level: "Beginner", status: "Not Started", progress: 0, color: "#0A5ADB" }
-        ]);
-      }
-
-      if (userProfile.data.badges && userProfile.data.badges.length > 0) {
-        setBadges(userProfile.data.badges.map((badge, index) => ({
-          id: index + 1,
-          badge: badge.icon || "🏆",
-          heading: badge.name,
-          content: badge.description,
-          points: badge.points || 0,
-          date: badge.earnedDate ? new Date(badge.earnedDate).toLocaleString('default', { month: 'short', year: 'numeric' }) : "Pending",
-          earned: badge.earned || false,
-          required: badge.requirement
-        })));
-      } else {
-        setBadges([
-          { id: 1, badge: "🎯", heading: "First Steps", content: "Complete profile setup", points: 100, date: "Pending", earned: false },
-          { id: 2, badge: "⚡", heading: "Quick Learner", content: "Finish 5 courses", points: 250, date: "Pending", earned: false },
-        ]);
-      }
-
-      if (userProfile.data.recentActivities && userProfile.data.recentActivities.length > 0) {
-        setActivities(userProfile.data.recentActivities.map((activity, index) => ({
-          id: index + 1,
-          logo: getActivityLogo(activity.type),
-          title: activity.title,
-          history: activity.timeAgo || activity.date,
-          type: activity.type
-        })));
-      }
-
-      setError(null);
-    } catch (err) {
-      console.error("Failed to fetch user data:", err);
-      setError(err.message || "Failed to load profile data");
-      showNotification("Failed to load profile data", "error");
-    } finally {
-      setLoading(false);
+    // Store the current user ID
+    if (userDataRes.userId) {
+      setCurrentUserId(userDataRes.userId);
     }
-  };
+
+    setUserData({
+      name: userDataRes.fullName || `${userDataRes.firstName || ''} ${userDataRes.lastName || ''}`.trim() || userDataRes.username || userDataRes.name || "Learner",
+      title: userProfile.data.careerGoalName || "Frontend Developer",
+      email: userDataRes.email || "",
+      location: userDataRes.location || userDataRes.city || "Egypt",
+      joined: userDataRes.joinedDate ? new Date(userDataRes.joinedDate).toLocaleString('default', { month: 'long', year: 'numeric' }) : "2026",
+      bio: userDataRes.bio || userDataRes.about || "Passionate developer dedicated to continuous learning and building impactful applications."
+    });
+
+    if (userProfile.data.careerGoalId) {
+      setCareerGoalId(userProfile.data.careerGoalId);
+    } else {
+      const matched = CAREER_GOALS_LIST.find(cg => cg.name === userProfile.data.careerGoalName);
+      if (matched) setCareerGoalId(matched.id);
+    }
+
+    // Set interestIds from backend
+    if (userProfile.data.interestIds && Array.isArray(userProfile.data.interestIds) && userProfile.data.interestIds.length > 0) {
+      console.log("Setting interests from interestIds:", userProfile.data.interestIds);
+      setInterestIds(userProfile.data.interestIds);
+    } else if (userProfile.data.interests && Array.isArray(userProfile.data.interests) && userProfile.data.interests.length > 0) {
+      console.log("Setting interests from interests array:", userProfile.data.interests);
+      const ids = userProfile.data.interests.map(i => i.id || i.interestId).filter(id => id);
+      setInterestIds(ids);
+    } else {
+      console.log("No interests found in API response");
+      setInterestIds([]);
+    }
+
+    // Set skills from backend
+    if (userProfile.data.skills && Array.isArray(userProfile.data.skills) && userProfile.data.skills.length > 0) {
+      console.log("Setting skills from API:", userProfile.data.skills);
+      setUserSkills(userProfile.data.skills);
+    } else {
+      setUserSkills([]);
+    }
+
+    if (userDataRes.progress) {
+      setProgress([
+        { name: "Fundamentals", percentage: userDataRes.progress.fundamentals || 0, color: "#0A5ADB" },
+        { name: "Core Skills", percentage: userDataRes.progress.coreSkills || 0, color: "#58A7B5" },
+        { name: "Advanced", percentage: userDataRes.progress.advanced || 0, color: "#667eea" },
+      ]);
+    }
+
+    if (userProfile.data.projects && userProfile.data.projects.length > 0) {
+      setProjects(userProfile.data.projects.map((project, index) => ({
+        id: index + 1,
+        name: project.name,
+        level: project.level || "Beginner",
+        status: project.status || "Not Started",
+        progress: project.progress || 0,
+        color: getProjectColor(project.status)
+      })));
+    } else {
+      setProjects([
+        { id: 1, name: "Sample Project", level: "Beginner", status: "Not Started", progress: 0, color: "#0A5ADB" }
+      ]);
+    }
+
+    setError(null);
+  } catch (err) {
+    console.error("Failed to fetch user data:", err);
+    setError(err.message || "Failed to load profile data");
+    showNotification("Failed to load profile data", "error");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // Fetch all posts where current user is the author across all career goals
+const fetchAllUserPosts = useCallback(async (userId) => {
+  if (!userId) {
+    console.log('No user ID provided');
+    return;
+  }
+
+  try {
+    setLoadingPosts(true);
+    const allCareerGoals = CAREER_GOALS_LIST.filter(cg => cg.id >= 13 && cg.id <= 32);
+    let allUserPosts = [];
+
+    // Fetch posts from each career goal
+    for (const careerGoal of allCareerGoals) {
+      try {
+        const response = await getCommunityPostsByCareerGoal(careerGoal.id);
+        
+        if (response.success && response.data) {
+          // Filter posts where current user is the author
+          const userAuthoredPosts = response.data.filter(
+            post => post.author.userId === userId
+          );
+          allUserPosts = [...allUserPosts, ...userAuthoredPosts];
+        }
+      } catch (err) {
+        console.error(`Error fetching posts for career goal ${careerGoal.id}:`, err);
+        // Continue with other career goals even if one fails
+      }
+    }
+
+    console.log(`Found ${allUserPosts.length} posts authored by user`);
+    setUserPosts(allUserPosts);
+
+    // Convert posts to activity format
+    const postActivities = allUserPosts.map(post => ({
+      id: `post-${post.postId}`,
+      logo: Community,
+      title: post.title,
+      history: new Date(post.createdAt).toLocaleString('default', { 
+        month: 'short', 
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
+      type: 'community',
+      likeCount: post.likeCount,
+      commentCount: post.commentCount,
+      isLiked: post.isLikedByCurrentUser,
+      author: `${post.author.firstName} ${post.author.lastName}`,
+      careerGoal: post.primaryCareerGoal?.careerGoalName || 'Unknown',
+      contentPreview: post.contentPreview
+    }));
+
+    // Sort by date (newest first)
+    postActivities.sort((a, b) => new Date(b.history) - new Date(a.history));
+
+    // Merge with existing activities or replace community activities
+    setActivities(prevActivities => {
+      const nonCommunityActivities = prevActivities.filter(activity => activity.type !== 'community');
+      return [...postActivities, ...nonCommunityActivities];
+    });
+
+  } catch (err) {
+    console.error('Failed to fetch user posts:', err);
+    showNotification('Failed to load your community posts', 'error');
+  } finally {
+    setLoadingPosts(false);
+  }
+}, []);
+
+// Fetch user's posts from all career goals when userId is available
+useEffect(() => {
+  if (currentUserId && !loading) {
+    fetchAllUserPosts(currentUserId);
+  }
+}, [currentUserId, loading, fetchAllUserPosts]);
 
   const getProjectColor = (status) => {
     switch(status) {
@@ -487,7 +499,6 @@ export default function Profile() {
       case "course": return Fundementals;
       case "community": return Community;
       case "project": return Portfolio;
-      default: return Badge;
     }
   };
 
@@ -562,79 +573,11 @@ export default function Profile() {
     ));
   };
 
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const convertFileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
-  const handleFileChange = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-    if (!allowedTypes.includes(file.type)) {
-      showNotification("Please upload a PDF or Word document", "error");
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      showNotification("File size must be less than 5MB", "error");
-      return;
-    }
-
-    setUploading(true);
-    showNotification("Uploading CV...", "info");
-
-    try {
-      const base64 = await convertFileToBase64(file);
-      
-      localStorage.setItem('userCVUrl', base64);
-      localStorage.setItem('userCVName', file.name);
-      localStorage.setItem('userCVType', file.type);
-      
-      setUserData(prev => ({ ...prev, cvUrl: base64, cvName: file.name }));
-      
-      showNotification("CV uploaded successfully!", "success");
-    } catch (err) {
-      console.error("Upload error:", err);
-      showNotification("Failed to upload CV. Please try again.", "error");
-    } finally {
-      setUploading(false);
-      event.target.value = '';
-    }
-  };
-
-  const handleDownloadCV = () => {
-    if (userData.cvUrl) {
-      if (userData.cvUrl.startsWith('data:')) {
-        const link = document.createElement('a');
-        link.href = userData.cvUrl;
-        link.download = userData.cvName || localStorage.getItem('userCVName') || 'CV.pdf';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } else {
-        window.open(userData.cvUrl, "_blank");
-      }
-    } else {
-      showNotification("No CV uploaded yet!", "info");
-    }
-  };
-
   const handleShareProfile = () => {
     navigator.clipboard.writeText(window.location.href);
     showNotification("Profile link copied to clipboard!", "success");
   };
 
-  const totalPoints = badges.filter(b => b.earned).reduce((acc, b) => acc + b.points, 0);
   const averageSkillLevel = userSkills.length > 0 
     ? Math.round(userSkills.reduce((acc, s) => acc + s.skillLevel, 0) / userSkills.length * 100 / 3)
     : 0;
@@ -702,14 +645,6 @@ export default function Profile() {
                 <p className={styles.user_bio}>{userData.bio}</p>
               </div>
             </div>
-            <div className={styles.header_actions}>
-              <button className={styles.share_btn} onClick={handleShareProfile}>
-                <ShareIcon /> Share Profile
-              </button>
-              <button className={styles.save_all_btn} onClick={saveDataToLocal}>
-                Save All Changes
-              </button>
-            </div>
           </div>
 
           <div className={styles.contact_info}>
@@ -740,7 +675,6 @@ export default function Profile() {
               >
                 <Tab label="Overview" value="1" className={styles.tab} />
                 <Tab label="Skills" value="2" className={styles.tab} />
-                <Tab label="Badges" value="3" className={styles.tab} />
                 <Tab label="Activity" value="4" className={styles.tab} />
               </TabList>
             </Box>
@@ -885,368 +819,158 @@ export default function Profile() {
                 </div>
 
               <div className={styles.overview_grid}>
-                {/* Roadmap Progress */}
-                <div className={styles.roadmap_card}>
-                  <div className={styles.card_header}>
-                    <img src={Progress_img} alt="Progress" />
-                    <div>
-                      <h4>Roadmap Progress</h4>
-                      <p>{userData.title}</p>
-                    </div>
-                  </div>
-                  <div className={styles.progress_list}>
-                    {progress.map((item, index) => (
-                      <div key={index} className={styles.progress_item}>
-                        <div className={styles.progress_header}>
-                          <span>{item.name}</span>
-                          <div className={styles.progress_controls}>
-                            <span style={{ color: item.color }}>{item.percentage}%</span>
-                            <button 
-                              className={styles.progress_btn}
-                              onClick={() => handleUpdateProgress(index, item.percentage - 10)}
-                              disabled={item.percentage <= 0}
-                            >
-                              -10
-                            </button>
-                            <button 
-                              className={styles.progress_btn}
-                              onClick={() => handleUpdateProgress(index, item.percentage + 10)}
-                              disabled={item.percentage >= 100}
-                            >
-                              +10
-                            </button>
-                          </div>
-                        </div>
-                        <div className={styles.progress_bar_container}>
-                          <div 
-                            className={styles.progress_bar}
-                            style={{ 
-                              width: `${item.percentage}%`,
-                              background: `linear-gradient(90deg, ${item.color}, ${item.color}cc)`
-                            }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className={styles.card_footer}>
-                    <button className={styles.view_btn} onClick={() => navigate('/learningpath')}>
-                      View Full Roadmap →
-                    </button>
-                  </div>
-                </div>
-
-                {/* Saved Projects */}
-                <div className={styles.projects_card}>
-                  <div className={styles.card_header}>
-                    <img src={Document_img} alt="Projects" />
-                    <div>
-                      <h4>Saved Projects</h4>
-                      <p>Your project bookmarks</p>
-                    </div>
-                    <button className={styles.add_btn} onClick={handleAddProject}>
-                      <AddIcon /> Add Project
-                    </button>
-                  </div>
-                  <div className={styles.projects_list}>
-                    {projects.map((project) => (
-                      <div key={project.id} className={styles.project_item}>
-                        <div className={styles.project_info}>
-                          <div className={styles.project_header}>
-                            <input
-                              type="text"
-                              value={project.name}
-                              onChange={(e) => handleUpdateProjectName(project.id, e.target.value)}
-                              className={styles.project_name_input}
-                            />
-                            <button 
-                              className={styles.delete_btn}
-                              onClick={() => handleDeleteProject(project.id)}
-                            >
-                              <DeleteIcon />
-                            </button>
-                          </div>
-                          <div className={styles.project_tags}>
-                            <select 
-                              className={styles.project_level}
-                              value={project.level}
-                              onChange={(e) => setProjects(projects.map(p => p.id === project.id ? {...p, level: e.target.value} : p))}
-                            >
-                              <option>Beginner</option>
-                              <option>Intermediate</option>
-                              <option>Advanced</option>
-                            </select>
-                            <select 
-                              className={`${styles.project_status} ${styles[project.status.toLowerCase().replace(' ', '_')]}`}
-                              value={project.status}
-                              onChange={(e) => handleUpdateProjectStatus(project.id, e.target.value)}
-                            >
-                              <option>Not Started</option>
-                              <option>In Progress</option>
-                              <option>Completed</option>
-                            </select>
-                          </div>
-                        </div>
-                        {project.status !== "Not Started" && (
-                          <div className={styles.project_progress}>
-                            <div className={styles.progress_bar_container}>
-                              <div 
-                                className={styles.progress_bar}
-                                style={{ 
-                                  width: `${project.progress}%`,
-                                  background: `linear-gradient(90deg, ${project.color}, ${project.color}cc)`
-                                }}
-                              />
-                            </div>
-                            <span>{project.progress}%</span>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* CV & Documents */}
-              <div className={styles.documents_card}>
-                <div className={styles.card_header}>
-                  <img src={Document_img} alt="Documents" />
-                  <div>
-                    <h4>CV & Documents</h4>
-                    <p>Your uploaded documents</p>
-                  </div>
-                </div>
-                <div className={styles.document_item}>
-                  <div className={styles.document_info}>
-                    <div className={styles.document_icon}>📄</div>
-                    <div>
-                      {/* ✅ عرض الـ CV - الأولوية: localStorage أولاً */}
-                      <h4>{userData.cvName || (userData.cvUrl ? 'Your CV' : "No CV Uploaded")}</h4>
-                      <p>{userData.cvUrl ? "CV uploaded successfully" : "Upload your CV to showcase your experience"}</p>
-                    </div>
-                  </div>
-                  {userData.cvUrl ? (
-                    <Button
-                      variant="contained"
-                      startIcon={<DownloadIcon />}
-                      className={styles.download_btn}
-                      onClick={handleDownloadCV}
-                    >
-                      Download
-                    </Button>
-                  ) : (
-                    <p className={styles.no_cv_text}>No CV uploaded yet</p>
-                  )}
-                </div>
-                <div className={styles.card_footer}>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    accept=".pdf,.doc,.docx"
-                    style={{ display: 'none' }}
-                  />
-                  <button 
-                    className={styles.upload_btn} 
-                    onClick={handleUploadClick}
-                    disabled={uploading}
-                  >
-                    {uploading ? (
-                      <>Uploading...</>
-                    ) : (
-                      <><UploadFileIcon /> Upload New Document</>
-                    )}
-                  </button>
-                </div>
               </div>
             </TabPanel>
 
             {/* Skills Tab */}
-<TabPanel value="2" className={styles.tab_panel}>
-  <div className={styles.skills_overview}>
-    <div className={styles.skills_stats}>
-      <div className={styles.skill_stat_card}>
-        <span className={styles.skill_stat_value}>{averageSkillLevel}%</span>
-        <span className={styles.skill_stat_label}>Average Proficiency</span>
-      </div>
-      <div className={styles.skill_stat_card}>
-        <span className={styles.skill_stat_value}>{userSkills.length}</span>
-        <span className={styles.skill_stat_label}>Total Skills</span>
-      </div>
-    </div>
-
-    <div className={styles.skills_card}>
-      <div className={styles.card_header}>
-        <div>
-          <h4>Your Skills</h4>
-          <p>Select skills from the list below and set your proficiency level (1=Beginner, 2=Intermediate, 3=Advanced)</p>
-        </div>
-        {!editingSkills && (
-          <button onClick={handleEditSkills} className={styles.add_skill_btn}>
-            <EditIcon /> Manage Skills
-          </button>
-        )}
-      </div>
-
-      {editingSkills ? (
-        <div className={styles.skills_edit_mode}>
-          <div className={styles.selected_skills_section}>
-            <h5>Your Selected Skills</h5>
-            {tempSkills.length > 0 ? (
-              <div className={styles.selected_skills_list}>
-                {tempSkills.map(skill => {
-                  const skillInfo = SKILLS_LIST.find(s => s.id === skill.skillId);
-                  return (
-                    <div key={skill.skillId} className={styles.selected_skill_item}>
-                      <div className={styles.selected_skill_info}>
-                        <span className={styles.selected_skill_name}>{skillInfo?.name}</span>
-                        <div className={styles.level_selector}>
-                          <button
-                            className={`${styles.level_btn} ${skill.skillLevel === 1 ? styles.active : ''}`}
-                            onClick={() => handleUpdateSkillLevel(skill.skillId, 1)}
-                          >
-                            Beginner
-                          </button>
-                          <button
-                            className={`${styles.level_btn} ${skill.skillLevel === 2 ? styles.active : ''}`}
-                            onClick={() => handleUpdateSkillLevel(skill.skillId, 2)}
-                          >
-                            Intermediate
-                          </button>
-                          <button
-                            className={`${styles.level_btn} ${skill.skillLevel === 3 ? styles.active : ''}`}
-                            onClick={() => handleUpdateSkillLevel(skill.skillId, 3)}
-                          >
-                            Advanced
-                          </button>
+            <TabPanel value="2" className={styles.tab_panel}>
+              <div className={styles.skills_overview}>
+                <div className={styles.skills_stats}>
+                  <div className={styles.skill_stat_card}>
+                    <span className={styles.skill_stat_value}>{averageSkillLevel}%</span>
+                    <span className={styles.skill_stat_label}>Average Proficiency</span>
+                  </div>
+                  <div className={styles.skill_stat_card}>
+                    <span className={styles.skill_stat_value}>{userSkills.length}</span>
+                    <span className={styles.skill_stat_label}>Total Skills</span>
+                  </div>
+                </div>
+                              
+                <div className={styles.skills_card}>
+                  <div className={styles.card_header}>
+                    <div>
+                      <h4>Your Skills</h4>
+                      <p>Select skills from the list below and set your proficiency level (1=Beginner, 2=Intermediate, 3=Advanced)</p>
+                    </div>
+                    {!editingSkills && (
+                      <button onClick={handleEditSkills} className={styles.add_skill_btn}>
+                        <EditIcon /> Manage Skills
+                      </button>
+                    )}
+                  </div>
+                  
+                  {editingSkills ? (
+                    <div className={styles.skills_edit_mode}>
+                      <div className={styles.selected_skills_section}>
+                        <h5>Your Selected Skills</h5>
+                        {tempSkills.length > 0 ? (
+                          <div className={styles.selected_skills_list}>
+                            {tempSkills.map(skill => {
+                              const skillInfo = SKILLS_LIST.find(s => s.id === skill.skillId);
+                              return (
+                                <div key={skill.skillId} className={styles.selected_skill_item}>
+                                  <div className={styles.selected_skill_info}>
+                                    <span className={styles.selected_skill_name}>{skillInfo?.name}</span>
+                                    <div className={styles.level_selector}>
+                                      <button
+                                        className={`${styles.level_btn} ${skill.skillLevel === 1 ? styles.active : ''}`}
+                                        onClick={() => handleUpdateSkillLevel(skill.skillId, 1)}
+                                      >
+                                        Beginner
+                                      </button>
+                                      <button
+                                        className={`${styles.level_btn} ${skill.skillLevel === 2 ? styles.active : ''}`}
+                                        onClick={() => handleUpdateSkillLevel(skill.skillId, 2)}
+                                      >
+                                        Intermediate
+                                      </button>
+                                      <button
+                                        className={`${styles.level_btn} ${skill.skillLevel === 3 ? styles.active : ''}`}
+                                        onClick={() => handleUpdateSkillLevel(skill.skillId, 3)}
+                                      >
+                                        Advanced
+                                      </button>
+                                    </div>
+                                  </div>
+                                  <button
+                                    className={styles.remove_skill_btn}
+                                    onClick={() => handleRemoveSkill(skill.skillId)}
+                                  >
+                                    <DeleteIcon />
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p className={styles.empty_message}>No skills selected yet. Browse the categories below to add skills.</p>
+                        )}
+                      </div>
+                      
+                      <div className={styles.available_skills_section}>
+                        <h5>Available Skills</h5>
+                        <div className={styles.skills_categories}>
+                          {Object.entries(skillsByCategory).map(([category, skills]) => (
+                            <div key={category} className={styles.skill_category}>
+                              <h6>{category}</h6>
+                              <div className={styles.category_skills}>
+                                {skills.map(skill => {
+                                  const isSelected = tempSkills.some(s => s.skillId === skill.id);
+                                  return (
+                                    <button
+                                      key={skill.id}
+                                      className={`${styles.skill_option} ${isSelected ? styles.disabled : ''}`}
+                                      onClick={() => !isSelected && handleAddSkill(skill.id)}
+                                      disabled={isSelected}
+                                    >
+                                      {skill.name}
+                                      {isSelected && <CheckIcon className={styles.check_icon} />}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                      <button
-                        className={styles.remove_skill_btn}
-                        onClick={() => handleRemoveSkill(skill.skillId)}
-                      >
-                        <DeleteIcon />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className={styles.empty_message}>No skills selected yet. Browse the categories below to add skills.</p>
-            )}
-          </div>
-
-          <div className={styles.available_skills_section}>
-            <h5>Available Skills</h5>
-            <div className={styles.skills_categories}>
-              {Object.entries(skillsByCategory).map(([category, skills]) => (
-                <div key={category} className={styles.skill_category}>
-                  <h6>{category}</h6>
-                  <div className={styles.category_skills}>
-                    {skills.map(skill => {
-                      const isSelected = tempSkills.some(s => s.skillId === skill.id);
-                      return (
-                        <button
-                          key={skill.id}
-                          className={`${styles.skill_option} ${isSelected ? styles.disabled : ''}`}
-                          onClick={() => !isSelected && handleAddSkill(skill.id)}
-                          disabled={isSelected}
-                        >
-                          {skill.name}
-                          {isSelected && <CheckIcon className={styles.check_icon} />}
+                        
+                      <div className={styles.edit_actions}>
+                        <button onClick={handleSaveSkills} className={styles.save_btn}>
+                          <CheckIcon /> Save Skills
                         </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.edit_actions}>
-            <button onClick={handleSaveSkills} className={styles.save_btn}>
-              <CheckIcon /> Save Skills
-            </button>
-            <button onClick={handleCancelSkills} className={styles.cancel_btn}>
-              <CloseIcon /> Cancel
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className={styles.skills_display_mode}>
-          {userSkills.length > 0 ? (
-            <div className={styles.skills_list_display}>
-              {userSkills.map(skill => {
-                const skillName = getSkillName(skill.skillId);
-                return (
-                  <div key={skill.skillId} className={styles.skill_display_card}>
-                    <div className={styles.skill_display_header}>
-                      <div 
-                        className={styles.skill_dot}
-                        style={{ background: getSkillColor(skillName) }}
-                      />
-                      <span className={styles.skill_display_name}>{skillName}</span>
-                    </div>
-                    <div className={styles.skill_display_level}>
-                      <span 
-                        className={styles.level_badge}
-                        style={{ background: getLevelColor(skill.skillLevel) }}
-                      >
-                        {getLevelLabel(skill.skillLevel)}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className={styles.empty_skills_state}>
-              <p>You haven't added any skills yet.</p>
-              <button onClick={handleEditSkills} className={styles.add_skill_btn}>
-                <AddIcon /> Add Your First Skill
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  </div>
-</TabPanel>
-
-            {/* Badges Tab */}
-            <TabPanel value="3" className={styles.tab_panel}>
-              <div className={styles.badges_stats}>
-                <div className={styles.badge_stat}>
-                  <span className={styles.badge_stat_value}>{badges.filter(b => b.earned).length}</span>
-                  <span className={styles.badge_stat_label}>Badges Earned</span>
-                </div>
-                <div className={styles.badge_stat}>
-                  <span className={styles.badge_stat_value}>{totalPoints}</span>
-                  <span className={styles.badge_stat_label}>Total Points</span>
-                </div>
-                <div className={styles.badge_stat}>
-                  <span className={styles.badge_stat_value}>{badges.filter(b => !b.earned).length}</span>
-                  <span className={styles.badge_stat_label}>Locked Badges</span>
-                </div>
-              </div>
-              <div className={styles.badges_grid}>
-                {badges.map((badge) => (
-                  <div key={badge.id} className={`${styles.badge_card} ${!badge.earned ? styles.locked : ""}`}>
-                    <div className={styles.badge_icon}>{badge.badge}</div>
-                    <h4>{badge.heading}</h4>
-                    <p>{badge.content}</p>
-                    {!badge.earned && badge.required && <p className={styles.badge_required}>Required: {badge.required}</p>}
-                    <div className={styles.badge_footer}>
-                      <span className={styles.badge_points}>+{badge.points} pts</span>
-                      <span className={styles.badge_date}>{badge.date}</span>
-                      {!badge.earned && (
-                        <button className={styles.track_btn} onClick={() => navigate('/learningpath')}>
-                          Track Progress
+                        <button onClick={handleCancelSkills} className={styles.cancel_btn}>
+                          <CloseIcon /> Cancel
                         </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className={styles.skills_display_mode}>
+                      {userSkills.length > 0 ? (
+                        <div className={styles.skills_list_display}>
+                          {userSkills.map(skill => {
+                            const skillName = getSkillName(skill.skillId);
+                            return (
+                              <div key={skill.skillId} className={styles.skill_display_card}>
+                                <div className={styles.skill_display_header}>
+                                  <div 
+                                    className={styles.skill_dot}
+                                    style={{ background: getSkillColor(skillName) }}
+                                  />
+                                  <span className={styles.skill_display_name}>{skillName}</span>
+                                </div>
+                                <div className={styles.skill_display_level}>
+                                  <span 
+                                    className={styles.level_badge}
+                                    style={{ background: getLevelColor(skill.skillLevel) }}
+                                  >
+                                    {getLevelLabel(skill.skillLevel)}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className={styles.empty_skills_state}>
+                          <p>You haven't added any skills yet.</p>
+                          <button onClick={handleEditSkills} className={styles.add_skill_btn}>
+                            <AddIcon /> Add Your First Skill
+                          </button>
+                        </div>
                       )}
                     </div>
-                  </div>
-                ))}
+                  )}
+                </div>
               </div>
             </TabPanel>
 
@@ -1254,28 +978,79 @@ export default function Profile() {
             <TabPanel value="4" className={styles.tab_panel}>
               <div className={styles.activity_card}>
                 <div className={styles.card_header}>
-                  <h4>Recent Activity</h4>
-                  <p>Your latest actions on the platform</p>
+                  <h4>Your Community Activity</h4>
+                  <p>
+                    {userPosts.length > 0 
+                      ? `You have published ${userPosts.length} post${userPosts.length !== 1 ? 's' : ''} across all career paths` 
+                      : "Your posts across different career paths will appear here"}
+                  </p>
                 </div>
-                <div className={styles.activity_timeline}>
-                  {activities.map((activity) => (
-                    <div key={activity.id} className={styles.activity_item}>
-                      <div className={styles.activity_icon}>
-                        <img src={activity.logo} alt={activity.type} />
+                {loadingPosts ? (
+                  <div className={styles.loading_activities}>
+                    <div className={styles.loading_spinner_small}></div>
+                    <p>Loading your posts...</p>
+                  </div>
+                ) : (
+                  <div className={styles.activity_timeline}>
+                    {activities.filter(a => a.type === 'community').length > 0 ? (
+                      activities.filter(a => a.type === 'community').map((activity) => (
+                        <div
+                          key={activity.id}
+                          className={`${styles.activity_item} ${activity.type === 'community' ? styles.activity_item_clickable : ''}`}
+                          onClick={() => {
+                            if (activity.type === 'community') {
+                              const postId = activity.id.replace('post-', '');
+                              navigate('/community', { state: { openPostId: postId } });
+                            }
+                          }}
+                        >
+                          <div className={styles.activity_icon}>
+                            <img src={activity.logo} alt={activity.type} />
+                          </div>
+                          <div className={styles.activity_content}>
+                            <h4>{activity.title}</h4>
+                            <p>Posted on {activity.history}</p>
+                            {activity.careerGoal && (
+                              <div className={styles.post_career_badge}>
+                                🎯 {activity.careerGoal}
+                              </div>
+                            )}
+                            {activity.contentPreview && (
+                              <p className={styles.post_preview}>{activity.contentPreview}</p>
+                            )}
+                            <div className={styles.post_stats}>
+                              <span>❤️ {activity.likeCount} likes</span>
+                              <span>💬 {activity.commentCount} comments</span>
+                            </div>
+                          </div>
+                          <div className={`${styles.activity_badge} ${styles.community}`}>
+                            Your Post
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className={styles.empty_activity}>
+                        <p>You haven't published any posts yet.</p>
+                        <button 
+                          className={styles.create_post_btn}
+                          onClick={() => navigate('/community')}
+                        >
+                          Create Your First Post →
+                        </button>
                       </div>
-                      <div className={styles.activity_content}>
-                        <h4>{activity.title}</h4>
-                        <p>{activity.history}</p>
-                      </div>
-                      <div className={`${styles.activity_badge} ${styles[activity.type]}`}>
-                        {activity.type}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className={styles.card_footer}>
-                  <button className={styles.view_all_btn}>View All Activity →</button>
-                </div>
+                    )}
+                  </div>
+                )}
+                {userPosts.length > 0 && (
+                  <div className={styles.card_footer}>
+                    <button 
+                      className={styles.view_all_btn} 
+                      onClick={() => navigate('/community')}
+                    >
+                      View All Your Posts →
+                    </button>
+                  </div>
+                )}
               </div>
             </TabPanel>
           </TabContext>
