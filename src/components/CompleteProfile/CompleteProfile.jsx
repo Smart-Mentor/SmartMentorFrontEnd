@@ -123,7 +123,7 @@ const careerOptions = [
 ];
 
 // Languages
-const languagesList = ["Arabic", "English", "French", "German", "Spanish", "Italian", "Chinese", "Japanese"];
+// const languagesList = ["Arabic", "English", "French", "German", "Spanish", "Italian", "Chinese", "Japanese"];
 
 // Skill level mapping (1 = Beginner, 2 = Intermediate, 3 = Advanced)
 const skillLevelMap = {
@@ -207,18 +207,18 @@ export default function CompleteProfile() {
   const [activeSkill, setActiveSkill] = useState(null);
   const [skillCategories, setSkillCategories] = useState({});
   
-  // Step 2 - CV
-  const [file, setFile] = useState(null);
-  const [dragActive, setDragActive] = useState(false);
-  const [error, setError] = useState("");
+  // // Step 2 - CV
+  // const [file, setFile] = useState(null);
+  // const [dragActive, setDragActive] = useState(false);
+  // const [error, setError] = useState("");
   
-  // Step 3 - Career
+  // Step 2 - Career
   const [careerPath, setCareerPath] = useState("");
   const [selectedCareerId, setSelectedCareerId] = useState(null);
   
-  // Step 4 - Interests & Languages
+  // Step 3 - Interests & Languages
   const [selectedInterests, setSelectedInterests] = useState([]);
-  const [selectedLanguages, setSelectedLanguages] = useState([]);
+  // const [selectedLanguages, setSelectedLanguages] = useState([]);
   
   // Search/filter states
   const [skillSearch, setSkillSearch] = useState("");
@@ -300,9 +300,9 @@ export default function CompleteProfile() {
         }
 
         // Populate languages if any
-        if (data.languages && Array.isArray(data.languages)) {
-          setSelectedLanguages(data.languages);
-        }
+        // if (data.languages && Array.isArray(data.languages)) {
+        //   setSelectedLanguages(data.languages);
+        // }
       }
 
     } catch (error) {
@@ -443,20 +443,20 @@ export default function CompleteProfile() {
     //   showNotification("Please upload your CV", "error");
     //   return;
     // }
-    if (activeStep === 2 && !careerPath) {
+    if (activeStep === 1 && !careerPath) {
       showNotification("Please select a career path", "error");
       return;
     }
-    if (activeStep === 3 && (selectedInterests.length === 0 || selectedLanguages.length === 0)) {
-      showNotification("Please select interests and languages", "error");
+    if (activeStep === 2 && (selectedInterests.length === 0 )) {
+      showNotification("Please select interests", "error");
       return;
     }
-    if (activeStep < 4) {
+    if (activeStep < 3) {
       setActiveStep(activeStep + 1);
     } else {
       handleComplete();
     }
-  }, [activeStep, skills, file, careerPath, selectedInterests, selectedLanguages]);
+  }, [activeStep, skills, careerPath, selectedInterests]);
 
   const handleBack = useCallback(() => {
     if (activeStep > 0) {
@@ -466,7 +466,7 @@ export default function CompleteProfile() {
 
   const handleComplete = useCallback(() => {
     submitProfileToAPI();
-  }, [skills, careerPath, selectedInterests, selectedLanguages, file]);
+  }, [skills, careerPath, selectedInterests]);
 
   // Step 1 Functions
   const handleSkillClick = useCallback((skill) => {
@@ -526,95 +526,95 @@ export default function CompleteProfile() {
   }, [activeSkill]);
 
   // Step 2 Functions
-  const handleFileUpload = useCallback((selectedFile) => {
-    setError("");
-    if (!selectedFile) return;
+  // const handleFileUpload = useCallback((selectedFile) => {
+  //   setError("");
+  //   if (!selectedFile) return;
 
-    const ALLOWED_TYPES = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
-    const MAX_FILE_SIZE = 10 * 1024 * 1024;
+  //   const ALLOWED_TYPES = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+  //   const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-    if (!ALLOWED_TYPES.includes(selectedFile.type)) {
-      setError("Only PDF, .doc and .docx files are allowed");
-      return;
-    }
+  //   if (!ALLOWED_TYPES.includes(selectedFile.type)) {
+  //     setError("Only PDF, .doc and .docx files are allowed");
+  //     return;
+  //   }
 
-    if (selectedFile.size > MAX_FILE_SIZE) {
-      setError("File size must be less than 10MB");
-      return;
-    }
+  //   if (selectedFile.size > MAX_FILE_SIZE) {
+  //     setError("File size must be less than 10MB");
+  //     return;
+  //   }
 
-    setFile(selectedFile);
+  //   setFile(selectedFile);
     
-    // ✅ أضف: تحويل وحفظ الـ CV في localStorage
-    try {
-      const base64 =  convertFileToBase64(selectedFile);
-      localStorage.setItem('userCVUrl', base64);
-      localStorage.setItem('userCVName', selectedFile.name);
-      localStorage.setItem('userCVType', selectedFile.type);
-      console.log('✅ CV saved to localStorage');
-    } catch (err) {
-      console.error('❌ Error saving CV:', err);
-      }
+  //   // ✅ أضف: تحويل وحفظ الـ CV في localStorage
+  //   try {
+  //     const base64 =  convertFileToBase64(selectedFile);
+  //     localStorage.setItem('userCVUrl', base64);
+  //     localStorage.setItem('userCVName', selectedFile.name);
+  //     localStorage.setItem('userCVType', selectedFile.type);
+  //     console.log('✅ CV saved to localStorage');
+  //   } catch (err) {
+  //     console.error('❌ Error saving CV:', err);
+  //     }
 
-    showNotification("CV uploaded successfully!", "success");
-  }, []);
+  //   showNotification("CV uploaded successfully!", "success");
+  // }, []);
 
-  const handleDrop = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileUpload(e.dataTransfer.files[0]);
-    }
-  }, [handleFileUpload]);
+  // const handleDrop = useCallback((e) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   setDragActive(false);
+  //   if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+  //     handleFileUpload(e.dataTransfer.files[0]);
+  //   }
+  // }, [handleFileUpload]);
 
-  const handleDrag = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  }, []);
+  // const handleDrag = useCallback((e) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   if (e.type === "dragenter" || e.type === "dragover") {
+  //     setDragActive(true);
+  //   } else if (e.type === "dragleave") {
+  //     setDragActive(false);
+  //   }
+  // }, []);
 
-  const handleChange = useCallback((e) => {
-    if (e.target.files && e.target.files[0]) {
-      handleFileUpload(e.target.files[0]);
-    }
-  }, [handleFileUpload]);
+  // const handleChange = useCallback((e) => {
+  //   if (e.target.files && e.target.files[0]) {
+  //     handleFileUpload(e.target.files[0]);
+  //   }
+  // }, [handleFileUpload]);
 
-  const removeFile = useCallback(() => {
-    setFile(null);
-    setError("");
+  // const removeFile = useCallback(() => {
+  //   setFile(null);
+  //   setError("");
 
-    // ✅ أضف: حذف الـ CV من localStorage
-    localStorage.removeItem('userCVUrl');
-    localStorage.removeItem('userCVName');
-    localStorage.removeItem('userCVType');
+  //   // ✅ أضف: حذف الـ CV من localStorage
+  //   localStorage.removeItem('userCVUrl');
+  //   localStorage.removeItem('userCVName');
+  //   localStorage.removeItem('userCVType');
     
-    showNotification("CV removed", "info");
-  }, []);
+  //   showNotification("CV removed", "info");
+  // }, []);
 
-  // Step 3 Functions
+  // Step 2 Functions
   const handleCareerSelect = useCallback((careerId, careerValue) => {
     setCareerPath(careerValue);
     setSelectedCareerId(careerId);
   }, []);
 
-  // Step 4 Functions
+  // Step 3 Functions
   const toggleInterest = useCallback((interestName) => {
     setSelectedInterests((prev) =>
       prev.includes(interestName) ? prev.filter((i) => i !== interestName) : [...prev, interestName]
     );
   }, []);
 
-  const handleLanguageChange = useCallback((event) => {
-    const lang = event.target.name;
-    setSelectedLanguages((prev) =>
-      event.target.checked ? [...prev, lang] : prev.filter((l) => l !== lang)
-    );
-  }, []);
+  // const handleLanguageChange = useCallback((event) => {
+  //   const lang = event.target.name;
+  //   setSelectedLanguages((prev) =>
+  //     event.target.checked ? [...prev, lang] : prev.filter((l) => l !== lang)
+  //   );
+  // }, []);
 
   // Get unique categories for filter
   const categories = ["all", ...new Set(skillsList.map(skill => skill.category))];
@@ -626,12 +626,12 @@ export default function CompleteProfile() {
       desc: "Choose the skills you have and rate your proficiency level",
       color: "#0A5ADB"
     },
-    { 
-      icon: "📄", 
-      title: "Upload Your CV", 
-      desc: "Share your CV so we can better understand your background",
-      color: "#58A7B5"
-    },
+    // { 
+    //   icon: "📄", 
+    //   title: "Upload Your CV", 
+    //   desc: "Share your CV so we can better understand your background",
+    //   color: "#58A7B5"
+    // },
     { 
       icon: "💼", 
       title: "Choose Your Career Path", 
@@ -640,8 +640,8 @@ export default function CompleteProfile() {
     },
     { 
       icon: "🎨", 
-      title: "Interests & Languages", 
-      desc: "Tell us about your interests and language skills",
+      title: "Interests", 
+      desc: "Tell us about your interests to personalize your experience",
       color: "#f59e0b"
     },
     { 
@@ -721,13 +721,13 @@ export default function CompleteProfile() {
         {/* Progress Bar */}
         <div className={`${styles.progress_section} ${animate ? styles.slide_up : ""}`}>
           <div className={styles.progress_labels}>
-            <span>Step {activeStep + 1} of 5</span>
-            <span>{Math.round((activeStep + 1) / 5 * 100)}% Complete</span>
+            <span>Step {activeStep + 1} of 4</span>
+            <span>{Math.round((activeStep + 1) / 4 * 100)}% Complete</span>
           </div>
           <div className={styles.progress_bar_container}>
             <div 
               className={styles.progress_bar_fill} 
-              style={{ width: `${(activeStep + 1) / 5 * 100}%` }}
+              style={{ width: `${(activeStep + 1) / 4 * 100}%` }}
             />
           </div>
           <div className={styles.steps_indicators}>
@@ -876,7 +876,7 @@ export default function CompleteProfile() {
           )}
 
           {/* Step 2 - CV Upload */}
-          {activeStep === 1 && (
+          {/* {activeStep === 1 && (
             <div className={styles.step_content}>
               <div
                 className={`${styles.upload_area} ${dragActive ? styles.drag_active : ""} ${error ? styles.has_error : ""}`}
@@ -915,18 +915,18 @@ export default function CompleteProfile() {
                     </button>
                   </div>
                 )}
-              </div>
+              </div> */}
               {/* {error && <Alert severity="error" className={styles.error_alert}>{error}</Alert>} */}
               
-              <div className={styles.upload_tips}>
+              {/* <div className={styles.upload_tips}>
                 <div className={styles.tip_item}>💡 Your CV helps us personalize your learning path</div>
                 <div className={styles.tip_item}>🔒 Your file is securely stored and never shared</div>
               </div>
             </div>
-          )}
+          )} */}
 
-          {/* Step 3 - Career Path with all 22 options */}
-          {activeStep === 2 && (
+          {/* Step 2 - Career Path with all 22 options */}
+          {activeStep === 1 && (
             <div className={styles.step_content}>
               <div className={styles.career_stats}>
                 <span className={styles.career_count}>{careerOptions.length} Career Paths Available</span>
@@ -957,8 +957,8 @@ export default function CompleteProfile() {
             </div>
           )}
 
-          {/* Step 4 - Interests (all 19) & Languages */}
-          {activeStep === 3 && (
+          {/* Step 3 - Interests (all 19) */}
+          {activeStep === 2 && (
             <div className={styles.step_content}>
               <div className={styles.interests_section}>
                 <div className={styles.section_title_wrapper}>
@@ -989,7 +989,7 @@ export default function CompleteProfile() {
                 )}
               </div>
 
-              <div className={styles.languages_section}>
+              {/* <div className={styles.languages_section}>
                 <div className={styles.section_title_wrapper}>
                   <span className={styles.section_emoji}>🗣️</span>
                   <h4>Languages You Speak ({languagesList.length} options)</h4>
@@ -1008,12 +1008,12 @@ export default function CompleteProfile() {
                     </label>
                   ))}
                 </div>
-              </div>
+              </div> */}
             </div>
           )}
 
-          {/* Step 5 - Review */}
-          {activeStep === 4 && (
+          {/* Step 4 - Review */}
+          {activeStep === 3 && (
             <div className={styles.step_content}>
               <div className={styles.review_section}>
                 <div className={styles.review_item}>
@@ -1030,13 +1030,13 @@ export default function CompleteProfile() {
                   </div>
                 </div>
 
-                <div className={styles.review_item}>
+                {/* <div className={styles.review_item}>
                   <div className={styles.review_item_header}>
                     <span className={styles.review_icon}>📄</span>
                     <h4>CV</h4>
                   </div>
                   <p className={styles.review_text}>{file?.name || "No file uploaded"}</p>
-                </div>
+                </div> */}
 
                 <div className={styles.review_item}>
                   <div className={styles.review_item_header}>
@@ -1058,7 +1058,7 @@ export default function CompleteProfile() {
                   </div>
                 </div>
 
-                <div className={styles.review_item}>
+                {/* <div className={styles.review_item}>
                   <div className={styles.review_item_header}>
                     <span className={styles.review_icon}>🗣️</span>
                     <h4>Languages ({selectedLanguages.length})</h4>
@@ -1068,7 +1068,7 @@ export default function CompleteProfile() {
                       <span key={lang} className={styles.review_tag}>{lang}</span>
                     ))}
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           )}
@@ -1082,10 +1082,10 @@ export default function CompleteProfile() {
             )}
             <Button 
               onClick={handleNext} 
-              className={`${styles.next_btn} ${activeStep === 4 ? styles.complete_btn : ""}`}
+              className={`${styles.next_btn} ${activeStep === 3 ? styles.complete_btn : ""}`}
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Saving..." : (activeStep === 4 ? "Complete Profile" : "Continue →")}
+              {isSubmitting ? "Saving..." : (activeStep === 3 ? "Complete Profile" : "Continue →")}
             </Button>
           </div>
         </div>

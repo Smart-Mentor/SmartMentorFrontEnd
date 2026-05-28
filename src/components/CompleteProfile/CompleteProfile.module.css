@@ -475,7 +475,7 @@
   border-color: #ef4444;
 }
 
-.upload_label {
+/* .upload_label {
   cursor: pointer;
   width: 100%;
   display: block;
@@ -586,7 +586,7 @@
   padding: 6px 12px;
   background: #f9f9f9;
   border-radius: 20px;
-}
+} */
 
 /* Career Grid */
 .career_grid {
@@ -693,7 +693,7 @@
 }
 
 /* Languages Section */
-.languages_section {
+/* .languages_section {
   margin-bottom: 0;
 }
 
@@ -751,7 +751,7 @@
   font-size: 15px;
   font-weight: 500;
   color: #1a1a2e;
-}
+} */
 
 /* Review Section */
 .review_section {
