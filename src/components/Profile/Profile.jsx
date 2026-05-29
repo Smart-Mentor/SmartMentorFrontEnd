@@ -446,7 +446,7 @@ const fetchAllUserPosts = useCallback(async (userId) => {
       id: `post-${post.postId}`,
       logo: Community,
       title: post.title,
-      history: new Date(post.createdAt).toLocaleString('default', { 
+      history: new Date(new Date(post.createdAt).getTime() + (3 * 60 * 60 * 1000)).toLocaleString('default', { 
         month: 'short', 
         day: 'numeric',
         year: 'numeric',
