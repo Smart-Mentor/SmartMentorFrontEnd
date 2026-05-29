@@ -302,7 +302,7 @@ const Dashboard = () => {
   const getOverallLearningProgress = () => {
     if (!learningData && !gapData) return 0;
     const data = learningData || gapData;
-    return data?.statusOfTheGapAnalysis?.completionPercentage || 0;
+    return Math.round(data?.statusOfTheGapAnalysis?.completionPercentage || 0);
   };
 
   const getMatchScore = () => {
