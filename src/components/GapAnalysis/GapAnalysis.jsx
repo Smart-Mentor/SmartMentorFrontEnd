@@ -167,7 +167,7 @@ const GapAnalysis = () => {
 
     // Prepare top skills comparison
     const topSkillsComparison = [
-      ...strongSkills.slice(0, 3).map(skill => ({
+      ...strongSkills.map(skill => ({
         name: skill.name,
         current: Math.round(skill.level),
         required: 100,
@@ -175,7 +175,7 @@ const GapAnalysis = () => {
         status: skill.level >= 80 ? "success" : skill.level >= 60 ? "warning" : "error",
         message: skill.level >= 80 ? "On Track" : skill.level >= 60 ? "Needs Improvement" : "Critical Gap"
       })),
-      ...needsImprovement.slice(0, 2).map(skill => ({
+      ...needsImprovement.map(skill => ({
         name: skill.name,
         current: Math.round(skill.current),
         required: 100,
@@ -228,8 +228,7 @@ const GapAnalysis = () => {
         if (aIsMissing && !bIsMissing) return -1;
         if (!aIsMissing && bIsMissing) return 1;
         return b[1].requiredLevel - a[1].requiredLevel;
-      })
-      .slice(0, 6); // Take top 6 skills for radar chart
+      });
 
     // Calculate radar data based on skills
     const radarLabels = sortedSkills.map(([skillName]) => skillName);
@@ -246,7 +245,7 @@ const GapAnalysis = () => {
         missingSkills,
         needsImprovement,
         strongSkills,
-        topSkillsComparison: topSkillsComparison.slice(0, 5),
+        topSkillsComparison: topSkillsComparison,
         matchScore: gapData.statusOfTheGapAnalysis?.completionPercentage || 0,
         readinessLevel: gapData.statusOfTheGapAnalysis?.readinessLevel || "Not Ready",
         careerGoalName: gapData.careerGoalName || "Backend Developer",
@@ -262,7 +261,7 @@ const GapAnalysis = () => {
       missingSkills,
       needsImprovement,
       strongSkills,
-      topSkillsComparison: topSkillsComparison.slice(0, 5),
+      topSkillsComparison: topSkillsComparison,
       matchScore: Math.round(gapData.statusOfTheGapAnalysis?.completionPercentage || 0),
       readinessLevel: gapData.statusOfTheGapAnalysis?.readinessLevel || "Not Ready",
       careerGoalName: gapData.careerGoalName || "Backend Developer",
@@ -603,7 +602,7 @@ const GapAnalysis = () => {
             </div>
             <div className={styles.skills_list}>
               {missingSkills.length > 0 ? (
-                missingSkills.slice(0, 4).map((skill, idx) => (
+                missingSkills.map((skill, idx) => (
                   <div key={idx} className={styles.skill_item}>
                     <div className={styles.skill_info}>
                       <span className={styles.skill_name}>{skill.name}</span>
