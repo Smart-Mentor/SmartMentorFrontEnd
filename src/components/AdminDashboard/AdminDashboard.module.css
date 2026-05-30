@@ -804,12 +804,13 @@
   color: #666;
 }
 
-/* Skills and Interests Badges */
+/* Skills and Interests Badges - Full Display */
 .skills_container {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   align-items: center;
+  max-width: 300px;
 }
 
 .skill_badge {
@@ -820,16 +821,7 @@
   font-size: 11px;
   font-weight: 500;
   color: #0A5ADB;
-}
-
-.skill_count {
-  display: inline-block;
-  padding: 4px 8px;
-  background: #f0f0f0;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 500;
-  color: #666;
+  white-space: nowrap;
 }
 
 .interests_container {
@@ -837,6 +829,7 @@
   flex-wrap: wrap;
   gap: 6px;
   align-items: center;
+  max-width: 300px;
 }
 
 .interest_badge {
@@ -847,16 +840,7 @@
   font-size: 11px;
   font-weight: 500;
   color: #58A7B5;
-}
-
-.interest_count {
-  display: inline-block;
-  padding: 4px 8px;
-  background: #f0f0f0;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 500;
-  color: #666;
+  white-space: nowrap;
 }
 
 .career_badge {
@@ -2030,16 +2014,9 @@
   font-size: 18px;
 }
 
-/* Responsive Logout Button */
-/* @media (max-width: 767px) {
-  .header_top {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .logout_btn {
-    width: 100%;
-    justify-content: center;
-    padding: 10px 20px;
-  }
-} */
+/* Add this at the top or bottom of your existing CSS file */
+.dashboard_content {
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}

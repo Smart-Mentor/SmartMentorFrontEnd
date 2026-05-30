@@ -286,11 +286,18 @@ export const completeUserProfile = async (profileData) => {
 };
 
 /**
- * 🔹 Update User Profile
- * PUT /api/User/update-profile
- * Body: { skills: [{skillId, skillLevel}], interestIds: [], careerGoalId }
+ * 🔹 Update user profile
  */
-
+export const updateUserProfile = async (profileData) => {
+  try {
+    return await authFetch('/Auth/profile', {
+      method: "PUT",
+      body: JSON.stringify(profileData),
+    });
+  } catch (error) {
+    throw new Error(error.message || "Network error");
+  }
+};
 
 /**
  * 🔹 Update User Skill Level
@@ -307,14 +314,56 @@ export const updateUserSkillLevel = async (skillId) => {
 };
 
 /**
- * 🔹 Get User Profile
- * GET /api/User/profile
+ * 🔹 Get user profile data (skills, interests, career goal)
+ * This endpoint returns the user's detailed profile including their selected skills, interests, and career goal.
  */
 export const getUserProfile = async () => {
   try {
     return await authFetch('/User/profile', { method: "GET" });
   } catch (error) {
     throw new Error(error.message || "Failed to fetch profile");
+  }
+};
+
+/**
+ * 🔹 Get gap analysis for the user
+ * Analyzes the gap between user's current skills and their career goal requirements
+ */
+export const getGapAnalysis = async () => {
+  try {
+    return await authFetch('/GapAnalysis/gap-analysis', { method: "GET" });
+  } catch (error) {
+    throw new Error(error.message || "Failed to fetch gap analysis");
+  }
+};
+
+/**
+ * 🔹 Update user profile (skills, interests, career goal)
+ * This endpoint updates the user's detailed profile including their skills, interests, and career goal.
+ * 
+ * @param {Object} profileData - The profile data to update
+ * @param {Array} profileData.skills - Array of skill objects with skillId and skillLevel
+ * @param {Array} profileData.interestIds - Array of interest IDs
+ * @param {number} profileData.careerGoalId - The career goal ID
+ * 
+ * @example
+ * updateUserProfileData({
+ *   skills: [
+ *     { skillId: 1, skillLevel: 80 },
+ *     { skillId: 2, skillLevel: 65 }
+ *   ],
+ *   interestIds: [1, 2, 3],
+ *   careerGoalId: 5
+ * })
+ */
+export const updateUserProfileData = async (profileData) => {
+  try {
+    return await authFetch('/User/update-profile', {
+      method: "PUT",
+      body: JSON.stringify(profileData),
+    });
+  } catch (error) {
+    throw new Error(error.message || "Network error");
   }
 };
 
@@ -399,40 +448,6 @@ export const getCareerGoalById = async (careerGoalId) => {
     return await authFetch(`/CareerGoal/GetCareerGoalById/${careerGoalId}`, { method: "GET" });
   } catch (error) {
     throw new Error(error.message || "Failed to fetch career goal");
-  }
-};
-
-// ============================================
-// 🔹 GAP ANALYSIS - Gap Analysis Endpoints
-// ============================================
-
-/**
- * 🔹 Get Gap Analysis
- * GET /api/GapAnalysis/gap-analysis
- */
-export const getGapAnalysis = async () => {
-  try {
-    return await authFetch('/GapAnalysis/gap-analysis', { method: "GET" });
-  } catch (error) {
-    throw new Error(error.message || "Failed to fetch gap analysis");
-  }
-};
-// ============================================
-// 🔹 USER - User Profile Endpoints (تحديث)
-// ============================================
-
-/**
- * 🔹 Update User Profile (مع CV)
- * PUT /api/User/update-profile
- */
-export const updateUserProfile = async (profileData) => {
-  try {
-    return await authFetch('/User/update-profile', {
-      method: "PUT",
-      body: JSON.stringify(profileData),
-    });
-  } catch (error) {
-    throw new Error(error.message || "Failed to update profile");
   }
 };
 

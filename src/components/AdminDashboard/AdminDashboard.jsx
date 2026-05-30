@@ -17,7 +17,6 @@ import WarningIcon from "@mui/icons-material/Warning";
 import AddIcon from "@mui/icons-material/Add";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import CategoryIcon from "@mui/icons-material/Category";
-import LogoutIcon from "@mui/icons-material/Logout";
 import styles from "./AdminDashboard.module.css";
 
 const AdminDashboard = () => {
@@ -34,7 +33,6 @@ const AdminDashboard = () => {
   const [alertTitle, setAlertTitle] = useState("");
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("users"); // users, skills, interests, goals
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -119,34 +117,13 @@ const AdminDashboard = () => {
     return localStorage.getItem('token');
   };
 
-  // Logout function
-  const handleLogout = () => {
-    setShowLogoutConfirm(true);
-  };
-
-  const confirmLogout = () => {
-    // Clear all auth data from localStorage
-    localStorage.removeItem('token');
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('userData');
-    
-    // Redirect to login page
-    window.location.href = '/login';
-  };
-
-  const cancelLogout = () => {
-    setShowLogoutConfirm(false);
-  };
-
   // ==================== USER MANAGEMENT ENDPOINTS ====================
   
   // GET /api/Admin/users - Fetch all users
   const fetchUsersFromAPI = async () => {
     try {
-      setLoading(true);
       const token = getAuthToken();
-      const response = await fetch('https://smartmentorapi.runasp.net/api/Admin/users', {
+      const response = await fetch('https://smartmentorapi.runasp.net/api/Admin/users/profile-summaries', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -154,32 +131,37 @@ const AdminDashboard = () => {
       });
       
       if (response.ok) {
-        const apiUsers = await response.json();
-        const transformedUsers = apiUsers.map((user, index) => ({
-          id: user.id || user.userId || index,
-          name: user.firstName + " " + user.lastName,
-          skills: user.skills || [],
-          interests: user.interests || [],
-          careerGoal: user.careerGoal || user.careerGoalName || "Not Specified",
-          email: user.email,
-          avatar: (user.firstName + " " + user.lastName || "U").split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
-          color: getRandomColor(),
-          topSkill: user.topSkill || (user.skills && user.skills[0]) || "General"
-        }));
-        setUsers(transformedUsers);
+        const result = await response.json();
+        if (result.success && result.data) {
+          const transformedUsers = result.data.map((user, index) => ({
+            id: user.userId || index,
+            name: `${user.firstName} ${user.lastName}`,
+            skills: user.skills.map(skill => skill.skillName),
+            interests: user.interests.map(interest => interest.interestName),
+            careerGoal: user.careerGoalName || "Not Specified",
+            email: user.email,
+            avatar: `${user.firstName} ${user.lastName}`.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
+            color: getRandomColor(),
+            topSkill: user.skills.length > 0 ? user.skills[0].skillName : "General",
+            careerGoalId: user.careerGoalId,
+            skillsWithLevel: user.skills,
+            interestsWithId: user.interests,
+            careerGoalMessage: user.careerGoalMessage,
+            skillsMessage: user.skillsMessage,
+            interestsMessage: user.interestsMessage
+          }));
+          setUsers(transformedUsers);
+          return transformedUsers;
+        }
       } else if (response.status === 401) {
         setAlertTitle("Authentication Error");
         setAlertMessage("Please log in again to continue.");
         setShowAlert(true);
-        // Auto logout after 2 seconds on auth error
-        setTimeout(() => {
-          handleLogout();
-        }, 2000);
       }
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('Error fetching user profile summaries:', error);
       setAlertTitle("Error");
-      setAlertMessage("Failed to fetch users from server.");
+      setAlertMessage("Failed to fetch user profiles from server.");
       setShowAlert(true);
     } finally {
       setLoading(false);
@@ -612,21 +594,6 @@ const AdminDashboard = () => {
   // ==================== MODAL HANDLERS ====================
   
   // User Modal Handlers
-  // const handleAddUser = () => {
-  //   setModalType("user");
-  //   setModalMode("add");
-  //   setCurrentUser({
-  //     id: null,
-  //     name: "",
-  //     skills: "",
-  //     interests: "",
-  //     careerGoal: "",
-  //     email: "",
-  //     topSkill: ""
-  //   });
-  //   setShowModal(true);
-  // };
-
   const handleEditUser = (user) => {
     setModalType("user");
     setModalMode("edit");
@@ -783,7 +750,6 @@ const AdminDashboard = () => {
       return;
     }
 
-    // For now, we'll just refresh users since POST/PUT endpoints might need adjustment
     await fetchUsersFromAPI();
     
     setAlertTitle("Success!");
@@ -987,18 +953,16 @@ const AdminDashboard = () => {
                   </td>
                   <td>
                     <div className={styles.skills_container}>
-                      {user.skills.slice(0, 2).map((skill, idx) => (
+                      {user.skills.map((skill, idx) => (
                         <span key={idx} className={styles.skill_badge}>{skill}</span>
                       ))}
-                      {user.skills.length > 2 && <span className={styles.skill_count}>+{user.skills.length - 2}</span>}
                     </div>
                   </td>
                   <td>
                     <div className={styles.interests_container}>
-                      {user.interests.slice(0, 2).map((interest, idx) => (
+                      {user.interests.map((interest, idx) => (
                         <span key={idx} className={styles.interest_badge}>{interest}</span>
                       ))}
-                      {user.interests.length > 2 && <span className={styles.interest_count}>+{user.interests.length - 2}</span>}
                     </div>
                   </td>
                   <td><span className={styles.career_badge}>{user.careerGoal}</span></td>
@@ -1178,189 +1142,154 @@ const AdminDashboard = () => {
 
   if (loading && users.length === 0) {
     return (
-      <Box component="main" className={styles.admin_container}>
-        <div className={styles.loading_container}>
-          <div className={styles.loading_spinner}></div>
-          <p>Loading data...</p>
-        </div>
-      </Box>
+      <div className={styles.loading_container}>
+        <div className={styles.loading_spinner}></div>
+        <p>Loading data...</p>
+      </div>
     );
   }
 
   return (
-    <Box component="main" className={styles.admin_container}>
-      <div className={styles.bg_blur_1}></div>
-      <div className={styles.bg_blur_2}></div>
-      <div className={styles.bg_blur_3}></div>
-
-      <div className={styles.admin_content}>
-        {/* Header Section with Logout Button */}
-        <div className={`${styles.header_section} ${animate ? styles.fade_in : ""}`}>
-          <div className={styles.header_top}>
-            <div className={styles.breadcrumb}>
-              <span className={styles.breadcrumb_home}>Admin Dashboard</span>
-            </div>
-            <button className={styles.logout_btn} onClick={handleLogout}>
-              <LogoutIcon /> Logout
-            </button>
-          </div>
-          <h1 className={styles.page_title}>Management Portal</h1>
-          <p className={styles.page_subtitle}>Manage users, skills, interests, and career goals</p>
+    <div className={styles.dashboard_content}>
+      {/* Header Section - Removed logout button since it's now in layout */}
+      <div className={`${styles.header_section} ${animate ? styles.fade_in : ""}`}>
+        <div className={styles.breadcrumb}>
+          <span className={styles.breadcrumb_home}>User Management</span>
         </div>
+        <h1 className={styles.page_title}>Manage Users</h1>
+        <p className={styles.page_subtitle}>View, edit, and manage all platform users</p>
+      </div>
 
-        {/* Stats Cards */}
-        <div className={`${styles.stats_cards} ${animate ? styles.slide_up : ""}`}>
-          <div className={styles.stat_card}>
-            <div className={styles.stat_icon_wrapper} style={{ background: '#e0f2fe' }}>
-              <PeopleIcon style={{ color: '#0A5ADB' }} />
-            </div>
-            <div className={styles.stat_info}>
-              <span className={styles.stat_value}>{users.length}</span>
-              <span className={styles.stat_label}>Total Users</span>
-            </div>
+      {/* Stats Cards */}
+      <div className={`${styles.stats_cards} ${animate ? styles.slide_up : ""}`}>
+        <div className={styles.stat_card}>
+          <div className={styles.stat_icon_wrapper} style={{ background: '#e0f2fe' }}>
+            <PeopleIcon style={{ color: '#0A5ADB' }} />
           </div>
-          <div className={styles.stat_card}>
-            <div className={styles.stat_icon_wrapper} style={{ background: '#e0e7ff' }}>
-              <SchoolIcon style={{ color: '#6366f1' }} />
-            </div>
-            <div className={styles.stat_info}>
-              <span className={styles.stat_value}>{masterData.careerGoals.length}</span>
-              <span className={styles.stat_label}>Career Paths</span>
-            </div>
-          </div>
-          <div className={styles.stat_card}>
-            <div className={styles.stat_icon_wrapper} style={{ background: '#fce7f3' }}>
-              <EmojiEventsIcon style={{ color: '#ec489a' }} />
-            </div>
-            <div className={styles.stat_info}>
-              <span className={styles.stat_value}>{masterData.skills.length}</span>
-              <span className={styles.stat_label}>Unique Skills</span>
-            </div>
-          </div>
-          <div className={styles.stat_card}>
-            <div className={styles.stat_icon_wrapper} style={{ background: '#fef3c7' }}>
-              <FavoriteIcon style={{ color: '#f59e0b' }} />
-            </div>
-            <div className={styles.stat_info}>
-              <span className={styles.stat_value}>{masterData.interests.length}</span>
-              <span className={styles.stat_label}>Interests</span>
-            </div>
+          <div className={styles.stat_info}>
+            <span className={styles.stat_value}>{users.length}</span>
+            <span className={styles.stat_label}>Total Users</span>
           </div>
         </div>
-
-        {/* Tab Navigation */}
-        <div className={styles.tab_navigation}>
-          <button className={`${styles.tab_btn} ${activeTab === "users" ? styles.tab_active : ""}`} onClick={() => setActiveTab("users")}>
-            <PeopleIcon /> Users
-          </button>
-          <button className={`${styles.tab_btn} ${activeTab === "skills" ? styles.tab_active : ""}`} onClick={() => setActiveTab("skills")}>
-            <EmojiEventsIcon /> Skills
-          </button>
-          <button className={`${styles.tab_btn} ${activeTab === "interests" ? styles.tab_active : ""}`} onClick={() => setActiveTab("interests")}>
-            <FavoriteIcon /> Interests
-          </button>
-          <button className={`${styles.tab_btn} ${activeTab === "goals" ? styles.tab_active : ""}`} onClick={() => setActiveTab("goals")}>
-            <SchoolIcon /> Career Goals
-          </button>
+        <div className={styles.stat_card}>
+          <div className={styles.stat_icon_wrapper} style={{ background: '#e0e7ff' }}>
+            <SchoolIcon style={{ color: '#6366f1' }} />
+          </div>
+          <div className={styles.stat_info}>
+            <span className={styles.stat_value}>{masterData.careerGoals.length}</span>
+            <span className={styles.stat_label}>Career Paths</span>
+          </div>
         </div>
-
-        {/* Search and Actions Bar (only for users tab) */}
-        {activeTab === "users" && (
-          <>
-            <div className={`${styles.search_bar} ${animate ? styles.slide_up : ""}`}>
-              <div className={styles.search_wrapper}>
-                <SearchIcon className={styles.search_icon} />
-                <input type="text" placeholder="Search by name, email, career goal, or skills..." className={styles.search_input} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-              </div>
-              <div className={styles.action_buttons}>
-                <div className={styles.filter_wrapper}>
-                  <button className={`${styles.filter_btn} ${hasActiveFilters ? styles.filter_active : ""}`} onClick={() => setShowFilterDropdown(!showFilterDropdown)}>
-                    <FilterListIcon className={styles.filter_icon} /> Filter {hasActiveFilters && <span className={styles.filter_badge}>•</span>}
-                  </button>
-                  {showFilterDropdown && (
-                    <div className={styles.filter_dropdown}>
-                      <div className={styles.filter_header}>
-                        <span>Filter Options</span>
-                        <button className={styles.clear_filters_btn} onClick={clearFilters}>Clear All</button>
-                      </div>
-                      <div className={styles.filter_group}>
-                        <label className={styles.filter_label}>Career Goal</label>
-                        <select className={styles.filter_select} value={filters.careerGoal} onChange={(e) => setFilters({...filters, careerGoal: e.target.value})}>
-                          <option value="">All Career Goals</option>
-                          {uniqueCareerGoals.map((goal, idx) => <option key={idx} value={goal}>{goal}</option>)}
-                        </select>
-                      </div>
-                      <div className={styles.filter_group}>
-                        <label className={styles.filter_label}>Top Skill</label>
-                        <select className={styles.filter_select} value={filters.topSkill} onChange={(e) => setFilters({...filters, topSkill: e.target.value})}>
-                          <option value="">All Skills</option>
-                          {uniqueTopSkills.map((skill, idx) => <option key={idx} value={skill}>{skill}</option>)}
-                        </select>
-                      </div>
-                      <div className={styles.filter_actions}>
-                        <button className={styles.apply_filters_btn} onClick={() => setShowFilterDropdown(false)}>Apply Filters</button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                {/* <button className={styles.add_btn} onClick={handleAddUser}>+ Add User</button> */}
-              </div>
-            </div>
-
-            {/* Bulk Delete Bar */}
-            {selectedUsers.length > 0 && (
-              <div className={`${styles.bulk_delete_bar} ${animate ? styles.slide_up : ""}`}>
-                <div className={styles.bulk_delete_info}>
-                  <span className={styles.bulk_delete_count}>{selectedUsers.length}</span>
-                  <span>users selected</span>
-                </div>
-                <button className={styles.bulk_delete_btn} onClick={handleBulkDelete}>
-                  <DeleteSweepIcon /> Delete Selected
-                </button>
-              </div>
-            )}
-
-            {/* Active Filters Display */}
-            {hasActiveFilters && (
-              <div className={styles.active_filters}>
-                <span className={styles.active_filters_label}>Active Filters:</span>
-                {searchTerm && <span className={styles.filter_tag}>Search: "{searchTerm}"<button onClick={() => setSearchTerm("")}>×</button></span>}
-                {filters.careerGoal && <span className={styles.filter_tag}>Career: {filters.careerGoal}<button onClick={() => setFilters({...filters, careerGoal: ""})}>×</button></span>}
-                {filters.topSkill && <span className={styles.filter_tag}>Skill: {filters.topSkill}<button onClick={() => setFilters({...filters, topSkill: ""})}>×</button></span>}
-                <button className={styles.clear_all_btn} onClick={clearFilters}>Clear All</button>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Main Content Grid - Full width now that sidebar is removed */}
-        <div className={`${styles.table_section} ${animate ? styles.slide_up : ""}`}>
-          {renderTabContent()}
+        <div className={styles.stat_card}>
+          <div className={styles.stat_icon_wrapper} style={{ background: '#fce7f3' }}>
+            <EmojiEventsIcon style={{ color: '#ec489a' }} />
+          </div>
+          <div className={styles.stat_info}>
+            <span className={styles.stat_value}>{masterData.skills.length}</span>
+            <span className={styles.stat_label}>Unique Skills</span>
+          </div>
+        </div>
+        <div className={styles.stat_card}>
+          <div className={styles.stat_icon_wrapper} style={{ background: '#fef3c7' }}>
+            <FavoriteIcon style={{ color: '#f59e0b' }} />
+          </div>
+          <div className={styles.stat_info}>
+            <span className={styles.stat_value}>{masterData.interests.length}</span>
+            <span className={styles.stat_label}>Interests</span>
+          </div>
         </div>
       </div>
 
-      {/* Logout Confirmation Modal */}
-      {showLogoutConfirm && (
-        <div className={styles.modal_overlay} onClick={cancelLogout}>
-          <div className={styles.confirm_modal} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.confirm_modal_header}>
-              <div className={styles.confirm_icon_wrapper}>
-                <LogoutIcon className={styles.confirm_icon} />
+      {/* Tab Navigation - Keep for switching between users/skills/interests/goals */}
+      <div className={styles.tab_navigation}>
+        <button className={`${styles.tab_btn} ${activeTab === "users" ? styles.tab_active : ""}`} onClick={() => setActiveTab("users")}>
+          <PeopleIcon /> Users
+        </button>
+        <button className={`${styles.tab_btn} ${activeTab === "skills" ? styles.tab_active : ""}`} onClick={() => setActiveTab("skills")}>
+          <EmojiEventsIcon /> Skills
+        </button>
+        <button className={`${styles.tab_btn} ${activeTab === "interests" ? styles.tab_active : ""}`} onClick={() => setActiveTab("interests")}>
+          <FavoriteIcon /> Interests
+        </button>
+        <button className={`${styles.tab_btn} ${activeTab === "goals" ? styles.tab_active : ""}`} onClick={() => setActiveTab("goals")}>
+          <SchoolIcon /> Career Goals
+        </button>
+      </div>
+
+      {/* Search and Actions Bar (only for users tab) */}
+      {activeTab === "users" && (
+        <>
+          <div className={`${styles.search_bar} ${animate ? styles.slide_up : ""}`}>
+            <div className={styles.search_wrapper}>
+              <SearchIcon className={styles.search_icon} />
+              <input type="text" placeholder="Search by name, email, career goal, or skills..." className={styles.search_input} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            </div>
+            <div className={styles.action_buttons}>
+              <div className={styles.filter_wrapper}>
+                <button className={`${styles.filter_btn} ${hasActiveFilters ? styles.filter_active : ""}`} onClick={() => setShowFilterDropdown(!showFilterDropdown)}>
+                  <FilterListIcon className={styles.filter_icon} /> Filter {hasActiveFilters && <span className={styles.filter_badge}>•</span>}
+                </button>
+                {showFilterDropdown && (
+                  <div className={styles.filter_dropdown}>
+                    <div className={styles.filter_header}>
+                      <span>Filter Options</span>
+                      <button className={styles.clear_filters_btn} onClick={clearFilters}>Clear All</button>
+                    </div>
+                    <div className={styles.filter_group}>
+                      <label className={styles.filter_label}>Career Goal</label>
+                      <select className={styles.filter_select} value={filters.careerGoal} onChange={(e) => setFilters({...filters, careerGoal: e.target.value})}>
+                        <option value="">All Career Goals</option>
+                        {uniqueCareerGoals.map((goal, idx) => <option key={idx} value={goal}>{goal}</option>)}
+                      </select>
+                    </div>
+                    <div className={styles.filter_group}>
+                      <label className={styles.filter_label}>Top Skill</label>
+                      <select className={styles.filter_select} value={filters.topSkill} onChange={(e) => setFilters({...filters, topSkill: e.target.value})}>
+                        <option value="">All Skills</option>
+                        {uniqueTopSkills.map((skill, idx) => <option key={idx} value={skill}>{skill}</option>)}
+                      </select>
+                    </div>
+                    <div className={styles.filter_actions}>
+                      <button className={styles.apply_filters_btn} onClick={() => setShowFilterDropdown(false)}>Apply Filters</button>
+                    </div>
+                  </div>
+                )}
               </div>
-              <h3 className={styles.confirm_title}>Logout</h3>
-            </div>
-            <div className={styles.confirm_modal_body}>
-              <p>Are you sure you want to logout?</p>
-              <p className={styles.confirm_warning}>You will need to log in again to access your account.</p>
-            </div>
-            <div className={styles.confirm_modal_footer}>
-              <button className={styles.confirm_cancel_btn} onClick={cancelLogout}>Cancel</button>
-              <button className={styles.confirm_delete_btn} onClick={confirmLogout}>Logout</button>
             </div>
           </div>
-        </div>
+
+          {/* Bulk Delete Bar */}
+          {selectedUsers.length > 0 && (
+            <div className={`${styles.bulk_delete_bar} ${animate ? styles.slide_up : ""}`}>
+              <div className={styles.bulk_delete_info}>
+                <span className={styles.bulk_delete_count}>{selectedUsers.length}</span>
+                <span>users selected</span>
+              </div>
+              <button className={styles.bulk_delete_btn} onClick={handleBulkDelete}>
+                <DeleteSweepIcon /> Delete Selected
+              </button>
+            </div>
+          )}
+
+          {/* Active Filters Display */}
+          {hasActiveFilters && (
+            <div className={styles.active_filters}>
+              <span className={styles.active_filters_label}>Active Filters:</span>
+              {searchTerm && <span className={styles.filter_tag}>Search: "{searchTerm}"<button onClick={() => setSearchTerm("")}>×</button></span>}
+              {filters.careerGoal && <span className={styles.filter_tag}>Career: {filters.careerGoal}<button onClick={() => setFilters({...filters, careerGoal: ""})}>×</button></span>}
+              {filters.topSkill && <span className={styles.filter_tag}>Skill: {filters.topSkill}<button onClick={() => setFilters({...filters, topSkill: ""})}>×</button></span>}
+              <button className={styles.clear_all_btn} onClick={clearFilters}>Clear All</button>
+            </div>
+          )}
+        </>
       )}
 
+      {/* Main Content */}
+      <div className={`${styles.table_section} ${animate ? styles.slide_up : ""}`}>
+        {renderTabContent()}
+      </div>
+
+      {/* Modals (keep all your existing modals) */}
       {/* Single Delete Confirmation Modal */}
       {showDeleteConfirm && userToDelete && (
         <div className={styles.modal_overlay} onClick={cancelSingleDelete}>
@@ -1401,7 +1330,7 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* Add/Edit Modal (Generic for all entity types) */}
+      {/* Add/Edit Modal */}
       {showModal && (
         <div className={styles.modal_overlay} onClick={closeModal}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -1505,8 +1434,8 @@ const AdminDashboard = () => {
                 </select>
               </div>
               <div className={styles.form_group}>
-                <label className={styles.form_label}>Required Level (1-5)</label>
-                <input type="number" className={styles.form_input} min="1" max="5" value={skillGoalAssignment.requiredLevel} onChange={(e) => setSkillGoalAssignment({...skillGoalAssignment, requiredLevel: parseInt(e.target.value)})} />
+                <label className={styles.form_label}>Required Level (1-3)</label>
+                <input type="number" className={styles.form_input} min="1" max="3" value={skillGoalAssignment.requiredLevel} onChange={(e) => setSkillGoalAssignment({...skillGoalAssignment, requiredLevel: parseInt(e.target.value)})} />
               </div>
               <div className={styles.form_group}>
                 <label className={styles.form_label}>Priority (1-10)</label>
@@ -1521,7 +1450,7 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* Modern Alert Modal */}
+      {/* Alert Modal */}
       {showAlert && (
         <div className={styles.modal_overlay} onClick={closeAlert}>
           <div className={styles.alert_modal} onClick={(e) => e.stopPropagation()}>
@@ -1540,7 +1469,7 @@ const AdminDashboard = () => {
           </div>
         </div>
       )}
-    </Box>
+    </div>
   );
 };
 

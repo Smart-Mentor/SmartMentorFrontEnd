@@ -21,13 +21,7 @@ import UndoIcon from "@mui/icons-material/Undo";
 import { useNavigate } from "react-router-dom";
 import styles from "./CompleteProfile.module.css";
 import logo from "../../assets/sign in logo.png";
-import { 
-  completeUserProfile, 
-  getAllSkills, 
-  getAllInterests, 
-  getAllCareerGoals 
-} from "../../api/authenticationService";
-// بعد imports الـ function
+
 const convertFileToBase64 = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -36,105 +30,126 @@ const convertFileToBase64 = (file) => {
     reader.onerror = (error) => reject(error);
   });
 };
-// Transition component for MUI Dialog
+
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
-// ============================================
-// ✅ ICONS FOR CAREER GOALS
-// ============================================
-const careerIcons = {
-  "Full-Stack": "⚛️",
-  "Backend": "🔧",
-  "Frontend": "🎨",
-  "Data Scientist": "📊",
-  "Data Analyst": "📈",
-  "Software Engineer": "💻",
-  "Machine Learning": "🤖",
-  "Database": "🗄️",
-  "Game Developer": "🎮",
-  "Cloud": "☁️",
-  "Cybersecurity": "🔒",
-  "AI": "🧠",
-  "DevOps": "🚀",
-  "Azure": "⚡",
-  ".NET": "🟣",
-  "React": "⚛️",
-  "Python": "🐍",
-  "Java": "☕",
-  "default": "💼",
+
+// ==================== COMPLETE BACKEND DATA ====================
+
+// Complete Skills List from Backend (41 skills)
+const skillsList = [
+  { id: 2, name: "JavaScript", category: " " },
+  { id: 3, name: "Project Management", category: " " },
+  { id: 4, name: "Data Analysis", category: " " },
+  { id: 5, name: "Machine Learning", category: " " },
+  { id: 6, name: "SQL", category: " " },
+  { id: 7, name: "C++", category: " " },
+  { id: 8, name: "HTML", category: " " },
+  { id: 9, name: "CSS", category: " " },
+  { id: 10, name: "Python", category: " " },
+  { id: 11, name: "Docker", category: " " },
+  { id: 12, name: "C#", category: " " },
+  { id: 13, name: "ASP.NET Core Web API", category: " " },
+  { id: 14, name: "Entity Framework Core", category: " " },
+  { id: 15, name: "LINQ Queries", category: " " },
+  { id: 16, name: "RESTful API Design", category: " " },
+  { id: 17, name: "Dependency Injection", category: " " },
+  { id: 18, name: "HTML5", category: " " },
+  { id: 19, name: "CSS3", category: " " },
+  { id: 20, name: "JavaScript ES6+", category: " " },
+  { id: 21, name: "React.js Fundamentals", category: " " },
+  { id: 22, name: "Responsive Web Design", category: " " },
+  { id: 23, name: "SQL Server", category: " " },
+  { id: 24, name: "Database Normalization", category: " " },
+  { id: 25, name: "Writing Complex SQL Queries", category: " " },
+  { id: 26, name: "Stored Procedures", category: " " },
+  { id: 27, name: "Python Programming", category: " " },
+  { id: 28, name: "Data Analysis with Pandas", category: " " },
+  { id: 29, name: "Data Visualization", category: " " },
+  { id: 30, name: "Machine Learning Fundamentals", category: " " },
+  { id: 31, name: "Docker Containers", category: " " },
+  { id: 32, name: "CI/CD Pipelines", category: " " },
+  { id: 33, name: "Azure Cloud Basics", category: " " },
+  { id: 34, name: "OWASP Security Principles", category: " " },
+  { id: 35, name: "Authentication & Authorization (JWT)", category: " " },
+  { id: 41, name: "TypeScript", category: " " },
+];
+
+// Complete Interests List from Backend (19 interests)
+const interestsList = [
+  { id: 1, name: "Web Development", category: "Development" },
+  { id: 2, name: "Data Science", category: "Data" },
+  { id: 3, name: "Mobile App Development", category: "Development" },
+  { id: 4, name: "Cloud Computing", category: "Infrastructure" },
+  { id: 5, name: "Cybersecurity", category: "Security" },
+  { id: 6, name: "Artificial Intelligence", category: "AI/ML" },
+  { id: 7, name: "Game Development", category: "Development" },
+  { id: 8, name: "DevOps", category: "Infrastructure" },
+  { id: 9, name: "UI/UX Design", category: "Design" },
+  { id: 10, name: "Blockchain", category: "Emerging Tech" },
+  { id: 11, name: "Backend Development with .NET", category: "Development" },
+  { id: 12, name: "Frontend Web Development", category: "Development" },
+  { id: 13, name: "Full-Stack Web Applications", category: "Development" },
+  { id: 14, name: "Data Analytics and Visualization", category: "Data" },
+  { id: 15, name: "Artificial Intelligence & Machine Learning", category: "AI/ML" },
+  { id: 16, name: "Cloud Computing (Azure)", category: "Infrastructure" },
+  { id: 17, name: "DevOps & Automation", category: "Infrastructure" },
+  { id: 18, name: "Cybersecurity & Ethical Hacking", category: "Security" },
+];
+
+// Complete Career Goals from Backend (22 career goals)
+const careerOptions = [
+  { id: 13, value: "fullstack-developer", label: "Full-Stack Developer", icon: "⚛️", color: "#667eea", description: "Aspire to master both frontend and backend technologies" },
+  { id: 14, value: "backend-developer", label: "Backend Developer", icon: "🔧", color: "#0A5ADB", description: "Focus on server-side development, working with databases and APIs" },
+  { id: 15, value: "frontend-developer", label: "Frontend Developer", icon: "🎨", color: "#58A7B5", description: "Specialize in creating engaging user interfaces and experiences" },
+  { id: 16, value: "data-scientist", label: "Data Scientist", icon: "📊", color: "#ef4444", description: "Leverage programming skills to analyze data and derive insights" },
+  { id: 17, value: "software-engineer", label: "Software Engineer", icon: "💻", color: "#8b5cf6", description: "Design, develop, and maintain software applications" },
+  { id: 18, value: "data-analyst", label: "Data Analyst", icon: "📈", color: "#f59e0b", description: "Analyze and interpret data to help organizations make decisions" },
+  { id: 19, value: "ml-engineer", label: "Machine Learning Engineer", icon: "🤖", color: "#10b981", description: "Develop expertise in machine learning algorithms and models" },
+  { id: 20, value: "database-admin", label: "Database Administrator", icon: "🗄️", color: "#3b82f6", description: "Manage and optimize databases, ensuring data integrity" },
+  { id: 21, value: "game-developer", label: "Game Developer", icon: "🎮", color: "#ec489a", description: "Create interactive and immersive gaming experiences" },
+  { id: 22, value: "cloud-architect", label: "Cloud Solutions Architect", icon: "☁️", color: "#06b6d4", description: "Design and implement cloud-based solutions" },
+  { id: 23, value: "cybersecurity-specialist", label: "Cybersecurity Specialist", icon: "🔒", color: "#ef4444", description: "Protect systems and data from cyber threats" },
+  { id: 24, value: "ai-researcher", label: "AI Researcher", icon: "🧠", color: "#8b5cf6", description: "Conduct research in artificial intelligence" },
+  { id: 25, value: "junior-backend-dotnet", label: "Junior Backend .NET Developer", icon: "🔷", color: "#512bd4", description: "Build and maintain RESTful APIs using ASP.NET Core and SQL Server" },
+  { id: 26, value: "fullstack-dotnet", label: "Full-Stack .NET Developer", icon: "🔷", color: "#512bd4", description: "Develop complete web applications using ASP.NET Core and React.js" },
+  { id: 27, value: "frontend-react", label: "Frontend React Developer", icon: "⚛️", color: "#61dafb", description: "Create responsive user interfaces using React and modern JavaScript" },
+  { id: 28, value: "data-analyst-python", label: "Data Analyst", icon: "🐍", color: "#3776ab", description: "Analyze datasets and build dashboards using Python and SQL" },
+  { id: 29, value: "ml-engineer-python", label: "Machine Learning Engineer", icon: "🤖", color: "#10b981", description: "Develop predictive models using Python and ML frameworks" },
+  { id: 30, value: "cloud-engineer-azure", label: "Cloud Engineer (Azure)", icon: "☁️", color: "#0078d4", description: "Design and deploy scalable applications on Microsoft Azure" },
+  { id: 31, value: "devops-engineer", label: "DevOps Engineer", icon: "🚀", color: "#8b5cf6", description: "Automate deployments and manage CI/CD pipelines" },
+  { id: 32, value: "cybersecurity-analyst", label: "Cybersecurity Analyst", icon: "🔒", color: "#ef4444", description: "Secure applications by applying modern security practices" },
+];
+
+// Languages
+// const languagesList = ["Arabic", "English", "French", "German", "Spanish", "Italian", "Chinese", "Japanese"];
+
+// Skill level mapping (1 = Beginner, 2 = Intermediate, 3 = Advanced)
+const skillLevelMap = {
+  "Beginner": 1,
+  "Intermediate": 2,
+  "Advanced": 3
 };
 
-const getCareerIcon = (careerName) => {
-  if (!careerName) return careerIcons.default;
-  
-  // Check if career name contains any key
-  for (const key of Object.keys(careerIcons)) {
-    if (careerName.toLowerCase().includes(key.toLowerCase())) {
-      return careerIcons[key];
-    }
-  }
-  
-  return careerIcons.default;
-};
-
-// ============================================
-// ✅ COLORS FOR CAREER GOALS
-// ============================================
-const careerColors = {
-  "Full-Stack": "#667eea",
-  "Backend": "#0A5ADB",
-  "Frontend": "#58A7B5",
-  "Data Scientist": "#ef4444",
-  "Data Analyst": "#14b8a6",
-  "Software Engineer": "#6366f1",
-  "Machine Learning": "#10b981",
-  "Database": "#f59e0b",
-  "Game Developer": "#ec4899",
-  "Cloud": "#3b82f6",
-  "Cybersecurity": "#dc2626",
-  "AI": "#8b5cf6",
-  "DevOps": "#f97316",
-  "Azure": "#2563eb",
-  ".NET": "#512bd4",
-  "React": "#61DAFB",
-  "Python": "#3776ab",
-  "Java": "#007396",
-  "default": "#667eea",
-};
-
-const getCareerColor = (careerName) => {
-  if (!careerName) return careerColors.default;
-  
-  for (const key of Object.keys(careerColors)) {
-    if (careerName.toLowerCase().includes(key.toLowerCase())) {
-      return careerColors[key];
-    }
-  }
-  
-  return careerColors.default;
-};
-// Level colors
 const levelColors = {
   Beginner: "#10b981",
   Intermediate: "#f59e0b",
   Advanced: "#0A5ADB",
 };
 
-// Level maps for conversion
-const levelMap = {
-  Beginner: 1,
-  Intermediate: 2,
-  Advanced: 3,
+const levelEmojis = {
+  Beginner: "🌱",
+  Intermediate: "⚡",
+  Advanced: "🚀"
 };
 
-const reverseLevelMap = {
-  1: "Beginner",
-  2: "Intermediate",
-  3: "Advanced",
+// Get token from localStorage
+const getAuthToken = () => {
+  return localStorage.getItem("authToken") || "";
 };
 
-// SkillChip Component
+// SkillChip component
 const SkillChip = ({ skill, level, isActive, onClick, onDelete }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const [hovering, setHovering] = useState(false);
@@ -149,28 +164,24 @@ const SkillChip = ({ skill, level, isActive, onClick, onDelete }) => {
 
   const getLevelStyle = () => {
     if (!level) return {};
-    switch (level) {
-      case "Beginner":
-        return { background: "linear-gradient(135deg, #10b981, #34d399)" };
-      case "Intermediate":
-        return { background: "linear-gradient(135deg, #f59e0b, #fbbf24)" };
-      case "Advanced":
-        return { background: "linear-gradient(135deg, #0A5ADB, #58A7B5)" };
-      default:
-        return {};
+    switch(level) {
+      case "Beginner": return { background: "linear-gradient(135deg, #10b981, #34d399)" };
+      case "Intermediate": return { background: "linear-gradient(135deg, #f59e0b, #fbbf24)" };
+      case "Advanced": return { background: "linear-gradient(135deg, #0A5ADB, #58A7B5)" };
+      default: return {};
     }
   };
 
   return (
     <Tooltip
-      title={level || ""}
+      title={level || "Click to select level"}
       arrow
       placement="top"
       open={showTooltip || hovering}
       TransitionComponent={Zoom}
     >
       <Chip
-        label={skill}
+        label={skill.name}
         clickable
         onClick={onClick}
         onDelete={level ? onDelete : undefined}
@@ -184,115 +195,145 @@ const SkillChip = ({ skill, level, isActive, onClick, onDelete }) => {
   );
 };
 
-// Main Component
 export default function CompleteProfile() {
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
   const [animate, setAnimate] = useState(false);
-
-  // ✅ DATA FROM API
-  const [skillsList, setSkillsList] = useState([]);
-  const [interestsList, setInterestsList] = useState([]);
-  const [careerOptions, setCareerOptions] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Loading states for API data
-  const [loadingSkills, setLoadingSkills] = useState(true);
-  const [loadingInterests, setLoadingInterests] = useState(true);
-  const [loadingCareers, setLoadingCareers] = useState(true);
-
   // Step 1 - Skills
   const [skills, setSkills] = useState({});
   const [activeSkill, setActiveSkill] = useState(null);
-
-  // Step 2 - CV
-  const [file, setFile] = useState(null);
-  const [dragActive, setDragActive] = useState(false);
-  const [error, setError] = useState("");
-
-  // Step 3 - Career
+  const [skillCategories, setSkillCategories] = useState({});
+  
+  // // Step 2 - CV
+  // const [file, setFile] = useState(null);
+  // const [dragActive, setDragActive] = useState(false);
+  // const [error, setError] = useState("");
+  
+  // Step 2 - Career
   const [careerPath, setCareerPath] = useState("");
-
-  // Step 4 - Interests & Languages
+  const [selectedCareerId, setSelectedCareerId] = useState(null);
+  
+  // Step 3 - Interests & Languages
   const [selectedInterests, setSelectedInterests] = useState([]);
-  const [selectedLanguages, setSelectedLanguages] = useState([]);
-
+  // const [selectedLanguages, setSelectedLanguages] = useState([]);
+  
+  // Search/filter states
+  const [skillSearch, setSkillSearch] = useState("");
+  // const [selectedCategory, setSelectedCategory] = useState("all");
+  const [interestSearch, setInterestSearch] = useState("");
+  
   // Notification
   const [notification, setNotification] = useState(null);
   const [undoSkill, setUndoSkill] = useState(null);
   const [undoTimeout, setUndoTimeout] = useState(null);
 
-  // Loading state
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Get user profile from API
+  const getUserProfile = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        console.log("No auth token found");
+        setIsLoading(false);
+        return;
+      }
 
-  // Languages list (static)
-  const languagesList = ["Arabic", "English", "French", "German"];
+      const response = await fetch('https://smartmentorapi.runasp.net/api/User/profile', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
 
-  // ============================================
-  // ✅ FETCH DATA FROM API ON MOUNT
-  // ============================================
+      if (!response.ok) {
+        throw new Error('Failed to fetch user profile');
+      }
+
+      const data = await response.json();
+      console.log("User profile data:", data);
+
+      // Check if profile is complete (careerGoalId exists and is not 0 or null)
+      if (data.data.careerGoalId && data.data.careerGoalId !== 0) {
+        console.log("Profile already completed, redirecting to dashboard");
+        localStorage.setItem("profileCompleted", "true");
+        localStorage.setItem("profileData", JSON.stringify(data));
+        navigate("/dashboard");
+        return;
+      }
+
+      // If profile exists but careerGoalId is 0 or null, populate existing data
+      if (data) {
+        // Populate skills if any
+        if (data.skills && Array.isArray(data.skills)) {
+          const existingSkills = {};
+          data.skills.forEach(skill => {
+            const skillInfo = skillsList.find(s => s.id === skill.skillId);
+            if (skillInfo) {
+              const levelText = Object.keys(skillLevelMap).find(
+                key => skillLevelMap[key] === skill.skillLevel
+              );
+              if (levelText) {
+                existingSkills[skillInfo.name] = levelText;
+              }
+            }
+          });
+          setSkills(existingSkills);
+        }
+
+        // Populate interests if any
+        if (data.interests && Array.isArray(data.interests)) {
+          const existingInterests = data.interests.map(interest => interest.name);
+          setSelectedInterests(existingInterests);
+        }
+
+        // Populate career goal if exists but not 0
+        if (data.careerGoalId && data.careerGoalId !== 0) {
+          const career = careerOptions.find(c => c.id === data.careerGoalId);
+          if (career) {
+            setCareerPath(career.value);
+            setSelectedCareerId(data.careerGoalId);
+          }
+        }
+
+        // Populate languages if any
+        // if (data.languages && Array.isArray(data.languages)) {
+        //   setSelectedLanguages(data.languages);
+        // }
+      }
+
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      // Don't redirect on error, allow user to complete profile
+    } finally {
+      setIsLoading(false);
+    }
+  }, [navigate]);
+
+  // Check profile completion on component mount
   useEffect(() => {
-    setAnimate(true);
-    
-    const fetchData = async () => {
-      try {
-        // Fetch Skills
-        setLoadingSkills(true);
-        const skillsData = await getAllSkills();
-        if (Array.isArray(skillsData)) {
-          setSkillsList(skillsData);
-        } else if (skillsData.data) {
-          setSkillsList(skillsData.data);
-        } else {
-          setSkillsList([]);
-        }
-      } catch (err) {
-        console.error("Failed to fetch skills:", err);
-        setSkillsList([]);
-      } finally {
-        setLoadingSkills(false);
-      }
+    getUserProfile();
+  }, [getUserProfile]);
 
-      try {
-        // Fetch Interests
-        setLoadingInterests(true);
-        const interestsData = await getAllInterests();
-        if (Array.isArray(interestsData)) {
-          setInterestsList(interestsData);
-        } else if (interestsData.data) {
-          setInterestsList(interestsData.data);
-        } else {
-          setInterestsList([]);
-        }
-      } catch (err) {
-        console.error("Failed to fetch interests:", err);
-        setInterestsList([]);
-      } finally {
-        setLoadingInterests(false);
+  // Group skills by category
+  useEffect(() => {
+    const categories = {};
+    skillsList.forEach(skill => {
+      if (!categories[skill.category]) {
+        categories[skill.category] = [];
       }
-
-      try {
-        // Fetch Career Goals
-        setLoadingCareers(true);
-        const careersData = await getAllCareerGoals();
-        if (Array.isArray(careersData)) {
-          setCareerOptions(careersData);
-        } else if (careersData.data) {
-          setCareerOptions(careersData.data);
-        } else {
-          setCareerOptions([]);
-        }
-      } catch (err) {
-        console.error("Failed to fetch career goals:", err);
-        setCareerOptions([]);
-      } finally {
-        setLoadingCareers(false);
-      }
-    };
-
-    fetchData();
+      categories[skill.category].push(skill);
+    });
+    setSkillCategories(categories);
   }, []);
 
-  // Show notification helper
+  useEffect(() => {
+    setAnimate(true);
+  }, []);
+
   const showNotification = (message, type, skillName = null) => {
     setNotification({ message, type, skillName });
     if (type !== "undo") {
@@ -300,29 +341,122 @@ export default function CompleteProfile() {
     }
   };
 
-  // Navigation - Linear progression, cannot skip steps
+  // Filter skills based on search and category
+  const getFilteredSkills = () => {
+    let filtered = skillsList;
+    
+    if (skillSearch) {
+      filtered = filtered.filter(skill => 
+        skill.name.toLowerCase().includes(skillSearch.toLowerCase())
+      );
+    }
+    
+    // if (selectedCategory !== "all") {
+    //   filtered = filtered.filter(skill => skill.category === selectedCategory);
+    // }
+    
+    return filtered;
+  };
+
+  // Filter interests
+  const getFilteredInterests = () => {
+    if (!interestSearch) return interestsList;
+    return interestsList.filter(interest =>
+      interest.name.toLowerCase().includes(interestSearch.toLowerCase())
+    );
+  };
+
+  // API Call to complete profile
+  const submitProfileToAPI = async () => {
+    setIsSubmitting(true);
+    
+    // Format skills data
+    const formattedSkills = Object.entries(skills).map(([skillName, level]) => {
+      const skill = skillsList.find(s => s.name === skillName);
+      return {
+        skillId: skill?.id || 0,
+        skillLevel: skillLevelMap[level]
+      };
+    }).filter(skill => skill.skillId !== 0);
+    
+    // Get interest IDs
+    const interestIds = selectedInterests
+      .map(interestName => {
+        const interest = interestsList.find(i => i.name === interestName);
+        return interest?.id;
+      })
+      .filter(id => id !== undefined);
+    
+    // Get career goal ID
+    const careerGoalId = selectedCareerId;
+    
+    const profileData = {
+      skills: formattedSkills,
+      interestIds: interestIds,
+      careerGoalId: careerGoalId
+    };
+    
+    console.log("Submitting profile data:", profileData);
+    
+    try {
+      const token = getAuthToken();
+      const response = await fetch('https://smartmentorapi.runasp.net/api/User/complete-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(profileData)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to complete profile");
+      }
+      
+      const result = await response.json();
+      console.log("Profile completed successfully:", result);
+      
+      localStorage.setItem("profileCompleted", "true");
+      localStorage.setItem("profileData", JSON.stringify(profileData));
+      
+      showNotification("Profile completed successfully!", "success");
+      
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1500);
+      
+    } catch (error) {
+      console.error("Error submitting profile:", error);
+      showNotification(error.message || "Failed to save profile. Please try again.", "error");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleNext = useCallback(() => {
     if (activeStep === 0 && Object.keys(skills).length === 0) {
       showNotification("Please select at least one skill", "error");
       return;
     }
-
-    if (activeStep === 2 && !careerPath) {
+    // if (activeStep === 1 && !file) {
+    //   showNotification("Please upload your CV", "error");
+    //   return;
+    // }
+    if (activeStep === 1 && !careerPath) {
       showNotification("Please select a career path", "error");
       return;
     }
-
-    if (activeStep === 3 && (selectedInterests.length === 0 || selectedLanguages.length === 0)) {
-      showNotification("Please select interests and languages", "error");
+    if (activeStep === 2 && (selectedInterests.length === 0 )) {
+      showNotification("Please select interests", "error");
       return;
     }
-
-    if (activeStep < 4) {
+    if (activeStep < 3) {
       setActiveStep(activeStep + 1);
     } else {
       handleComplete();
     }
-  }, [activeStep, skills, file, careerPath, selectedInterests, selectedLanguages]);
+  }, [activeStep, skills, careerPath, selectedInterests]);
 
   const handleBack = useCallback(() => {
     if (activeStep > 0) {
@@ -330,274 +464,214 @@ export default function CompleteProfile() {
     }
   }, [activeStep]);
 
-  // Complete Profile Handler
-  const handleComplete = useCallback(async () => {
-    if (isSubmitting) return;
-
-    try {
-      setIsSubmitting(true);
-
-      const formattedSkills = Object.entries(skills).map(([skillId, skillLevel]) => ({
-        skillId: Number(skillId),
-        skillLevel,
-      }));
-
-      const profileData = {
-        skills: formattedSkills,
-        interestIds: selectedInterests,
-        careerGoalId: careerPath,
-      };
-
-      console.log("PROFILE DATA:", profileData);
-
-      await completeUserProfile(profileData);
-
-      localStorage.setItem("profileCompleted", "true");
-
-      showNotification("🎉 Profile completed successfully!", "success");
-
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1500);
-
-    } catch (error) {
-      console.error("Complete Profile Error:", error);
-      showNotification(error.message || "Failed to complete profile. Please try again.", "error");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [skills, selectedInterests, careerPath, navigate, isSubmitting]);
+  const handleComplete = useCallback(() => {
+    submitProfileToAPI();
+  }, [skills, careerPath, selectedInterests]);
 
   // Step 1 Functions
   const handleSkillClick = useCallback((skill) => {
-    if (activeSkill?.id === skill.id) {
+    if (activeSkill === skill.name) {
       setActiveSkill(null);
       return;
     }
-    setActiveSkill(skill);
+    setActiveSkill(skill.name);
   }, [activeSkill]);
 
-  const handleDeleteSkill = useCallback((skillId) => {
-    const level = skills[skillId];
-
-    const skillData = skillsList.find(
-      (s) => s.id === Number(skillId)
-    );
-
-    const deletedSkill = {
-      skillId,
-      level,
-      name: skillData?.name,
-    };
-
+  const handleDeleteSkill = useCallback((skillName) => {
+    const level = skills[skillName];
+    const deletedSkill = { skill: skillName, level };
+    
     setSkills((prev) => {
       const updated = { ...prev };
-      delete updated[skillId];
+      delete updated[skillName];
       return updated;
     });
-
-    if (activeSkill?.id === skillId) {
+    
+    if (activeSkill === skillName) {
       setActiveSkill(null);
     }
-
+    
     setUndoSkill(deletedSkill);
-
-    showNotification(
-      `"${skillData?.name}" was removed`,
-      "undo"
-    );
-
+    showNotification(`"${skillName}" was removed`, "undo", skillName);
+    
     const timeout = setTimeout(() => {
       setUndoSkill(null);
       setNotification(null);
     }, 5000);
-
+    
     setUndoTimeout(timeout);
-  }, [skills, activeSkill, skillsList]);
+  }, [skills, activeSkill]);
 
   const handleUndoDelete = useCallback(() => {
     if (undoSkill) {
       setSkills((prev) => ({
         ...prev,
-        [undoSkill.skillId]: undoSkill.level
+        [undoSkill.skill]: undoSkill.level
       }));
       setUndoSkill(null);
       setNotification(null);
       if (undoTimeout) clearTimeout(undoTimeout);
-      showNotification(`"${undoSkill.name}" restored`, "success");
+      showNotification(`"${undoSkill.skill}" restored`, "success");
     }
   }, [undoSkill, undoTimeout]);
 
   const changeLevel = useCallback((level) => {
     if (!level || !activeSkill) return;
-
     setSkills((prev) => ({
       ...prev,
-      [activeSkill.id]: levelMap[level],
+      [activeSkill]: level,
     }));
-
     setActiveSkill(null);
-
-    showNotification(`${activeSkill.name} level set to ${level}`, "success");
+    showNotification(`${activeSkill} level set to ${level}`, "success");
   }, [activeSkill]);
 
   // Step 2 Functions
-const handleFileUpload = useCallback(async (selectedFile) => {
-  setError("");
-  if (!selectedFile) return;
+  // const handleFileUpload = useCallback((selectedFile) => {
+  //   setError("");
+  //   if (!selectedFile) return;
 
-  const ALLOWED_TYPES = [
-    "application/pdf",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-  ];
-  const MAX_FILE_SIZE = 10 * 1024 * 1024;
+  //   const ALLOWED_TYPES = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+  //   const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-  if (!ALLOWED_TYPES.includes(selectedFile.type)) {
-    setError("Only PDF, .doc and .docx files are allowed");
-    return;
-  }
+  //   if (!ALLOWED_TYPES.includes(selectedFile.type)) {
+  //     setError("Only PDF, .doc and .docx files are allowed");
+  //     return;
+  //   }
 
-  if (selectedFile.size > MAX_FILE_SIZE) {
-    setError("File size must be less than 10MB");
-    return;
-  }
+  //   if (selectedFile.size > MAX_FILE_SIZE) {
+  //     setError("File size must be less than 10MB");
+  //     return;
+  //   }
 
-  setFile(selectedFile);
+  //   setFile(selectedFile);
+    
+  //   // ✅ أضف: تحويل وحفظ الـ CV في localStorage
+  //   try {
+  //     const base64 =  convertFileToBase64(selectedFile);
+  //     localStorage.setItem('userCVUrl', base64);
+  //     localStorage.setItem('userCVName', selectedFile.name);
+  //     localStorage.setItem('userCVType', selectedFile.type);
+  //     console.log('✅ CV saved to localStorage');
+  //   } catch (err) {
+  //     console.error('❌ Error saving CV:', err);
+  //     }
 
-  // ✅ أضف: تحويل وحفظ الـ CV في localStorage
-  try {
-    const base64 = await convertFileToBase64(selectedFile);
-    localStorage.setItem('userCVUrl', base64);
-    localStorage.setItem('userCVName', selectedFile.name);
-    localStorage.setItem('userCVType', selectedFile.type);
-    console.log('✅ CV saved to localStorage');
-  } catch (err) {
-    console.error('❌ Error saving CV:', err);
-  }
+  //   showNotification("CV uploaded successfully!", "success");
+  // }, []);
 
-  showNotification("CV uploaded successfully!", "success");
-}, []);
+  // const handleDrop = useCallback((e) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   setDragActive(false);
+  //   if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+  //     handleFileUpload(e.dataTransfer.files[0]);
+  //   }
+  // }, [handleFileUpload]);
 
-  const handleDrop = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileUpload(e.dataTransfer.files[0]);
-    }
-  }, [handleFileUpload]);
+  // const handleDrag = useCallback((e) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   if (e.type === "dragenter" || e.type === "dragover") {
+  //     setDragActive(true);
+  //   } else if (e.type === "dragleave") {
+  //     setDragActive(false);
+  //   }
+  // }, []);
 
-  const handleDrag = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
+  // const handleChange = useCallback((e) => {
+  //   if (e.target.files && e.target.files[0]) {
+  //     handleFileUpload(e.target.files[0]);
+  //   }
+  // }, [handleFileUpload]);
+
+  // const removeFile = useCallback(() => {
+  //   setFile(null);
+  //   setError("");
+
+  //   // ✅ أضف: حذف الـ CV من localStorage
+  //   localStorage.removeItem('userCVUrl');
+  //   localStorage.removeItem('userCVName');
+  //   localStorage.removeItem('userCVType');
+    
+  //   showNotification("CV removed", "info");
+  // }, []);
+
+  // Step 2 Functions
+  const handleCareerSelect = useCallback((careerId, careerValue) => {
+    setCareerPath(careerValue);
+    setSelectedCareerId(careerId);
   }, []);
 
-  const handleChange = useCallback((e) => {
-    if (e.target.files && e.target.files[0]) {
-      handleFileUpload(e.target.files[0]);
-    }
-  }, [handleFileUpload]);
-
-const removeFile = useCallback(() => {
-  setFile(null);
-  setError("");
-  
-  // ✅ أضف: حذف الـ CV من localStorage
-  localStorage.removeItem('userCVUrl');
-  localStorage.removeItem('userCVName');
-  localStorage.removeItem('userCVType');
-  
-  showNotification("CV removed", "info");
-}, []);
-
-  // Step 4 Functions
-  const toggleInterest = useCallback((interestId) => {
+  // Step 3 Functions
+  const toggleInterest = useCallback((interestName) => {
     setSelectedInterests((prev) =>
-      prev.includes(interestId)
-        ? prev.filter((i) => i !== interestId)
-        : [...prev, interestId]
+      prev.includes(interestName) ? prev.filter((i) => i !== interestName) : [...prev, interestName]
     );
   }, []);
 
-  const handleLanguageChange = useCallback((event) => {
-    const lang = event.target.name;
-    setSelectedLanguages((prev) =>
-      event.target.checked ? [...prev, lang] : prev.filter((l) => l !== lang)
-    );
-  }, []);
+  // const handleLanguageChange = useCallback((event) => {
+  //   const lang = event.target.name;
+  //   setSelectedLanguages((prev) =>
+  //     event.target.checked ? [...prev, lang] : prev.filter((l) => l !== lang)
+  //   );
+  // }, []);
 
-  // Step configurations
+  // Get unique categories for filter
+  const categories = ["all", ...new Set(skillsList.map(skill => skill.category))];
+
   const stepConfigs = [
-    {
-      icon: "🎯",
-      title: "Select Your Skills",
+    { 
+      icon: "🎯", 
+      title: "Select Your Skills", 
       desc: "Choose the skills you have and rate your proficiency level",
       color: "#0A5ADB"
     },
-    {
-      icon: "📄",
-      title: "Upload Your CV",
-      desc: "Share your CV so we can better understand your background",
-      color: "#58A7B5"
-    },
-    {
-      icon: "💼",
-      title: "Choose Your Career Path",
+    // { 
+    //   icon: "📄", 
+    //   title: "Upload Your CV", 
+    //   desc: "Share your CV so we can better understand your background",
+    //   color: "#58A7B5"
+    // },
+    { 
+      icon: "💼", 
+      title: "Choose Your Career Path", 
       desc: "Select the career path you want to pursue",
       color: "#667eea"
     },
-    {
-      icon: "🎨",
-      title: "Interests & Languages",
-      desc: "Tell us about your interests and language skills",
+    { 
+      icon: "🎨", 
+      title: "Interests", 
+      desc: "Tell us about your interests to personalize your experience",
       color: "#f59e0b"
     },
-    {
-      icon: "✅",
-      title: "Review Your Profile",
+    { 
+      icon: "✅", 
+      title: "Review Your Profile", 
       desc: "Double-check your information before completing",
       color: "#10b981"
     },
   ];
 
-  // ============================================
-  // ✅ GET SKILL NAME FROM API DATA
-  // ============================================
-  const getSkillName = (skillId) => {
-    const skill = skillsList.find(s => s.id === Number(skillId) || s.skillId === Number(skillId));
-    return skill?.name || skill?.skillName || `Skill ${skillId}`;
-  };
-
-  // ============================================
-  // ✅ GET INTEREST NAME FROM API DATA
-  // ============================================
-  const getInterestName = (interestId) => {
-    const interest = interestsList.find(i => i.id === interestId || i.interestId === interestId);
-    return interest?.name || `Interest ${interestId}`;
-  };
-
-  // ============================================
-  // ✅ GET CAREER NAME FROM API DATA
-  // ============================================
-  const getCareerName = (careerId) => {
-    const career = careerOptions.find(c => c.id === careerId || c.careerGoalId === careerId);
-    return career?.name || career?.careerGoalName || `Career ${careerId}`;
-  };
+  // Show loading state while checking profile
+  if (isLoading) {
+    return (
+      <div className={styles.complete_profile_container}>
+        <div className={styles.loading_overlay}>
+          <div className={styles.loading_spinner}></div>
+          <p>Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.complete_profile_container}>
-      {/* Undo Notification for Skill Deletion */}
+      {/* Undo Notification */}
       {undoSkill && (
         <div className={styles.undo_notification}>
           <div className={styles.undo_content}>
             <span className={styles.undo_icon}>🗑️</span>
-            <span className={styles.undo_message}>"{undoSkill.name}" was removed</span>
+            <span className={styles.undo_message}>"{undoSkill.skill}" was removed</span>
             <button className={styles.undo_button} onClick={handleUndoDelete}>
               <UndoIcon /> Undo
             </button>
@@ -617,12 +691,20 @@ const removeFile = useCallback(() => {
         </div>
       )}
 
+      {/* Loading Overlay for submission */}
+      {isSubmitting && (
+        <div className={styles.loading_overlay}>
+          <div className={styles.loading_spinner}></div>
+          <p>Saving your profile...</p>
+        </div>
+      )}
+
       {/* Background decorative elements */}
       <div className={styles.bg_blur_1}></div>
       <div className={styles.bg_blur_2}></div>
       <div className={styles.bg_blur_3}></div>
 
-            <div className={styles.complete_profile_content}>
+      <div className={styles.complete_profile_content}>
         {/* Header */}
         <div className={`${styles.header_section} ${animate ? styles.fade_in : ""}`}>
           <div className={styles.logo_section}>
@@ -639,18 +721,18 @@ const removeFile = useCallback(() => {
         {/* Progress Bar */}
         <div className={`${styles.progress_section} ${animate ? styles.slide_up : ""}`}>
           <div className={styles.progress_labels}>
-            <span>Step {activeStep + 1} of 5</span>
-            <span>{Math.round((activeStep + 1) / 5 * 100)}% Complete</span>
+            <span>Step {activeStep + 1} of 4</span>
+            <span>{Math.round((activeStep + 1) / 4 * 100)}% Complete</span>
           </div>
           <div className={styles.progress_bar_container}>
-            <div
-              className={styles.progress_bar_fill}
-              style={{ width: `${(activeStep + 1) / 5 * 100}%` }}
+            <div 
+              className={styles.progress_bar_fill} 
+              style={{ width: `${(activeStep + 1) / 4 * 100}%` }}
             />
           </div>
           <div className={styles.steps_indicators}>
             {stepConfigs.map((_, index) => (
-              <div
+              <div 
                 key={index}
                 className={`${styles.step_indicator} ${index === activeStep ? styles.active : ""} ${index < activeStep ? styles.completed : ""}`}
               />
@@ -669,114 +751,124 @@ const removeFile = useCallback(() => {
             <p>{stepConfigs[activeStep].desc}</p>
           </div>
 
-          {/* Step 1 - Skills */}
+          {/* Step 1 - Skills with Search and Filter */}
           {activeStep === 0 && (
             <div className={styles.step_content}>
-              {loadingSkills ? (
-                <div className={styles.loading_state}>
-                  <div className={styles.spinner}></div>
-                  <p>Loading skills...</p>
-                </div>
-              ) : (
-                <ClickAwayListener onClickAway={() => setActiveSkill(null)}>
-                  <div>
-                    <div className={styles.skills_grid}>
-                      {skillsList.map((skill) => {
-                        const level = skills[skill.id || skill.skillId];
-                        const isActive = activeSkill?.id === skill.id || activeSkill?.skillId === skill.skillId;
+              {/* Search and Filter Bar */}
+              <div className={styles.skills_filter_bar}>
+                <input
+                  type="text"
+                  placeholder="Search skills..."
+                  value={skillSearch}
+                  onChange={(e) => setSkillSearch(e.target.value)}
+                  className={styles.skills_search}
+                />
+                {/* <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className={styles.category_filter}
+                >
+                  {categories.map(cat => (
+                    <option key={cat} value={cat}>
+                      {cat === "all" ? "All Categories" : cat}
+                    </option>
+                  ))}
+                </select> */}
+              </div>
 
-                        return (
-                          <SkillChip
-                            key={skill.id || skill.skillId}
-                            skill={skill.name || skill.skillName}
-                            level={reverseLevelMap[level]}
-                            isActive={isActive}
-                            onClick={() => handleSkillClick(skill)}
-                            onDelete={() => handleDeleteSkill(skill.id || skill.skillId)}
-                          />
-                        );
-                      })}
-                    </div>
-
-                    <Dialog
-                      open={!!activeSkill}
-                      onClose={() => setActiveSkill(null)}
-                      TransitionComponent={Transition}
-                      fullWidth
-                      maxWidth="xs"
-                      PaperProps={{ className: styles.level_dialog }}
-                    >
-                      <DialogTitle className={styles.level_dialog_title}>
-                        <span className={styles.level_dialog_icon}>📊</span>
-                        Select Proficiency Level
-                      </DialogTitle>
-                      <DialogContent className={styles.level_dialog_content}>
-                        <Typography className={styles.level_dialog_skill}>
-                          Level for <strong>{activeSkill?.name || activeSkill?.skillName}</strong>
-                        </Typography>
-                        <div className={styles.level_options}>
-                          {["Beginner", "Intermediate", "Advanced"].map((lvl) => (
-                            <button
-                              key={lvl}
-                              onClick={() => changeLevel(lvl)}
-                              className={`${styles.level_option} ${
-                                reverseLevelMap[skills[activeSkill?.id || activeSkill?.skillId]] === lvl ? styles.selected : ""
-                              }`}
-                              style={{
-                                background:
-                                  reverseLevelMap[skills[activeSkill?.id || activeSkill?.skillId]] === lvl ? levelColors[lvl] : "#f5f5f5",
-                                color:
-                                  reverseLevelMap[skills[activeSkill?.id || activeSkill?.skillId]] === lvl ? "#fff" : "#555",
-                              }}
-                            >
-                              <span className={styles.level_emoji}>
-                                {lvl === "Beginner" && "🌱"}
-                                {lvl === "Intermediate" && "⚡"}
-                                {lvl === "Advanced" && "🚀"}
-                              </span>
-                              {lvl}
-                            </button>
-                          ))}
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+              <ClickAwayListener onClickAway={() => setActiveSkill(null)}>
+                <div>
+                  <div className={styles.skills_grid}>
+                    {getFilteredSkills().map((skill) => {
+                      const level = skills[skill.name];
+                      const isActive = activeSkill === skill.name;
+                      
+                      return (
+                        <SkillChip
+                          key={skill.id}
+                          skill={skill}
+                          level={level}
+                          isActive={isActive}
+                          onClick={() => handleSkillClick(skill)}
+                          onDelete={() => handleDeleteSkill(skill.name)}
+                        />
+                      );
+                    })}
                   </div>
-                </ClickAwayListener>
-              )}
+
+                  {getFilteredSkills().length === 0 && (
+                    <div className={styles.no_results}>
+                      <span>🔍</span>
+                      <p>No skills found matching your search</p>
+                    </div>
+                  )}
+
+                  <Dialog
+                    open={!!activeSkill}
+                    onClose={() => setActiveSkill(null)}
+                    TransitionComponent={Transition}
+                    fullWidth
+                    maxWidth="xs"
+                    PaperProps={{ className: styles.level_dialog }}
+                  >
+                    <DialogTitle className={styles.level_dialog_title}>
+                      <span className={styles.level_dialog_icon}>📊</span>
+                      Select Proficiency Level
+                    </DialogTitle>
+                    <DialogContent className={styles.level_dialog_content}>
+                      <Typography className={styles.level_dialog_skill}>
+                        Level for <strong>{activeSkill}</strong>
+                      </Typography>
+                      <div className={styles.level_options}>
+                        {["Beginner", "Intermediate", "Advanced"].map((lvl) => (
+                          <button
+                            key={lvl}
+                            onClick={() => changeLevel(lvl)}
+                            className={`${styles.level_option} ${skills[activeSkill] === lvl ? styles.selected : ""}`}
+                            style={{
+                              background: skills[activeSkill] === lvl ? levelColors[lvl] : "#f5f5f5",
+                              color: skills[activeSkill] === lvl ? "#fff" : "#555",
+                            }}
+                          >
+                            <span className={styles.level_emoji}>{levelEmojis[lvl]}</span>
+                            {lvl}
+                          </button>
+                        ))}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </ClickAwayListener>
 
               {/* Selected Skills Preview */}
               {Object.keys(skills).length > 0 && (
                 <div className={styles.selected_skills_preview}>
                   <div className={styles.preview_header}>
-                    <h4>Your Selected Skills</h4>
-                    <span className={styles.preview_count}>{Object.keys(skills).length} skills</span>
+                    <h4>Your Selected Skills ({Object.keys(skills).length})</h4>
+                    <button 
+                      className={styles.clear_all_btn}
+                      onClick={() => {
+                        Object.keys(skills).forEach(skill => handleDeleteSkill(skill));
+                      }}
+                    >
+                      Clear All
+                    </button>
                   </div>
                   <div className={styles.selected_skills_list}>
-                    {Object.entries(skills).map(([skillId, level]) => {
-                      return (
-                        <div key={skillId} className={styles.selected_skill_item}>
-                          <span className={styles.selected_skill_name}>
-                            {getSkillName(skillId)}
-                          </span>
-
-                          <span
-                            className={styles.skill_level_badge}
-                            style={{
-                              background: levelColors[reverseLevelMap[level]],
-                            }}
-                          >
-                            {reverseLevelMap[level]}
-                          </span>
-
-                          <button
-                            className={styles.remove_skill_btn}
-                            onClick={() => handleDeleteSkill(Number(skillId))}
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      );
-                    })}
+                    {Object.entries(skills).map(([skillName, level]) => (
+                      <div key={skillName} className={styles.selected_skill_item}>
+                        <span className={styles.selected_skill_name}>{skillName}</span>
+                        <span className={styles.skill_level_badge} style={{ background: levelColors[level] }}>
+                          {levelEmojis[level]} {level}
+                        </span>
+                        <button
+                          className={styles.remove_skill_btn}
+                          onClick={() => handleDeleteSkill(skillName)}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -784,7 +876,7 @@ const removeFile = useCallback(() => {
           )}
 
           {/* Step 2 - CV Upload */}
-          {activeStep === 1 && (
+          {/* {activeStep === 1 && (
             <div className={styles.step_content}>
               <div
                 className={`${styles.upload_area} ${dragActive ? styles.drag_active : ""} ${error ? styles.has_error : ""}`}
@@ -823,91 +915,84 @@ const removeFile = useCallback(() => {
                     </button>
                   </div>
                 )}
-              </div>
-              {error && <Alert severity="error" className={styles.error_alert}>{error}</Alert>}
-
-              <div className={styles.upload_tips}>
+              </div> */}
+              {/* {error && <Alert severity="error" className={styles.error_alert}>{error}</Alert>} */}
+              
+              {/* <div className={styles.upload_tips}>
                 <div className={styles.tip_item}>💡 Your CV helps us personalize your learning path</div>
                 <div className={styles.tip_item}>🔒 Your file is securely stored and never shared</div>
               </div>
             </div>
+          )} */}
+
+          {/* Step 2 - Career Path with all 22 options */}
+          {activeStep === 1 && (
+            <div className={styles.step_content}>
+              <div className={styles.career_stats}>
+                <span className={styles.career_count}>{careerOptions.length} Career Paths Available</span>
+              </div>
+              <div className={styles.career_grid}>
+                {careerOptions.map((option) => (
+                  <button
+                    key={option.id}
+                    onClick={() => handleCareerSelect(option.id, option.value)}
+                    className={`${styles.career_card} ${careerPath === option.value ? styles.selected : ""}`}
+                  >
+                    <div className={styles.career_icon_wrapper} style={{ background: `${option.color}15` }}>
+                      <span className={styles.career_icon}>{option.icon}</span>
+                    </div>
+                    <div className={styles.career_info}>
+                      <span className={styles.career_name}>{option.label}</span>
+                      <span className={styles.career_description}>{option.description.substring(0, 60)}...</span>
+                      {careerPath === option.value && (
+                        <span className={styles.career_badge}>Selected</span>
+                      )}
+                    </div>
+                    {careerPath === option.value && (
+                      <CheckCircleIcon className={styles.career_check} style={{ color: option.color }} />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
 
-{/* Step 3 - Career Path */}
-{activeStep === 2 && (
-  <div className={styles.step_content}>
-    {loadingCareers ? (
-      <div className={styles.loading_state}>
-        <div className={styles.spinner}></div>
-        <p>Loading career paths...</p>
-      </div>
-    ) : (
-      <div className={styles.career_grid}>
-        {careerOptions.map((option) => {
-          const careerName = option.name || option.careerGoalName || "";
-          const icon = getCareerIcon(careerName);
-          const color = getCareerColor(careerName);
-          const careerId = option.id || option.careerGoalId;
-
-          return (
-            <button
-              key={careerId}
-              onClick={() => setCareerPath(careerId)}
-              className={`${styles.career_card} ${careerPath === careerId ? styles.selected : ""}`}
-            >
-              <div className={styles.career_icon_wrapper} style={{ background: `${color}15` }}>
-                <span className={styles.career_icon}>{icon}</span>
-              </div>
-              <div className={styles.career_info}>
-                <span className={styles.career_name}>{careerName}</span>
-                {careerPath === careerId && (
-                  <span className={styles.career_badge}>Selected</span>
-                )}
-              </div>
-              {careerPath === careerId && (
-                <CheckCircleIcon className={styles.career_check} style={{ color: color }} />
-              )}
-            </button>
-          );
-        })}
-      </div>
-    )}
-  </div>
-)}
-
-          {/* Step 4 - Interests & Languages */}
-          {activeStep === 3 && (
+          {/* Step 3 - Interests (all 19) */}
+          {activeStep === 2 && (
             <div className={styles.step_content}>
               <div className={styles.interests_section}>
                 <div className={styles.section_title_wrapper}>
                   <span className={styles.section_emoji}>🎯</span>
-                  <h4>Areas of Interest</h4>
+                  <h4>Areas of Interest ({interestsList.length} options)</h4>
                 </div>
-                {loadingInterests ? (
-                  <div className={styles.loading_state}>
-                    <div className={styles.spinner}></div>
-                    <p>Loading interests...</p>
-                  </div>
-                ) : (
-                  <div className={styles.interests_grid}>
-                    {interestsList.map((interest) => (
-                      <Chip
-                        key={interest.id || interest.interestId}
-                        label={interest.name || interest.interestName}
-                        onClick={() => toggleInterest(interest.id || interest.interestId)}
-                        color={selectedInterests.includes(interest.id || interest.interestId) ? "primary" : "default"}
-                        variant={selectedInterests.includes(interest.id || interest.interestId) ? "filled" : "outlined"}
-                        className={styles.interest_chip}
-                      />
-                    ))}
-                  </div>
+                <input
+                  type="text"
+                  placeholder="Search interests..."
+                  value={interestSearch}
+                  onChange={(e) => setInterestSearch(e.target.value)}
+                  className={styles.interests_search}
+                />
+                <div className={styles.interests_grid}>
+                  {getFilteredInterests().map((interest) => (
+                    <Chip
+                      key={interest.id}
+                      label={interest.name}
+                      onClick={() => toggleInterest(interest.name)}
+                      color={selectedInterests.includes(interest.name) ? "primary" : "default"}
+                      variant={selectedInterests.includes(interest.name) ? "filled" : "outlined"}
+                      className={styles.interest_chip}
+                    />
+                  ))}
+                </div>
+                {getFilteredInterests().length === 0 && (
+                  <div className={styles.no_results}>No interests found</div>
                 )}
               </div>
 
-              <div className={styles.languages_section}>
+              {/* <div className={styles.languages_section}>
                 <div className={styles.section_title_wrapper}>
                   <span className={styles.section_emoji}>🗣️</span>
-                  <h4>Languages You Speak</h4>
+                  <h4>Languages You Speak ({languagesList.length} options)</h4>
                 </div>
                 <div className={styles.languages_grid}>
                   {languagesList.map((lang) => (
@@ -923,83 +1008,67 @@ const removeFile = useCallback(() => {
                     </label>
                   ))}
                 </div>
-              </div>
+              </div> */}
             </div>
           )}
 
-          {/* Step 5 - Review */}
-          {activeStep === 4 && (
+          {/* Step 4 - Review */}
+          {activeStep === 3 && (
             <div className={styles.step_content}>
               <div className={styles.review_section}>
                 <div className={styles.review_item}>
                   <div className={styles.review_item_header}>
                     <span className={styles.review_icon}>🎯</span>
-                    <h4>Skills</h4>
+                    <h4>Skills ({Object.keys(skills).length})</h4>
                   </div>
                   <div className={styles.review_skills}>
-                    {Object.entries(skills).map(([skillId, level]) => {
-                      return (
-                        <div key={skillId} className={styles.review_skill_tag}>
-                          {getSkillName(skillId)}
-                          <span
-                            className={styles.review_level}
-                            style={{
-                              color: levelColors[reverseLevelMap[level]],
-                            }}
-                          >
-                            ({reverseLevelMap[level]})
-                          </span>
-                        </div>
-                      );
-                    })}
+                    {Object.entries(skills).map(([skillName, level]) => (
+                      <div key={skillName} className={styles.review_skill_tag}>
+                        {skillName} <span className={styles.review_level} style={{ color: levelColors[level] }}>({level})</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                <div className={styles.review_item}>
+                {/* <div className={styles.review_item}>
                   <div className={styles.review_item_header}>
                     <span className={styles.review_icon}>📄</span>
                     <h4>CV</h4>
                   </div>
                   <p className={styles.review_text}>{file?.name || "No file uploaded"}</p>
-                </div>
+                </div> */}
 
                 <div className={styles.review_item}>
                   <div className={styles.review_item_header}>
                     <span className={styles.review_icon}>💼</span>
                     <h4>Career Path</h4>
                   </div>
-                  <p className={styles.review_text}>
-                    {getCareerName(careerPath)}
-                  </p>
+                  <p className={styles.review_text}>{careerOptions.find(c => c.value === careerPath)?.label || "Not selected"}</p>
                 </div>
 
                 <div className={styles.review_item}>
                   <div className={styles.review_item_header}>
                     <span className={styles.review_icon}>🎨</span>
-                    <h4>Interests</h4>
+                    <h4>Interests ({selectedInterests.length})</h4>
                   </div>
                   <div className={styles.review_interests}>
-                    {selectedInterests.map((interestId) => {
-                      return (
-                        <span key={interestId} className={styles.review_tag}>
-                          {getInterestName(interestId)}
-                        </span>
-                      );
-                    })}
+                    {selectedInterests.map(interest => (
+                      <span key={interest} className={styles.review_tag}>{interest}</span>
+                    ))}
                   </div>
                 </div>
 
-                <div className={styles.review_item}>
+                {/* <div className={styles.review_item}>
                   <div className={styles.review_item_header}>
                     <span className={styles.review_icon}>🗣️</span>
-                    <h4>Languages</h4>
+                    <h4>Languages ({selectedLanguages.length})</h4>
                   </div>
                   <div className={styles.review_languages}>
                     {selectedLanguages.map(lang => (
                       <span key={lang} className={styles.review_tag}>{lang}</span>
                     ))}
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           )}
@@ -1007,16 +1076,16 @@ const removeFile = useCallback(() => {
           {/* Navigation Buttons */}
           <div className={styles.navigation_buttons}>
             {activeStep > 0 && (
-              <Button onClick={handleBack} className={styles.back_btn}>
+              <Button onClick={handleBack} className={styles.back_btn} disabled={isSubmitting}>
                 ← Back
               </Button>
             )}
-            <Button
-              onClick={handleNext}
-              className={`${styles.next_btn} ${activeStep === 4 ? styles.complete_btn : ""}`}
+            <Button 
+              onClick={handleNext} 
+              className={`${styles.next_btn} ${activeStep === 3 ? styles.complete_btn : ""}`}
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Submitting..." : activeStep === 4 ? "Complete Profile" : "Continue →"}
+              {isSubmitting ? "Saving..." : (activeStep === 3 ? "Complete Profile" : "Continue →")}
             </Button>
           </div>
         </div>

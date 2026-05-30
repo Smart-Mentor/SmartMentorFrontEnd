@@ -512,7 +512,7 @@ export default function Signup() {
                 className={`${styles.signup_button} ${loading ? styles.loading : ''}`}
                 disabled={loading}
               >
-                <span>{loading ? "Creating Account..." : "Create Account"}</span>
+                <span>{loading ? "Creating Account..." : ""}</span>
                 {!loading && (
                   <span className={styles.button_content}>
                     <span className={styles.button_text}>Get Started</span>

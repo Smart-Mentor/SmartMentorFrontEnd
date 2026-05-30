@@ -1,12 +1,14 @@
+// 🔹 Imports
 import { Link, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import styles from "./Login.module.css";
 import logo from "../../assets/sign in logo.png";
-import { loginUser, forgotPassword, resetPassword, getUserProfile } from "../../api/authenticationService";
+import { loginUser, forgotPassword, resetPassword } from "../../api/authenticationService";
 
+// 🔹 Login Component
 export default function Login() {
 
-  // --- Main Form States ---
+  // 🔹 Main Form States
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -18,7 +20,7 @@ export default function Login() {
   const [animate, setAnimate] = useState(false);
   const navigate = useNavigate();
 
-  // --- Forgot / Reset Password Popup States ---
+  // 🔹 Forgot / Reset Password Popup States
   const [showForgotPopup, setShowForgotPopup] = useState(false);
   const [showResetPopup, setShowResetPopup] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
@@ -34,60 +36,45 @@ export default function Login() {
     setAnimate(true);
   }, []);
 
-  // --- Handle Input Change ---
+  // 🔹 Handle Input Change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     if (error) setError("");
   };
 
-  // --- Check if profile is completed ---
-  const checkProfileCompletion = (userProfile) => {
-    const localProfileCompleted = localStorage.getItem("profileCompleted") === "true";
-    const profileData = userProfile?.data || userProfile?.result || userProfile || {};
-
-    const apiProfileCompleted = !!(
-      profileData.careerGoalId ||
-      profileData.career_goal_id ||
-      profileData.careerGoal ||
-      (profileData.skills && profileData.skills.length > 0) ||
-      (profileData.interests && profileData.interests.length > 0) ||
-      (profileData.userSkills && profileData.userSkills.length > 0) ||
-      (profileData.userInterests && profileData.userInterests.length > 0)
-    );
-
-    return localProfileCompleted || apiProfileCompleted;
-  };
-
-  // --- Handle Login Submit ---
+  // 🔹 Handle Login Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // 🔹 Check for admin credentials first (case-insensitive)
     const isAdminEmail = formData.email.toLowerCase() === "admin@gmail.com";
     const isAdminPassword = formData.password === "Admin@123";
-
+    
     if (isAdminEmail && isAdminPassword) {
+      // Admin login - bypass API call
       try {
         setError("");
         setLoading(true);
-
+        
+        // Store admin token or admin flag
         const loginData = {
-          ...formData,
-          email: formData.email.toLowerCase()
-        };
+        ...formData,
+        email: formData.email.toLowerCase()
+      };
 
-        const response = await loginUser(loginData);
+      const response = await loginUser(loginData);
 
-        if (response.isSuccessful && response.token) {
-          localStorage.setItem("authToken", response.token);
-          localStorage.setItem("userRole", "admin");
-          localStorage.removeItem("verificationToken");
-        }
-
+      if (response.isSuccessful && response.token) {
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("userRole", "admin");
+        localStorage.removeItem("verificationToken");}
+        
         if (rememberMe) {
           localStorage.setItem("rememberMe", "true");
         }
-
-        navigate("/admindashboard", { replace: true });
+        
+        // Navigate to admin dashboard
+        navigate("/admin/dashboard", { replace: true });
         return;
       } catch (err) {
         setError("Admin login failed");
@@ -97,10 +84,12 @@ export default function Login() {
       return;
     }
 
+    // 🔹 Regular user login flow (also make email case-insensitive)
     try {
       setError("");
       setLoading(true);
 
+      // Convert email to lowercase before sending to API
       const loginData = {
         ...formData,
         email: formData.email.toLowerCase()
@@ -109,7 +98,7 @@ export default function Login() {
       const response = await loginUser(loginData);
 
       if (response.isSuccessful && response.token) {
-        localStorage.setItem("authToken", response.token);
+        localStorage.setItem("token", response.token);
         localStorage.setItem("userRole", "user");
         localStorage.removeItem("verificationToken");
 
@@ -117,15 +106,7 @@ export default function Login() {
           localStorage.setItem("rememberMe", "true");
         }
 
-        const userProfile = await getUserProfile();
-        const profileCompleted = checkProfileCompletion(userProfile);
-
-        if (profileCompleted) {
-          navigate("/dashboard", { replace: true });
-        } else {
-          navigate("/completeprofile", { replace: true });
-        }
-
+        navigate("/completeprofile", { replace: true });
         return;
       }
 
@@ -148,15 +129,16 @@ export default function Login() {
     }
   };
 
-  // --- Step 1: Send Reset Code ---
+  // 🔹 Step 1: Send Reset Code
   const handleForgotSubmit = async (e) => {
     e.preventDefault();
-
+    
+    // Prevent password reset for admin account (case-insensitive)
     if (forgotEmail.toLowerCase() === "admin@gmail.com") {
       setPopupError("Admin password reset is not allowed through this form");
       return;
     }
-
+    
     if (!forgotEmail) {
       setPopupError("Please enter your email");
       return;
@@ -167,6 +149,7 @@ export default function Login() {
       setPopupError("");
       setPopupSuccess("");
 
+      // Convert email to lowercase for API call
       const res = await forgotPassword(forgotEmail.toLowerCase());
 
       if (res.message?.toLowerCase().includes("sent") || res.isSuccessful) {
@@ -190,12 +173,13 @@ export default function Login() {
     }
   };
 
-  // --- Step 2: Reset Password ---
+  // 🔹 Step 2: Reset Password
   const handleResetSubmit = async (e) => {
     e.preventDefault();
 
     const email = localStorage.getItem("resetEmail");
-
+    
+    // Prevent password reset for admin account (case-insensitive)
     if (email && email.toLowerCase() === "admin@gmail.com") {
       setPopupError("Admin password reset is not allowed through this form");
       return;
@@ -240,7 +224,7 @@ export default function Login() {
     }
   };
 
-  // --- Close All Popups ---
+  // 🔹 Close All Popups
   const closeAllPopups = () => {
     setShowForgotPopup(false);
     setShowResetPopup(false);
@@ -489,10 +473,10 @@ export default function Login() {
         </div>
       </div>
 
-      {/* --- Popup 1: Forgot Password --- */}
+      {/* 🔹 Popup 1: Forgot Password */}
       {showForgotPopup && (
         <div className={styles.popup_overlay} onClick={closeAllPopups}>
-          <div className={`${styles.popup_card} ${styles.popup_enter}`} onClick={(e) => e.stopPropagation()}>
+          <div className={styles.popup_card} onClick={(e) => e.stopPropagation()}>
             <button className={styles.popup_close} onClick={closeAllPopups}>
               <i className="fas fa-times"></i>
             </button>
@@ -553,7 +537,7 @@ export default function Login() {
         </div>
       )}
 
-      {/* --- Popup 2: Reset Password --- */}
+      {/* 🔹 Popup 2: Reset Password */}
       {showResetPopup && (
         <div className={styles.popup_overlay} onClick={closeAllPopups}>
           <div className={`${styles.popup_card} ${styles.popup_enter}`} onClick={(e) => e.stopPropagation()}>

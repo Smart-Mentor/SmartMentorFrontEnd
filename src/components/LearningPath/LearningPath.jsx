@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Box } from "@mui/material";
+import { Box, CircularProgress, Alert } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
@@ -12,98 +11,305 @@ import styles from "./LearningPath.module.css";
 export default function LearningPath() {
   const [animate, setAnimate] = useState(false);
   const [expandedSections, setExpandedSections] = useState({});
-  const [completedItems, setCompletedItems] = useState({});
   const [overallProgress, setOverallProgress] = useState(0);
+  const [gapAnalysisData, setGapAnalysisData] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [sectionProgress, setSectionProgress] = useState({});
 
   useEffect(() => {
     setAnimate(true);
+    fetchUserProfileAndGapAnalysis();
   }, []);
 
-  // Calculate overall progress whenever completed items change
+  // Calculate overall progress whenever data changes
   useEffect(() => {
-    calculateOverallProgress();
-  }, [completedItems]);
+    if (gapAnalysisData) {
+      updateAllProgress();
+    }
+  }, [gapAnalysisData]);
 
-  const titles = [
-    {
-      id: "fundamentals",
-      title: "Fundamentals",
-      icon: "🎯",
-      color: "#0A5ADB",
-      description: "Master the essential building blocks of development",
-      checks: [
-        { name: "JavaScript Basics", completed: false, resource: "Beginner-friendly guide", points: 100 },
-        { name: "HTML & CSS", completed: false, resource: "Interactive tutorials", points: 100 },
-        { name: "Git & GitHub", completed: false, resource: "Version control mastery", points: 100 },
-        { name: "Command Line", completed: false, resource: "Terminal basics", points: 100 },
-      ],
-    },
-    {
-      id: "core",
-      title: "Core Skills",
-      icon: "⚛️",
-      color: "#58A7B5",
-      description: "Build modern applications with industry-standard tools",
-      checks: [
-        { name: "React Fundamentals", completed: false, resource: "Component-based architecture", points: 150 },
-        { name: "TypeScript", completed: false, resource: "Type-safe development", points: 150 },
-        { name: "State Management", completed: false, resource: "Redux, Context API", points: 150 },
-        { name: "REST APIs", completed: false, resource: "API integration", points: 150 },
-      ],
-    },
-    {
-      id: "advanced",
-      title: "Advanced Topics",
-      icon: "🚀",
-      color: "#667eea",
-      description: "Take your skills to the next level",
-      checks: [
-        { name: "Next.js", completed: false, resource: "React framework", points: 200 },
-        { name: "GraphQL", completed: false, resource: "Modern API query language", points: 200 },
-        { name: "Testing", completed: false, resource: "Jest, React Testing Library", points: 200 },
-        { name: "Performance Optimization", completed: false, resource: "Web Vitals", points: 200 },
-      ],
-    },
-  ];
+  // Fetch user profile and then gap analysis
+  const fetchUserProfileAndGapAnalysis = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      
+      if (!token) {
+        throw new Error('No authentication token found. Please login again.');
+      }
+
+      const profileResponse = await fetch('https://smartmentorapi.runasp.net/api/User/profile', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!profileResponse.ok) {
+        if (profileResponse.status === 401) {
+          throw new Error('Session expired. Please login again.');
+        }
+        throw new Error('Failed to fetch user profile');
+      }
+
+      const profileResult = await profileResponse.json();
+      
+      if (!profileResult.success) {
+        throw new Error(profileResult.message || 'Failed to load user profile');
+      }
+
+      setUserProfile(profileResult.data);
+      await fetchGapAnalysis(token, profileResult.data.careerGoalName);
+      
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  // Fetch gap analysis data from API
+  const fetchGapAnalysis = async (token, careerGoalName) => {
+    try {
+      const response = await fetch('https://smartmentorapi.runasp.net/api/GapAnalysis/gap-analysis', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch gap analysis data');
+      }
+
+      const data = await response.json();
+      setGapAnalysisData(data);
+      setLoading(false);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  // Update all progress calculations based on user levels
+  const updateAllProgress = () => {
+    const sections = organizeSkillsIntoSections();
+    const progress = {};
+    let totalSkills = 0;
+    let completedTotal = 0;
+    
+    sections.forEach(section => {
+      let sectionCompleted = 0;
+      section.skills.forEach(skill => {
+        // Skill is completed if user's level meets or exceeds required level
+        const isCompleted = skill.currentLevel && skill.currentLevel >= skill.requiredLevel;
+        
+        if (isCompleted) {
+          sectionCompleted++;
+          completedTotal++;
+        }
+        totalSkills++;
+      });
+      
+      const percentage = section.skills.length > 0 
+        ? Math.round((sectionCompleted / section.skills.length) * 100) 
+        : 0;
+      progress[section.id] = percentage;
+    });
+    
+    setSectionProgress(progress);
+    const overall = totalSkills > 0 ? Math.round((completedTotal / totalSkills) * 100) : 0;
+    setOverallProgress(overall);
+  };
+
+  // Get color based on required level
+  const getRequiredLevelColor = (requiredLevel) => {
+    switch(requiredLevel) {
+      case 1: return "#4caf50";
+      case 2: return "#2196f3";
+      case 3: return "#ff9800";
+      default: return "#9e9e9e";
+    }
+  };
+
+  // Get badge text based on required level
+  const getLevelBadge = (requiredLevel) => {
+    switch(requiredLevel) {
+      case 1: return "Beginner";
+      case 2: return "Intermediate";
+      case 3: return "Advanced";
+      default: return "Not Set";
+    }
+  };
+
+  // Get skill level description
+  const getSkillLevelDescription = (level) => {
+    if (!level || level === 0) return "Not Started";
+    switch(level) {
+      case 1: return "Beginner";
+      case 2: return "Intermediate";
+      case 3: return "Advanced";
+      default: return "Not Started";
+    }
+  };
+
+  // Get current level color
+  const getCurrentLevelColor = (currentLevel, requiredLevel) => {
+    if (!currentLevel || currentLevel === 0) return "#9e9e9e";
+    if (currentLevel >= requiredLevel) return "#10b981";
+    switch(currentLevel) {
+      case 1: return "#4caf50";
+      case 2: return "#2196f3";
+      case 3: return "#ff9800";
+      default: return "#9e9e9e";
+    }
+  };
+
+  // Get progress percentage based on current vs required level
+  const getLevelProgress = (currentLevel, requiredLevel) => {
+    if (!currentLevel || currentLevel === 0) return 0;
+    // Cap progress at 100% - cannot exceed required level
+    return Math.min(100, (currentLevel / requiredLevel) * 100);
+  };
+
+  // Check if user can upgrade to a higher level
+  const canUpgradeLevel = (currentLevel, requiredLevel) => {
+    // Cannot upgrade if already at or above required level
+    if (currentLevel >= requiredLevel) return false;
+    // Cannot upgrade beyond required level
+    if (currentLevel + 1 > requiredLevel) return false;
+    return true;
+  };
+
+  // Get the maximum level allowed (cannot exceed required level)
+  const getMaxAllowedLevel = (requiredLevel) => {
+    return requiredLevel;
+  };
+
+  // Get the maximum level to display (3 levels max, but only show up to required level)
+  const getMaxLevelToShow = (requiredLevel) => {
+    return requiredLevel; // Show only up to the required level
+  };
+
+  // Organize skills into categories based on skill level
+  const organizeSkillsIntoSections = () => {
+    if (!gapAnalysisData) return [];
+
+    const sections = [];
+    const fundamentalsSkills = [];
+    const coreSkills = [];
+    const advancedSkills = [];
+
+    // Process missing skills
+    if (gapAnalysisData.missingSkills) {
+      gapAnalysisData.missingSkills.forEach(skill => {
+        const isCompleted = skill.currentLevel && skill.currentLevel >= skill.requiredLevel;
+        const skillData = {
+          ...skill,
+          type: 'missing',
+          completed: isCompleted,
+          currentLevel: skill.currentLevel || 0
+        };
+        
+        if (skill.requiredLevel === 1) fundamentalsSkills.push(skillData);
+        else if (skill.requiredLevel === 2) coreSkills.push(skillData);
+        else if (skill.requiredLevel === 3) advancedSkills.push(skillData);
+      });
+    }
+
+    // Process weak skills
+    if (gapAnalysisData.weakSkills) {
+      gapAnalysisData.weakSkills.forEach(skill => {
+        const isCompleted = skill.currentLevel && skill.currentLevel >= skill.requiredLevel;
+        const skillData = {
+          ...skill,
+          type: 'weak',
+          completed: isCompleted,
+          currentLevel: skill.currentLevel || 0
+        };
+        
+        if (skill.requiredLevel === 1) fundamentalsSkills.push(skillData);
+        else if (skill.requiredLevel === 2) coreSkills.push(skillData);
+        else if (skill.requiredLevel === 3) advancedSkills.push(skillData);
+      });
+    }
+
+    // Process ready skills (already completed)
+    if (gapAnalysisData.readySkills) {
+      gapAnalysisData.readySkills.forEach(skill => {
+        const skillData = {
+          ...skill,
+          type: 'ready',
+          completed: true,
+          currentLevel: skill.currentLevel || skill.requiredLevel
+        };
+        
+        if (skill.requiredLevel === 1) fundamentalsSkills.push(skillData);
+        else if (skill.requiredLevel === 2) coreSkills.push(skillData);
+        else if (skill.requiredLevel === 3) advancedSkills.push(skillData);
+      });
+    }
+
+    if (fundamentalsSkills.length > 0) {
+      sections.push({
+        id: "fundamentals",
+        title: "Fundamentals",
+        icon: "🎯",
+        color: "#0A5ADB",
+        description: "Master the essential building blocks of development",
+        skills: fundamentalsSkills,
+        pointsPerSkill: 100,
+        progress: sectionProgress.fundamentals || 0
+      });
+    }
+
+    if (coreSkills.length > 0) {
+      sections.push({
+        id: "core",
+        title: "Core Skills",
+        icon: "⚛️",
+        color: "#58A7B5",
+        description: "Build modern applications with industry-standard tools",
+        skills: coreSkills,
+        pointsPerSkill: 150,
+        progress: sectionProgress.core || 0
+      });
+    }
+
+    if (advancedSkills.length > 0) {
+      sections.push({
+        id: "advanced",
+        title: "Advanced Topics",
+        icon: "🚀",
+        color: "#667eea",
+        description: "Take your skills to the next level",
+        skills: advancedSkills,
+        pointsPerSkill: 200,
+        progress: sectionProgress.advanced || 0
+      });
+    }
+
+    return sections;
+  };
 
   // Calculate section percentage
   const calculateSectionPercentage = (section) => {
-    if (!section.checks.length) return 0;
-    const completedCount = section.checks.filter((_, idx) => 
-      completedItems[`${section.id}-${idx}`]
-    ).length;
-    return Math.round((completedCount / section.checks.length) * 100);
-  };
-
-  // Calculate overall percentage across all sections
-  const calculateOverallProgress = () => {
-    let totalItems = 0;
-    let completedTotal = 0;
-    
-    titles.forEach(section => {
-      totalItems += section.checks.length;
-      section.checks.forEach((_, idx) => {
-        if (completedItems[`${section.id}-${idx}`]) {
-          completedTotal++;
-        }
-      });
-    });
-    
-    const percentage = totalItems === 0 ? 0 : Math.round((completedTotal / totalItems) * 100);
-    setOverallProgress(percentage);
-    return percentage;
+    return section.progress || 0;
   };
 
   // Calculate total points earned
   const calculateTotalPoints = () => {
+    const sections = organizeSkillsIntoSections();
     let totalPoints = 0;
     let earnedPoints = 0;
     
-    titles.forEach(section => {
-      section.checks.forEach((check, idx) => {
-        totalPoints += check.points;
-        if (completedItems[`${section.id}-${idx}`]) {
-          earnedPoints += check.points;
+    sections.forEach(section => {
+      section.skills.forEach(skill => {
+        totalPoints += section.pointsPerSkill;
+        if (skill.completed) {
+          earnedPoints += section.pointsPerSkill;
         }
       });
     });
@@ -116,10 +322,10 @@ export default function LearningPath() {
     let totalPoints = 0;
     let earnedPoints = 0;
     
-    section.checks.forEach((check, idx) => {
-      totalPoints += check.points;
-      if (completedItems[`${section.id}-${idx}`]) {
-        earnedPoints += check.points;
+    section.skills.forEach(skill => {
+      totalPoints += section.pointsPerSkill;
+      if (skill.completed) {
+        earnedPoints += section.pointsPerSkill;
       }
     });
     
@@ -130,27 +336,56 @@ export default function LearningPath() {
     setExpandedSections(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const toggleCheckbox = (sectionId, checkIndex) => {
-    const key = `${sectionId}-${checkIndex}`;
-    setCompletedItems(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
   const getCompletedCount = (section) => {
-    return section.checks.filter((_, idx) => completedItems[`${section.id}-${idx}`]).length;
+    return section.skills.filter(skill => skill.completed).length;
   };
 
+  if (loading) {
+    return (
+      <Box className={styles.loading_container}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box className={styles.error_container}>
+        <Alert severity="error" onClose={() => setError(null)}>
+          {error}
+        </Alert>
+        <Box mt={2}>
+          <Alert severity="info">
+            Please make sure you're logged in and have completed a skills assessment.
+          </Alert>
+        </Box>
+      </Box>
+    );
+  }
+
+  if (!gapAnalysisData || !gapAnalysisData.careerGoalName) {
+    return (
+      <Box className={styles.error_container}>
+        <Alert severity="info">
+          No gap analysis data available for {userProfile?.careerGoalName || 'your career goal'}. 
+          Please complete a skills assessment first.
+        </Alert>
+      </Box>
+    );
+  }
+
+  const titles = organizeSkillsIntoSections();
   const { earnedPoints, totalPoints } = calculateTotalPoints();
   const pointsPercentage = Math.round((earnedPoints / totalPoints) * 100) || 0;
+  const apiProgress = Math.round(gapAnalysisData?.statusOfTheGapAnalysis?.completionPercentage || overallProgress);
 
   const achievements = [
-    { icon: "🏆", title: "Streak", value: "15 days", color: "#f59e0b" },
     { icon: "⭐", title: "Points", value: `${earnedPoints}/${totalPoints}`, color: "#10b981" },
-    { icon: "📚", title: "Courses", value: `${Math.floor(earnedPoints / 100)}/${Math.floor(totalPoints / 100)}`, color: "#0A5ADB" },
+    { icon: "📚", title: "Skills Completed", value: `${titles.reduce((acc, section) => acc + getCompletedCount(section), 0)}/${titles.reduce((acc, section) => acc + section.skills.length, 0)}`, color: "#0A5ADB" },
   ];
 
   return (
     <Box component="main" className={styles.learning_path_container}>
-      {/* Background decorative elements */}
       <div className={styles.bg_blur_1}></div>
       <div className={styles.bg_blur_2}></div>
       <div className={styles.bg_blur_3}></div>
@@ -164,16 +399,29 @@ export default function LearningPath() {
             </div>
             <div>
               <h1 className={styles.header_title}>Your Learning Path</h1>
-              <p className={styles.header_subtitle}>Backend Developer Roadmap</p>
-            </div>
-          </div>
-          <div className={styles.header_right}>
-            <div className={styles.achievement_badge}>
-              <EmojiEventsIcon className={styles.achievement_icon} />
-              <span>Level {Math.floor(pointsPercentage / 20) + 1} Learner</span>
+              <p className={styles.header_subtitle}>{gapAnalysisData.careerGoalName}</p>
             </div>
           </div>
         </div>
+
+        {/* User Interests Section */}
+        {userProfile?.interests && userProfile.interests.length > 0 && (
+          <div className={styles.interests_section}>
+            <div className={styles.interests_content}>
+              <span className={styles.interests_icon}>🎯</span>
+              <div className={styles.interests_info}>
+                <span className={styles.interests_label}>Your Interests:</span>
+                <div className={styles.interests_tags}>
+                  {userProfile.interests.map(interest => (
+                    <span key={interest.interestId} className={styles.interest_tag}>
+                      {interest.interestName}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Achievements Row */}
         <div className={styles.achievements_row}>
@@ -196,12 +444,12 @@ export default function LearningPath() {
               <div>
                 <h2 className={styles.overall_title}>Overall Progress</h2>
                 <p className={styles.overall_message}>
-                  {overallProgress === 100 ? "🎉 Congratulations! You've completed everything!" : "Keep going! You're making great progress!"}
+                  {apiProgress === 100 ? "🎉 Congratulations! You've completed everything!" : "Keep going! You're making great progress!"}
                 </p>
               </div>
             </div>
             <div className={styles.overall_percentage}>
-              <span className={styles.percentage_value}>{overallProgress}%</span>
+              <span className={styles.percentage_value}>{apiProgress}%</span>
               <span className={styles.percentage_label}>Complete</span>
             </div>
           </div>
@@ -209,18 +457,18 @@ export default function LearningPath() {
           <div className={styles.progress_bar_container}>
             <div 
               className={styles.progress_bar}
-              style={{ width: `${overallProgress}%` }}
+              style={{ width: `${apiProgress}%` }}
             >
-              <span className={styles.progress_percentage}>{overallProgress}%</span>
+              <span className={styles.progress_percentage}>{apiProgress}%</span>
             </div>
           </div>
           
           <div className={styles.overall_footer}>
             <span className={styles.milestone_text}>
-              🎯 {overallProgress < 30 ? "Next milestone: 30%" : overallProgress < 60 ? "Next milestone: 60%" : overallProgress < 100 ? "Next milestone: 100%" : "🏆 Fully completed!"}
+              🎯 {apiProgress < 30 ? "Next milestone: 30%" : apiProgress < 60 ? "Next milestone: 60%" : apiProgress < 100 ? "Next milestone: 100%" : "🏆 Fully completed!"}
             </span>
             <span className={styles.courses_left}>
-              📚 {titles.reduce((acc, section) => acc + (section.checks.length - getCompletedCount(section)), 0)} tasks remaining
+              📚 {titles.reduce((acc, section) => acc + (section.skills.length - getCompletedCount(section)), 0)} skills remaining
             </span>
           </div>
         </div>
@@ -229,6 +477,7 @@ export default function LearningPath() {
         {titles.map((section, index) => {
           const sectionPercentage = calculateSectionPercentage(section);
           const { earnedPoints: sectionEarned, totalPoints: sectionTotal } = calculateSectionPoints(section);
+          const completedCount = getCompletedCount(section);
           
           return (
             <div 
@@ -293,34 +542,131 @@ export default function LearningPath() {
               </div>
 
               <div className={`${styles.checks_container} ${expandedSections[section.id] ? styles.expanded : ""}`}>
-                {section.checks.map((check, idx) => {
-                  const isCompleted = completedItems[`${section.id}-${idx}`];
+                {section.skills.map((skill) => {
+                  const isCompleted = skill.completed;
+                  const levelProgress = getLevelProgress(skill.currentLevel, skill.requiredLevel);
+                  const requiredLevelColor = getRequiredLevelColor(skill.requiredLevel);
+                  const currentLevelColor = getCurrentLevelColor(skill.currentLevel, skill.requiredLevel);
+                  const levelBadge = getLevelBadge(skill.requiredLevel);
+                  const maxLevelToShow = getMaxLevelToShow(skill.requiredLevel);
+                  const maxAllowedLevel = getMaxAllowedLevel(skill.requiredLevel);
+                  const canUpgrade = canUpgradeLevel(skill.currentLevel, skill.requiredLevel);
+                  
                   return (
-                    <div key={idx} className={`${styles.check_item} ${isCompleted ? styles.completed : ""}`}>
-                      <label className={styles.checkbox_label}>
-                        <input
-                          type="checkbox"
-                          checked={isCompleted || false}
-                          onChange={() => toggleCheckbox(section.id, idx)}
-                          className={styles.custom_checkbox}
-                        />
-                        <span className={styles.checkbox_custom}>
-                          {isCompleted ? (
-                            <CheckCircleIcon className={styles.checkbox_checked} />
-                          ) : (
-                            <RadioButtonUncheckedIcon className={styles.checkbox_unchecked} />
+                    <div key={skill.skillId} className={`${styles.check_item} ${isCompleted ? styles.completed : ""}`}>
+                      <div className={styles.check_content}>
+                        <div className={styles.skill_header}>
+                          <span className={styles.skill_name}>{skill.skillName}</span>
+                          {!canUpgrade && skill.currentLevel >= skill.requiredLevel && (
+                            <div className={styles.level_limit_badge}>
+                              <span>✓ Max Level Reached</span>
+                            </div>
                           )}
-                        </span>
-                        <div className={styles.check_content}>
-                          <span className={styles.check_name}>{check.name}</span>
-                          <span className={styles.check_resource}>{check.resource}</span>
                         </div>
-                      </label>
+                        
+                        <div className={styles.levels_container}>
+                          <div className={styles.level_section}>
+                            <div className={styles.level_label}>Required Level:</div>
+                            <div className={styles.level_dots}>
+                              {[...Array(maxLevelToShow)].map((_, index) => {
+                                const level = index + 1;
+                                return (
+                                  <div
+                                    key={level}
+                                    className={`${styles.level_dot} ${skill.requiredLevel >= level ? styles.active_dot : ''}`}
+                                    style={{ 
+                                      background: skill.requiredLevel >= level ? requiredLevelColor : '#e0e0e0'
+                                    }}
+                                  >
+                                    {level}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            <div className={styles.level_badge} style={{ color: requiredLevelColor }}>
+                              {levelBadge}
+                            </div>
+                          </div>
+                          
+                          <div className={styles.level_section}>
+                            <div className={styles.level_label}>Your Level:</div>
+                            <div className={styles.level_dots}>
+                              {[...Array(maxLevelToShow)].map((_, index) => {
+                                const level = index + 1;
+                                const isActive = skill.currentLevel >= level;
+                                const isDisabled = level > maxAllowedLevel;
+                                return (
+                                  <div
+                                    key={level}
+                                    className={`${styles.level_dot} ${isActive ? styles.active_dot : ''} ${isDisabled ? styles.disabled_dot : ''}`}
+                                    style={{ 
+                                      background: isActive ? currentLevelColor : '#e0e0e0',
+                                      cursor: !isDisabled && canUpgrade ? 'pointer' : 'default',
+                                      opacity: isDisabled ? 0.5 : 1
+                                    }}
+                                    onClick={() => {
+                                      // Only allow upgrade if not disabled and can upgrade
+                                      if (!isDisabled && canUpgrade && level === skill.currentLevel + 1) {
+                                        // Here you would make API call to update user's skill level
+                                        console.log(`Upgrading ${skill.skillName} to level ${level}`);
+                                        // Update local state or refetch data
+                                      }
+                                    }}
+                                  >
+                                    {level}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            <div className={styles.level_badge} style={{ color: currentLevelColor }}>
+                              {getSkillLevelDescription(skill.currentLevel)}
+                              {canUpgrade && skill.currentLevel < skill.requiredLevel && (
+                                <span className={styles.upgrade_hint}></span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className={styles.progress_section}>
+                          <div className={styles.progress_label}>
+                            <span>Progress to Required Level:</span>
+                            <span className={styles.progress_percentage_text}>{Math.round(levelProgress)}%</span>
+                          </div>
+                          <div className={styles.level_progress_bar_bg}>
+                            <div 
+                              className={styles.level_progress_bar_fill}
+                              style={{ 
+                                width: `${levelProgress}%`,
+                                background: `linear-gradient(90deg, ${currentLevelColor}, ${requiredLevelColor})`
+                              }}
+                            />
+                          </div>
+                        </div>
+                        
+                        {!isCompleted && skill.currentLevel < skill.requiredLevel && (
+                          <div className={styles.improvement_needed}>
+                            <span>⚠️ Need to improve to {getSkillLevelDescription(skill.requiredLevel)} level</span>
+                          </div>
+                        )}
+                        
+                        {skill.currentLevel >= skill.requiredLevel && (
+                          <div className={styles.mastered_message}>
+                            <span>🎉 You have mastered this skill!</span>
+                          </div>
+                        )}
+                      </div>
+                      
                       <div className={styles.check_right}>
-                        <span className={styles.check_points}>+{check.points} pts</span>
-                        <button className={styles.start_btn}>
-                          {isCompleted ? "Completed ✓" : "Start →"}
-                        </button>
+                        <div className={styles.points_section}>
+                          <span className={styles.check_points}>+{section.pointsPerSkill} pts</span>
+                        </div>
+                        <div className={styles.status_badge}>
+                          {isCompleted ? (
+                            <span className={styles.mastered_status}>✓ Mastered</span>
+                          ) : (
+                            <span className={styles.pending_status}>In Progress</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
@@ -329,46 +675,22 @@ export default function LearningPath() {
 
               <div className={styles.section_footer}>
                 <div className={styles.footer_stats}>
-                  <span>✅ {getCompletedCount(section)}/{section.checks.length} completed</span>
-                  <span>⏱️ Estimated: {(section.checks.length - getCompletedCount(section)) * 4} hours left</span>
-                  <span>🎯 {sectionPercentage}% mastered</span>
+                  <span>✅ {completedCount}/{section.skills.length} mastered</span>
+                  <span>⏱️ Estimated: {(section.skills.length - completedCount) * 4} hours to complete</span>
+                  <span>🎯 {sectionPercentage}% complete</span>
                 </div>
               </div>
             </div>
           );
         })}
 
-        {/* Certificate Section */}
-        <div className={styles.certificate_section}>
-          <div className={styles.certificate_content}>
-            <div className={styles.certificate_icon}>🎓</div>
-            <div className={styles.certificate_info}>
-              <h3 className={styles.certificate_title}>Earn Your Certificate</h3>
-              <p className={styles.certificate_text}>
-                Complete all sections to receive your Backend Developer certificate
-              </p>
-            </div>
-            <button 
-              className={styles.certificate_btn} 
-              disabled={overallProgress < 100}
-              style={{
-                background: overallProgress === 100 
-                  ? "linear-gradient(135deg, #10b981, #059669)" 
-                  : "linear-gradient(135deg, #0A5ADB, #58A7B5)"
-              }}
-            >
-              {overallProgress === 100 ? "🎉 Download Certificate" : `${overallProgress}% Complete`}
-            </button>
-          </div>
-        </div>
-
         {/* Motivation Message */}
-        {overallProgress > 0 && overallProgress < 100 && (
+        {apiProgress > 0 && apiProgress < 100 && (
           <div className={styles.motivation_section}>
             <div className={styles.motivation_content}>
               <span className={styles.motivation_icon}>💪</span>
               <p className={styles.motivation_text}>
-                You're {overallProgress}% of the way there! Keep up the amazing work!
+                You're {apiProgress}% of the way there! Keep improving your skills!
               </p>
             </div>
           </div>
