@@ -470,3 +470,107 @@ export const uploadCV = async (formData) => {
     throw new Error(error.message || "Failed to upload CV");
   }
 };
+
+// ============================================
+// 🔹 COMMUNITY - Community Endpoints
+// ============================================
+
+/**
+ * 🔹 Get Posts by Career Goal
+ * GET /api/Community/career-goals/{careerGoalId}/posts
+ */
+export const getPostsByCareerGoal = async (careerGoalId) => {
+  try {
+    return await authFetch(
+      `/Community/career-goals/${careerGoalId}/posts`,
+      { method: "GET" }
+    );
+  } catch (error) {
+    console.error("Failed to fetch posts:", error);
+    return [];
+  }
+};
+
+/**
+ * 🔹 Get Single Post
+ * GET /api/Community/posts/{postId}
+ */
+export const getPostById = async (postId) => {
+  try {
+    return await authFetch(
+      `/Community/posts/${postId}`,
+      { method: "GET" }
+    );
+  } catch (error) {
+    console.error("Failed to fetch post:", error);
+    throw error;
+  }
+};
+
+/**
+ * 🔹 Create New Post
+ * POST /api/Community/posts
+ */
+export const createPost = async (postData) => {
+  try {
+    return await authFetch('/Community/posts', {
+      method: "POST",
+      body: JSON.stringify(postData),
+    });
+  } catch (error) {
+    console.error("Failed to create post:", error);
+    throw error;
+  }
+};
+
+/**
+ * 🔹 Add Comment
+ * POST /api/Community/posts/{postId}/comments
+ */
+export const addComment = async (postId, content) => {
+  try {
+    return await authFetch(
+      `/Community/posts/${postId}/comments`,
+      {
+        method: "POST",
+        body: JSON.stringify({ content }),
+      }
+    );
+  } catch (error) {
+    console.error("Failed to add comment:", error);
+    throw error;
+  }
+};
+
+/**
+ * 🔹 Like Post
+ * POST /api/Community/posts/{postId}/like
+ */
+export const likePost = async (postId) => {
+  try {
+    return await authFetch(
+      `/Community/posts/${postId}/like`,
+      { method: "POST" }
+    );
+  } catch (error) {
+    console.error("Failed to like post:", error);
+    throw error;
+  }
+};
+
+/**
+ * 🔹 Unlike Post
+ * DELETE /api/Community/posts/{postId}/like
+ */
+export const unlikePost = async (postId) => {
+  try {
+    return await authFetch(
+      `/Community/posts/${postId}/like`,
+      { method: "DELETE" }
+    );
+  } catch (error) {
+    console.error("Failed to unlike post:", error);
+    throw error;
+  }
+};
+

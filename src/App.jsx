@@ -21,6 +21,7 @@ import CVAnalysis from "./components/CVAnalysis/CVAnalysis";
 import AdminLayout from "./components/AdminLayout/AdminLayout";
 import AnalyticsOverview from "./components/AdminOverview/AdminOverview";
 import AdminUserGrowth from "./components/AdminUserGrowth/AdminUserGrowth";
+import Community from "./components/Community/Community";
 
 
 function ProtectedRoute({ children }) {
@@ -65,6 +66,7 @@ function App() {
           <Route path="/Skills" element={<Skills />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/projects" element={<Projects />} />
+          <Route path="/Community" element={<Community />} />
           <Route path="/studyplanner" element={<StudyPlanner />} />
           <Route path="/jobtrends" element={<JobTrends />} />
           <Route path="/gapanalysis" element={<GapAnalysis />} />
