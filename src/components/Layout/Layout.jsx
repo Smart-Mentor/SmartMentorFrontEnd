@@ -2,12 +2,24 @@ import PropTypes from "prop-types";
 import { useState, useEffect, useCallback } from "react";
 import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import styles from "./Layout.module.css";
+import { fetchUserInfo } from "../../api/notificationService";
+import NotificationBell from "../NotificationBell/NotificationBell";
+import { useNotifications } from "../../hooks/useNotifications";
 
 export default function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isTablet, setIsTablet] = useState(window.innerWidth <= 1024);
+  
+  // Get notifications
+  const {
+    notifications,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    clearNotifications,
+  } = useNotifications();
 
   const isAiModelPage = location.pathname.includes('/aimentor/');
 
@@ -57,13 +69,17 @@ export default function Layout() {
   }, [navigate, handleDrawerClose]);
 
   const handleLogout = useCallback(() => {
-    // Add your logout logic here
-    // Example: clear tokens, user data, then redirect
+    localStorage.removeItem('authToken');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('userInfo');
     navigate('/login');
     handleDrawerClose();
   }, [navigate, handleDrawerClose]);
+
+  useEffect(() => {
+    fetchUserInfo();
+  }, []);
 
   // Classified menu items into 5 sections
   const menuSections = [
@@ -193,6 +209,18 @@ export default function Layout() {
       )}
 
       <main className={styles.main_content}>
+        {/* Floating Notification Bell - Bottom Right */}
+        <div className={styles.floating_notification}>
+          <NotificationBell
+            notifications={notifications}
+            unreadCount={unreadCount}
+            onMarkAsRead={markAsRead}
+            onMarkAllAsRead={markAllAsRead}
+            onClearAll={clearNotifications}
+          />
+        </div>
+        
+        {/* Page Content - Unchanged */}
         <Outlet />
       </main>
     </div>

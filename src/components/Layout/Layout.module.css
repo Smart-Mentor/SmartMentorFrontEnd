@@ -698,3 +698,39 @@ button {
     width: 100%;
   }
 }
+/* ================== Floating Notification Bell - Bottom Right ================== */
+.floating_notification {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+}
+
+/* Adjust for mobile */
+@media (max-width: 768px) {
+  .floating_notification {
+    bottom: 16px;
+    right: 16px;
+  }
+}
+
+/* When menu button is visible on tablet/mobile */
+@media (max-width: 1024px) {
+  .floating_notification {
+    bottom: 20px;
+    right: 20px;
+  }
+}
+
+/* Make sure the notification bell stands out */
+.floating_notification > div {
+  background: linear-gradient(135deg, #0A5ADB, #58A7B5);
+  border-radius: 50%;
+  box-shadow: 0 4px 16px rgba(10, 90, 219, 0.3);
+  transition: all 0.2s ease;
+}
+
+.floating_notification > div:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(10, 90, 219, 0.4);
+}
