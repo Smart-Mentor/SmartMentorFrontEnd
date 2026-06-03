@@ -47,11 +47,9 @@ function App() {
 
         <Route path="/signup" element={<Signup />} />
 
-        <Route path="/admindashboard" element={<AdminDashboard />} />
-
         <Route path="/completeprofile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
 
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="analytics" element={<AnalyticsOverview />} />
