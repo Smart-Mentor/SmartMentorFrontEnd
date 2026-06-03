@@ -1,1406 +1,1156 @@
-import { useState, useEffect, useRef } from "react";
-import { Avatar, Button, Divider, IconButton, Badge } from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import CommentIcon from "@mui/icons-material/ChatBubbleOutlineRounded";
-import DeleteIcon from "@mui/icons-material/Delete";
-import CreateIcon from "@mui/icons-material/Create";
-import CloseIcon from "@mui/icons-material/Close";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import React, { useState, useEffect, useCallback } from "react";
+import { useLocation } from 'react-router-dom';
+import { Box, CircularProgress, Alert, Dialog, DialogTitle, DialogContent, TextField, Button, Chip, IconButton } from "@mui/material";
+import { Close as CloseIcon, Favorite as FavoriteIcon, FavoriteBorder as FavoriteBorderIcon, Comment as CommentIcon, Send as SendIcon } from "@mui/icons-material";
+import ForumIcon from "@mui/icons-material/Forum";
+import PeopleIcon from "@mui/icons-material/People";
+import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 import AddIcon from "@mui/icons-material/Add";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import {
-  getCurrentUser,
-  getAllCareerGoals,
-  createPost,
-  addComment,
-  likePost,
-  unlikePost,
-  getUserProfile,
-  getPostsByCareerGoal,
-  getPostById,
-} from "../../api/authenticationService";
 import styles from "./Community.module.css";
 
-// ================================================
-// 🚫 قائمة الكلمات المحظورة
-// ================================================
-const BLOCKED_PATTERNS = {
-  arabic: [
-    "زب",
-    "زبي",
-    "زباله",
-    "نيج",
-    "نيجه",
-    "عرص",
-    "قحب",
-    "خنز",
-    "قذر",
-    "لوطي",
-    "لوط",
-    "مثلي",
-    "كلب",
-    "حمار",
-    "قرد",
-    "خنزير",
-    "لعنة",
-    "لعين",
-    "ملعون",
-    "زنوج",
-  ],
-  english: [
-    "fuck",
-    "fucks",
-    "fucked",
-    "fucking",
-    "fucker",
-    "shit",
-    "shits",
-    "shitty",
-    "ass",
-    "asses",
-    "asshole",
-    "assholes",
-    "bitch",
-    "bitches",
-    "bitchy",
-    "bastard",
-    "bastards",
-    "dick",
-    "dicks",
-    "dickhead",
-    "pussy",
-    "pussies",
-    "cock",
-    "cocks",
-    "whore",
-    "whores",
-    "slut",
-    "sluts",
-    "nigger",
-    "nigga",
-    "niggers",
-    "niggas",
-    "faggot",
-    "fags",
-    "retard",
-    "retards",
-    "moron",
-    "morons",
-    "idiot",
-    "idiots",
-    "dumbass",
-    "cunt",
-    "porn",
-    "sexy",
-  ],
-  symbols: ["fuk", "fck", "fuq", "phuck", "fukn", "sh1t", "@$$"],
-};
-
-const checkBlockedWords = (text) => {
-  if (!text) return { blocked: false, foundWords: [] };
-  const lowerText = text.toLowerCase().trim();
-  const foundWords = [];
-  const allPatterns = [
-    ...BLOCKED_PATTERNS.arabic,
-    ...BLOCKED_PATTERNS.english,
-    ...BLOCKED_PATTERNS.symbols,
-  ];
-  for (const word of allPatterns) {
-    if (lowerText.includes(word.toLowerCase())) {
-      foundWords.push(word);
-    }
-  }
-  return { blocked: foundWords.length > 0, foundWords };
-};
-
-const cleanText = (text) => {
-  if (!text) return "";
-  return text.replace(/\s+/g, " ").trim();
-};
-
-// ================================================
-// 🎨 ألوان الأفاتار الفاخرة
-// ================================================
-const avatarGradients = [
-  "linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)",
-  "linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%)",
-  "linear-gradient(135deg, #667EEA 0%, #764BA2 100%)",
-  "linear-gradient(135deg, #F093FB 0%, #F5576C 100%)",
-  "linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%)",
-  "linear-gradient(135deg, #43E97B 0%, #38F9D7 100%)",
-  "linear-gradient(135deg, #FA709A 0%, #FEE140 100%)",
-  "linear-gradient(135deg, #A18CD1 0%, #FBC2EB 100%)",
-  "linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%)",
-  "linear-gradient(135deg, #FFECD2 0%, #FCB69F 100%)",
-  "linear-gradient(135deg, #A1C4FD 0%, #C2E9FB 100%)",
-  "linear-gradient(135deg, #D4FC79 0%, #96E6A1 100%)",
-  "linear-gradient(135deg, #FDDb92 0%, #D1FDFF 100%)",
-  "linear-gradient(135deg, #A8EDEA 0%, #FED6E3 100%)",
-  "linear-gradient(135deg, #FF6B6B 0%, #FECA57 100%)",
-  "linear-gradient(135deg, #5F27CD 0%, #48DBFB 100%)",
-  "linear-gradient(135deg, #00D2D3 0%, #FF9FF3 100%)",
-  "linear-gradient(135deg, #FC5C7D 0%, #6A82FB 100%)",
-  "linear-gradient(135deg, #11998E 0%, #38EF7D 100%)",
-  "linear-gradient(135deg, #EE0979 0%, #FF6A00 100%)",
-];
-
-const getAvatarGradient = (name) => {
-  if (!name) return avatarGradients[0];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return avatarGradients[Math.abs(hash) % avatarGradients.length];
-};
-
-function stringAvatar(name) {
-  if (!name)
-    return { children: "?", sx: { background: getAvatarGradient(name) } };
-  const names = name.trim().split(" ");
-  let initials = "";
-  if (names.length >= 2) {
-    initials = `${names[0][0]}${names[1][0]}`.toUpperCase();
-  } else if (names[0]?.length >= 2) {
-    initials = names[0].substring(0, 2).toUpperCase();
-  } else {
-    initials = names[0]?.[0]?.toUpperCase() || "?";
-  }
-
-  return {
-    children: initials,
-    sx: {
-      background: getAvatarGradient(name),
-      fontWeight: 800,
-      fontSize: name.length > 10 ? "14px" : "16px",
-      boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-    },
-  };
-}
-
-// ================================================
-// 🔹 دالة تحويل بيانات البوست من API
-// ================================================
-const transformPost = (post, careerGoals = []) => {
-  let categoryName =
-    post.primaryCareerGoal?.careerGoalName || post.careerGoalName || "General";
-
-  if (post.careerGoalId || post.primaryCareerGoalId) {
-    const goalId = post.careerGoalId || post.primaryCareerGoalId;
-    const goal = careerGoals.find((g) => g.id === goalId);
-    categoryName =
-      goal?.name ||
-      post.primaryCareerGoal?.careerGoalName ||
-      post.careerGoalName ||
-      "General";
-  }
-
-  return {
-    id: post.id || post.postId,
-    title: post.title || "",
-    content:
-      post.content ||
-      post.data?.content ||
-      post.contentPreview ||
-      post.body ||
-      "",
-    userName:
-      post.userName ||
-      post.authorName ||
-      post.name ||
-      `${post.author?.firstName || ""} ${post.author?.lastName || ""}`.trim() ||
-      "Anonymous",
-    userId:
-      post.userId || post.authorId || post.user?.id || post.author?.userId,
-    likes: post.likes ?? post.likeCount ?? post.data?.likeCount ?? 0,
-    isLiked: post.isLiked ?? post.isLikedByCurrentUser ?? false,
-    comments: (
-      post.comments ||
-      post.postComments ||
-      post.data?.comments ||
-      []
-    ).map((c) => ({
-      id: c.id || c.commentId,
-      userName:
-        c.userName ||
-        c.authorName ||
-        `${c.author?.firstName || ""} ${c.author?.lastName || ""}`.trim() ||
-        "Anonymous",
-      userId: c.userId || c.authorId || c.author?.userId,
-      content: c.content || c.text || "",
-      createdAt: c.createdAt || c.date || new Date().toISOString(),
-    })),
-    createdAt:
-      post.createdAt || post.date || post.created || new Date().toISOString(),
-    category: categoryName,
-    categoryId: post.careerGoalId || post.primaryCareerGoalId,
-  };
-};
-
-export default function Community() {
+const Community = () => {
+  const [animate, setAnimate] = useState(false);
+  const location = useLocation();
   const [posts, setPosts] = useState([]);
-  const [myPosts, setMyPosts] = useState([]);
-  const [careerGoals, setCareerGoals] = useState([]);
-  const [selectedCareerGoal, setSelectedCareerGoal] = useState("all");
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("feed");
-  const [notification, setNotification] = useState(null);
-  const [userData, setUserData] = useState({
-    id: null,
-    name: "",
-    careerGoalName: "Student",
+  const [error, setError] = useState(null);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [postDetailOpen, setPostDetailOpen] = useState(false);
+  const [createPostOpen, setCreatePostOpen] = useState(false);
+  const [newPost, setNewPost] = useState({
+    title: "",
+    content: "",
+    primaryCareerGoalId: "",
+    careerGoalTagIds: []
+  });
+  const [newComment, setNewComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [careerGoals, setCareerGoals] = useState([]);
+  const [careerGoalsWithPosts, setCareerGoalsWithPosts] = useState([]);
+  const [careerGoalPostCounts, setCareerGoalPostCounts] = useState({});
+  const [selectedCareerGoalId, setSelectedCareerGoalId] = useState(null);
+  const [postDetailLoading, setPostDetailLoading] = useState(false);
+  const [userCareerGoalId, setUserCareerGoalId] = useState(null);
+  const [userProfileLoading, setUserProfileLoading] = useState(true);
+  const [careerGoalsLoading, setCareerGoalsLoading] = useState(true);
+  const [inlineCommentText, setInlineCommentText] = useState({});
+  const [postComments, setPostComments] = useState({});
+  const [inlineSubmitting, setInlineSubmitting] = useState({});
+  const [expandedComments, setExpandedComments] = useState({});
+  const [userInfo, setUserInfo] = useState({
+    firstName: '',
+    lastName: '',
+    userName: '',
+    email: '',
+    userId: ''
   });
 
-  // Create Post State
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [postTitle, setPostTitle] = useState("");
-  const [postContent, setPostContent] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [creating, setCreating] = useState(false);
+  // Get token from localStorage
+  const getAuthToken = () => localStorage.getItem('authToken');
 
-  // ================================================
-  // 🔔 Notifications State
-  // ================================================
-  const [notifications, setNotifications] = useState([]);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [bellShaking, setBellShaking] = useState(false);
-  const [newNotificationPopup, setNewNotificationPopup] = useState(null);
-  const notificationRef = useRef(null);
-
-  // Comment State
-  const [commentText, setCommentText] = useState({});
-  const [activeComments, setActiveComments] = useState(null);
-  const [submittingComment, setSubmittingComment] = useState(null);
-
-  // Delete State
-  const [postToDelete, setPostToDelete] = useState(null);
-
-  // Category Dropdown State
-  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-  const [showModalCategoryDropdown, setShowModalCategoryDropdown] =
-    useState(false);
-  const categoryRef = useRef(null);
-
-  const previousPostsRef = useRef([]);
-  const isFetchingNotificationsRef = useRef(false);
-
-  useEffect(() => {
-    fetchInitialData();
-    const handleClickOutside = (event) => {
-      if (categoryRef.current && !categoryRef.current.contains(event.target)) {
-        setShowCategoryDropdown(false);
-        setShowModalCategoryDropdown(false);
-      }
-      if (
-        notificationRef.current &&
-        !notificationRef.current.contains(event.target)
-      ) {
-        setShowNotifications(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    if (careerGoals.length > 0) {
-      fetchPosts();
-    }
-  }, [selectedCareerGoal, careerGoals, userData.id]);
-
-  // ================================================
-  // 🔔 Background Notification Check
-  // ================================================
-  useEffect(() => {
-    if (!userData.id || careerGoals.length === 0) return;
-
-    const interval = setInterval(async () => {
-      if (isFetchingNotificationsRef.current) return;
-
-      isFetchingNotificationsRef.current = true;
-
-      if (previousPostsRef.current.length === 0) {
-        await fetchPosts(false);
-      } else {
-        await fetchPosts(true);
-      }
-      isFetchingNotificationsRef.current = false;
-    }, 15000);
-
-    return () => clearInterval(interval);
-  }, [careerGoals, selectedCareerGoal, userData.id]);
-
-  useEffect(() => {
-    if (notifications.length > 0) {
-      setBellShaking(true);
-      const timer = setTimeout(() => setBellShaking(false), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [notifications.length]);
-
-  const showNotification = (message, type) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 4000);
-  };
-
-  const fetchInitialData = async () => {
+  // Fetch user info from /api/auth/me
+  const fetchUserInfo = async () => {
     try {
-      setLoading(true);
+      const token = getAuthToken();
+      if (!token) return;
 
-      const [currentUser, allCareerGoalsData, userProfile] = await Promise.all([
-        getCurrentUser().catch(() => null),
-        getAllCareerGoals().catch(() => []),
-        getUserProfile().catch(() => null),
-      ]);
-
-      const userId =
-        currentUser?.id ||
-        currentUser?.userId ||
-        localStorage.getItem("userId");
-
-      setUserData({
-        id: userId,
-        name: `${currentUser?.firstName || "User"} ${currentUser?.lastName || ""}`.trim(),
-        careerGoalName: userProfile?.careerGoalName || "Student",
+      const response = await fetch('https://smartmentorapi.runasp.net/api/auth/me', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
-      setCareerGoals(allCareerGoalsData || []);
-
-      if (allCareerGoalsData?.length > 0 && !selectedCategory) {
-        setSelectedCategory(allCareerGoalsData[0].id);
+      if (response.ok) {
+        const data = await response.json();
+        setUserInfo({
+          firstName: data.firstName || '',
+          lastName: data.lastName || '',
+          userName: data.userName || '',
+          email: data.email || '',
+          userId: data.userId || ''
+        });
+        // Store in localStorage for quick access
+        localStorage.setItem('userFirstName', data.firstName || '');
+        localStorage.setItem('userLastName', data.lastName || '');
+        localStorage.setItem('userFullName', `${data.firstName || ''} ${data.lastName || ''}`.trim());
       }
     } catch (err) {
-      console.error("Failed to fetch initial data:", err);
+      console.error("Failed to fetch user info:", err);
+    }
+  };
+
+  // Fetch user profile to get careerGoalId
+  const fetchUserProfile = async () => {
+    try {
+      setUserProfileLoading(true);
+      const token = getAuthToken();
+      
+      if (!token) {
+        throw new Error('Please login to view community posts');
+      }
+
+      const response = await fetch('https://smartmentorapi.runasp.net/api/User/profile', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Session expired. Please login again.');
+        }
+        throw new Error('Failed to fetch user profile');
+      }
+
+      const data = await response.json();
+      
+      if (data.success && data.data) {
+        // Get careerGoalId from user profile
+        const careerGoalId = data.data.careerGoalId || data.data.careerGoal?.careerGoalId;
+        setUserCareerGoalId(careerGoalId);
+        
+        // AUTO-FILL: Set the user's career goal as the default primaryCareerGoalId for new posts
+        if (careerGoalId) {
+          setNewPost(prev => ({
+            ...prev,
+            primaryCareerGoalId: careerGoalId
+          }));
+        }
+        
+        return careerGoalId;
+      }
+      return null;
+    } catch (err) {
+      console.error("Failed to fetch user profile:", err);
+      setError(err.message);
+      return null;
+    } finally {
+      setUserProfileLoading(false);
+    }
+  };
+
+  // Fetch career goals
+  const fetchCareerGoals = async () => {
+    try {
+      setCareerGoalsLoading(true);
+      const token = getAuthToken();
+      if (!token) return;
+
+      const response = await fetch('https://smartmentorapi.runasp.net/api/CareerGoal/GetAllCareerGoals', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // The API returns an array directly
+        if (Array.isArray(data)) {
+          // Map the response to match your expected structure
+          const mappedCareerGoals = data.map(goal => ({
+            careerGoalId: goal.id,
+            careerGoalName: goal.name,
+            description: goal.description
+          }));
+          setCareerGoals(mappedCareerGoals);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch career goals:", err);
+    } finally {
+      setCareerGoalsLoading(false);
+    }
+  };
+
+  // Modify fetchPosts to RETURN data instead of setting state directly
+  const fetchPostsData = async (careerGoalId = null) => {
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        throw new Error('Please login to view community posts');
+      }
+
+      let url = 'https://smartmentorapi.runasp.net/api/Community/posts';
+      if (careerGoalId) {
+        url = `https://smartmentorapi.runasp.net/api/Community/career-goals/${careerGoalId}/posts`;
+      }
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Session expired. Please login again.');
+        }
+        throw new Error('Failed to fetch posts');
+      }
+
+      const data = await response.json();
+      
+      if (data.success && data.data) {
+        return data.data;
+      }
+      return [];
+    } catch (err) {
+      setError(err.message);
+      return [];
+    }
+  };
+
+  // Fetch comments for a post (for inline display)
+  const fetchCommentsForPost = async (postId) => {
+    try {
+      const token = getAuthToken();
+      const response = await fetch(`https://smartmentorapi.runasp.net/api/Community/posts/${postId}`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        cache: 'no-cache'
+      });
+      if (!response.ok) return;
+      const data = await response.json();
+      if (data.success && data.data?.comments) {
+        // Sort comments by date (newest first)
+        const sortedComments = [...data.data.comments].sort((a, b) => {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+        setPostComments(prev => ({ ...prev, [postId]: sortedComments }));
+      }
+    } catch (err) {
+      console.error('Failed to fetch comments for post', postId, err);
+    }
+  };
+
+  // Refresh all posts from all career goals
+  const refreshAllPosts = async () => {
+    // Use all career goal IDs from the API
+    const goalIds = careerGoals.map(goal => goal.careerGoalId);
+    
+    if (goalIds.length === 0) {
+      setLoading(false);
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      // Fetch all posts in parallel
+      const allPostsArrays = await Promise.all(
+        goalIds.map(id => fetchPostsData(id))
+      );
+      
+      // Calculate post counts per career goal
+      const counts = {};
+      goalIds.forEach((id, index) => {
+        counts[id] = allPostsArrays[index].length;
+      });
+      setCareerGoalPostCounts(counts);
+      
+      // Merge all posts (flatten the array)
+      const mergedPosts = allPostsArrays.flat();
+      
+      // Remove duplicates based on postId
+      const uniquePosts = Array.from(
+        new Map(mergedPosts.map(post => [post.postId, post])).values()
+      );
+      
+      // Sort posts by date (newest first)
+      const sortedPosts = uniquePosts.sort((a, b) => {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+      
+      setPosts(sortedPosts);
+
+      // Fetch comments for each post in background
+      sortedPosts.forEach(post => {
+        fetchCommentsForPost(post.postId);
+      });
+
+      // Filter career goals that have posts
+      let goalsWithPosts = careerGoals.filter(goal => counts[goal.careerGoalId] > 0);
+      
+      // Always include user's primary career goal even if it has no posts
+      if (userCareerGoalId && !goalsWithPosts.some(goal => goal.careerGoalId === userCareerGoalId)) {
+        const primaryGoal = careerGoals.find(goal => goal.careerGoalId === userCareerGoalId);
+        if (primaryGoal) {
+          goalsWithPosts = [primaryGoal, ...goalsWithPosts];
+        }
+      }
+      
+      setCareerGoalsWithPosts(goalsWithPosts);
+    } catch (err) {
+      setError('Failed to fetch posts');
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchPosts = async (isAutoRefresh = false) => {
+  // Submit inline comment from post card
+  const handleInlineComment = async (postId) => {
+    const text = (inlineCommentText[postId] || '').trim();
+    if (!text) return;
+    
+    const commentText = text;
+    setInlineCommentText(prev => ({ ...prev, [postId]: '' }));
+    setInlineSubmitting(prev => ({ ...prev, [postId]: true }));
+    
+    // Optimistic comment with user info
+    const optimisticComment = {
+      commentId: Date.now(),
+      content: commentText,
+      createdAt: new Date().toISOString(),
+      author: {
+        firstName: userInfo.firstName || localStorage.getItem('userFirstName') || 'You',
+        lastName: userInfo.lastName || localStorage.getItem('userLastName') || '',
+        email: userInfo.email || ''
+      }
+    };
+    
+    // Add optimistic comment to UI and sort (newest first)
+    setPostComments(prev => {
+      const existingComments = prev[postId] || [];
+      const newComments = [...existingComments, optimisticComment];
+      // Sort newest first
+      const sortedComments = newComments.sort((a, b) => {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+      return { ...prev, [postId]: sortedComments };
+    });
+    
     try {
-      let fetchedPosts = [];
-
-      if (selectedCareerGoal === "all") {
-        for (const goal of careerGoals) {
-          try {
-            const response = await getPostsByCareerGoal(goal.id);
-            const categoryPosts =
-              response?.posts || response?.data || response?.items || response;
-
-            if (Array.isArray(categoryPosts)) {
-              const transformed = await Promise.all(
-                categoryPosts.map(async (post) => {
-                  let fullPost = post;
-                  try {
-                    const response = await getPostById(post.postId || post.id);
-                    fullPost = response?.data || response;
-                  } catch (e) {
-                    console.error("Failed full post fetch", e);
-                  }
-
-                  return transformPost(
-                    { ...post, ...fullPost, careerGoalId: goal.id },
-                    careerGoals,
-                  );
-                }),
-              );
-              fetchedPosts.push(...transformed);
-            }
-          } catch (err) {
-            console.error(`Failed category ${goal.id}`, err);
-          }
-        }
+      const token = getAuthToken();
+      const response = await fetch(`https://smartmentorapi.runasp.net/api/Community/posts/${postId}/comments`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: commentText })
+      });
+      if (response.ok) {
+        await fetchCommentsForPost(postId);
+        setPosts(prev => prev.map(p => p.postId === postId ? { ...p, commentCount: (p.commentCount || 0) + 1 } : p));
       } else {
-        const response = await getPostsByCareerGoal(selectedCareerGoal);
-        const categoryPosts =
-          response?.posts || response?.data || response?.items || response;
-
-        fetchedPosts = Array.isArray(categoryPosts)
-          ? await Promise.all(
-              categoryPosts.map(async (post) => {
-                let fullPost = post;
-                try {
-                  const response = await getPostById(post.postId || post.id);
-                  fullPost = response?.data || response;
-                } catch (e) {
-                  console.error("Failed full post fetch", e);
-                }
-                return transformPost({ ...post, ...fullPost }, careerGoals);
-              }),
-            )
-          : [];
-      }
-
-      fetchedPosts.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-      );
-
-      if (!isAutoRefresh) {
-        fetchedPosts = [...fetchedPosts].sort(() => Math.random() - 0.5);
-      }
-
-      if (isAutoRefresh && previousPostsRef.current.length > 0) {
-        const previousPosts = previousPostsRef.current;
-        const newNotifications = [];
-
-        fetchedPosts.forEach((newPost) => {
-          const oldPost = previousPosts.find((p) => p.id === newPost.id);
-
-          if (oldPost && String(newPost.userId) === String(userData.id)) {
-            if (newPost.likes > oldPost.likes && !newPost.isLiked) {
-              const likeCount = newPost.likes - oldPost.likes;
-              newNotifications.push({
-                id: Date.now() + Math.random(),
-                postId: newPost.id,
-                type: "like",
-                text:
-                  likeCount === 1
-                    ? `❤️ Someone liked your post "${newPost.title.substring(0, 25)}${newPost.title.length > 25 ? "..." : ""}"`
-                    : `❤️ ${likeCount} people liked your post "${newPost.title.substring(0, 25)}${newPost.title.length > 25 ? "..." : ""}"`,
-                createdAt: new Date().toISOString(),
-              });
-            }
-
-            const oldCommentIds = new Set(
-              (oldPost.comments || []).map((c) => c.id),
-            );
-
-            const newComments = (newPost.comments || []).filter(
-              (c) => !oldCommentIds.has(c.id),
-            );
-
-            if (newComments.length > 0) {
-              newNotifications.push({
-                id: Date.now() + Math.random() + 1,
-                postId: newPost.id,
-                type: "comment",
-                text:
-                  newComments.length === 1
-                    ? `💬 Someone commented on "${newPost.title.substring(0, 25)}${newPost.title.length > 25 ? "..." : ""}"`
-                    : `💬 ${newComments.length} new comments on "${newPost.title.substring(0, 25)}${newPost.title.length > 25 ? "..." : ""}"`,
-                createdAt: new Date().toISOString(),
-              });
-            }
-          }
-        });
-
-        if (newNotifications.length > 0) {
-          console.log("🔔 New notifications detected:", newNotifications);
-
-          setNotifications((prev) => {
-            const existing = new Set(
-              prev.map((n) => `${n.type}-${n.postId}-${n.text}`),
-            );
-            const filtered = newNotifications.filter(
-              (n) => !existing.has(`${n.type}-${n.postId}-${n.text}`),
-            );
-            return [...filtered, ...prev];
-          });
-
-          setNewNotificationPopup(newNotifications[0]);
-          setTimeout(() => setNewNotificationPopup(null), 5000);
-        }
-      }
-
-      previousPostsRef.current = fetchedPosts;
-
-      if (!isAutoRefresh) {
-        setPosts(fetchedPosts);
-
-        setMyPosts(
-          fetchedPosts.filter(
-            (post) => String(post.userId) === String(userData.id),
-          ),
-        );
+        // Revert optimistic comment on error
+        setPostComments(prev => ({
+          ...prev,
+          [postId]: (prev[postId] || []).filter(c => c.commentId !== optimisticComment.commentId)
+        }));
+        setInlineCommentText(prev => ({ ...prev, [postId]: commentText }));
       }
     } catch (err) {
-      console.error("Failed to fetch posts:", err);
-      setPosts([]);
-      setMyPosts([]);
+      // Revert optimistic comment on error
+      setPostComments(prev => ({
+        ...prev,
+        [postId]: (prev[postId] || []).filter(c => c.commentId !== optimisticComment.commentId)
+      }));
+      setInlineCommentText(prev => ({ ...prev, [postId]: commentText }));
+    } finally {
+      setInlineSubmitting(prev => ({ ...prev, [postId]: false }));
     }
   };
 
-  // ================================================
-  // 🔹 إنشاء بوست جديد
-  // ================================================
+  // Open post from navigation state (e.g. from Profile activity click)
+  useEffect(() => {
+    const openPostId = location?.state?.openPostId;
+    if (!openPostId || posts.length === 0) return;
+    const found = posts.find(p => String(p.postId) === String(openPostId));
+    if (found) {
+      openPostDetail(found);
+      // Clear the state so re-renders don't re-open it
+      window.history.replaceState({}, document.title);
+    } else {
+      // Post not in current list — fetch directly
+      fetchPostDetail(openPostId);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location?.state?.openPostId, posts]);
+
+  // Handle like/unlike
+  const handleLike = async (postId, isCurrentlyLiked) => {
+    try {
+      const token = getAuthToken();
+      const method = isCurrentlyLiked ? 'DELETE' : 'POST';
+
+      const response = await fetch(`https://smartmentorapi.runasp.net/api/Community/posts/${postId}/like`, {
+        method: method,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        // Update local state
+        setPosts(prevPosts =>
+          prevPosts.map(post =>
+            post.postId === postId
+              ? {
+                  ...post,
+                  likeCount: isCurrentlyLiked ? post.likeCount - 1 : post.likeCount + 1,
+                  isLikedByCurrentUser: !isCurrentlyLiked
+                }
+              : post
+          )
+        );
+
+        // Also update selected post if open
+        if (selectedPost && selectedPost.postId === postId) {
+          setSelectedPost(prev => ({
+            ...prev,
+            likeCount: isCurrentlyLiked ? prev.likeCount - 1 : prev.likeCount + 1,
+            isLikedByCurrentUser: !isCurrentlyLiked
+          }));
+        }
+      }
+    } catch (err) {
+      console.error("Failed to like/unlike post:", err);
+    }
+  };
+
+  // Handle create post
   const handleCreatePost = async () => {
-    const titleCheck = checkBlockedWords(postTitle);
-    const contentCheck = checkBlockedWords(postContent);
-
-    if (titleCheck.blocked) {
-      showNotification(
-        `Title contains inappropriate words: "${titleCheck.foundWords.join(", ")}"`,
-        "error",
-      );
-      return;
-    }
-
-    if (contentCheck.blocked) {
-      showNotification(
-        `Content contains inappropriate words: "${contentCheck.foundWords.join(", ")}"`,
-        "error",
-      );
-      return;
-    }
-
-    if (!postTitle.trim() || !postContent.trim()) {
-      showNotification("Please fill in title and content", "error");
-      return;
-    }
-
-    if (!selectedCategory) {
-      showNotification("Please select a category", "error");
+    if (!newPost.title.trim() || !newPost.content.trim()) {
+      alert("Please fill in title and content");
       return;
     }
 
     try {
-      setCreating(true);
+      setSubmitting(true);
+      const token = getAuthToken();
 
-      const postData = {
-        title: cleanText(postTitle),
-        content: cleanText(postContent),
-        primaryCareerGoalId: selectedCategory,
+      const requestBody = {
+        title: newPost.title,
+        content: newPost.content
       };
 
-      const newPost = await createPost(postData);
+      if (newPost.primaryCareerGoalId && newPost.primaryCareerGoalId !== "") {
+        requestBody.primaryCareerGoalId = parseInt(newPost.primaryCareerGoalId);
+      }
 
-      const goal = careerGoals.find((g) => g.id === selectedCategory);
-      const createdPost = {
-        id: newPost?.id || newPost?.postId || Date.now(),
-        title: cleanText(postTitle),
-        content: cleanText(postContent),
-        userName: userData.name,
-        userId: userData.id,
-        likes: 0,
-        isLiked: false,
-        comments: [],
-        createdAt: new Date().toISOString(),
-        category: goal?.name || "General",
-        categoryId: selectedCategory,
-      };
+      if (newPost.careerGoalTagIds && newPost.careerGoalTagIds.length > 0) {
+        requestBody.careerGoalTagIds = newPost.careerGoalTagIds.map(id => parseInt(id));
+      }
 
-      setPosts((prev) => [createdPost, ...prev]);
-      setMyPosts((prev) => [createdPost, ...prev]);
+      const response = await fetch('https://smartmentorapi.runasp.net/api/Community/posts', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+      });
 
-      setPostTitle("");
-      setPostContent("");
-      setShowCreateModal(false);
-      showNotification("Post created successfully! 🎉", "success");
+      if (response.ok) {
+        setCreatePostOpen(false);
+        setNewPost({ 
+          title: "", 
+          content: "", 
+          primaryCareerGoalId: userCareerGoalId || "", 
+          careerGoalTagIds: [] 
+        });
+        
+        // Refresh all posts
+        await refreshAllPosts();
+      } else {
+        const errorText = await response.text();
+        console.error("Create post failed:", response.status, errorText);
+        throw new Error(errorText || 'Failed to create post');
+      }
     } catch (err) {
       console.error("Failed to create post:", err);
-      showNotification("Failed to create post", "error");
+      alert(err.message);
     } finally {
-      setCreating(false);
+      setSubmitting(false);
     }
   };
 
-  // ================================================
-  // 🔹 حذف بوست
-  // ================================================
-  const handleDeletePost = async () => {
-    if (!postToDelete) return;
-    const postId = postToDelete;
-    setPostToDelete(null);
+  // Handle add comment (for modal)
+  const handleAddComment = async () => {
+    if (!newComment.trim() || !selectedPost) return;
 
-    setPosts((prev) => prev.filter((p) => p.id !== postId));
-    setMyPosts((prev) => prev.filter((p) => p.id !== postId));
-
-    showNotification("Post deleted successfully! 🗑️", "success");
-  };
-
-  // ================================================
-  // 🔹 لايك/أنلايك بوست
-  // ================================================
-  const handleLike = async (postId) => {
-    const currentPost = posts.find((p) => p.id === postId);
-    if (!currentPost) return;
-
-    const wasLiked = currentPost.isLiked;
-
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId
-          ? {
-              ...p,
-              isLiked: !wasLiked,
-              likes: wasLiked ? p.likes - 1 : p.likes + 1,
-            }
-          : p,
-      ),
-    );
-
-    setMyPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId
-          ? {
-              ...p,
-              isLiked: !wasLiked,
-              likes: wasLiked ? p.likes - 1 : p.likes + 1,
-            }
-          : p,
-      ),
-    );
+    const commentContent = newComment.trim();
+    setNewComment("");
+    setSubmitting(true);
 
     try {
-      if (wasLiked) {
-        await unlikePost(postId);
+      const token = getAuthToken();
+
+      const response = await fetch(`https://smartmentorapi.runasp.net/api/Community/posts/${selectedPost.postId}/comments`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ content: commentContent })
+      });
+
+      if (response.ok) {
+        await fetchPostDetail(selectedPost.postId);
+        
+        setPosts(prevPosts =>
+          prevPosts.map(post =>
+            post.postId === selectedPost.postId
+              ? { ...post, commentCount: (post.commentCount || 0) + 1 }
+              : post
+          )
+        );
       } else {
-        await likePost(postId);
+        setNewComment(commentContent);
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to add comment');
       }
-    } catch (err) {
-      console.error("Failed to update like:", err);
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.id === postId
-            ? { ...p, isLiked: wasLiked, likes: currentPost.likes }
-            : p,
-        ),
-      );
-      setMyPosts((prev) =>
-        prev.map((p) =>
-          p.id === postId
-            ? { ...p, isLiked: wasLiked, likes: currentPost.likes }
-            : p,
-        ),
-      );
-    }
-  };
-
-  // ================================================
-  // 🔹 إضافة تعليق
-  // ================================================
-  const handleAddComment = async (postId) => {
-    const currentComment = commentText[postId] || "";
-
-    if (!currentComment.trim()) {
-      showNotification("Please enter a comment", "error");
-      return;
-    }
-
-    const contentCheck = checkBlockedWords(currentComment);
-    if (contentCheck.blocked) {
-      showNotification(
-        `Comment contains inappropriate words: "${contentCheck.foundWords.join(", ")}"`,
-        "error",
-      );
-      return;
-    }
-
-    const commentData = {
-      id: Date.now(),
-      userName: userData.name,
-      userId: userData.id,
-      content: cleanText(currentComment),
-      createdAt: new Date().toISOString(),
-    };
-
-    setSubmittingComment(postId);
-
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId
-          ? { ...p, comments: [...(p.comments || []), commentData] }
-          : p,
-      ),
-    );
-
-    setMyPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId
-          ? { ...p, comments: [...(p.comments || []), commentData] }
-          : p,
-      ),
-    );
-
-    const tempCommentText = currentComment;
-
-    setCommentText((prev) => ({
-      ...prev,
-      [postId]: "",
-    }));
-
-    try {
-      await addComment(postId, cleanText(tempCommentText));
-      showNotification("Comment added! 💬", "success");
     } catch (err) {
       console.error("Failed to add comment:", err);
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.id === postId
-            ? {
-                ...p,
-                comments: p.comments.filter((c) => c.id !== commentData.id),
-              }
-            : p,
-        ),
-      );
-      setMyPosts((prev) =>
-        prev.map((p) =>
-          p.id === postId
-            ? {
-                ...p,
-                comments: p.comments.filter((c) => c.id !== commentData.id),
-              }
-            : p,
-        ),
-      );
-      showNotification("Failed to add comment", "error");
+      alert(err.message);
     } finally {
-      setSubmittingComment(null);
+      setSubmitting(false);
     }
   };
 
-  // ================================================
-  // 🔹 حذف تعليق
-  // ================================================
-  const handleDeleteComment = async (postId, commentId) => {
-    const commentToDelete = posts
-      .find((p) => p.id === postId)
-      ?.comments?.find((c) => c.id === commentId);
-
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId
-          ? { ...p, comments: p.comments.filter((c) => c.id !== commentId) }
-          : p,
-      ),
-    );
-
-    setMyPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId
-          ? { ...p, comments: p.comments.filter((c) => c.id !== commentId) }
-          : p,
-      ),
-    );
-
+  // Fetch single post details
+  const fetchPostDetail = async (postId) => {
     try {
-      showNotification("Comment deleted! 🗑️", "success");
-    } catch (err) {
-      console.error("Failed to delete comment:", err);
-      if (commentToDelete) {
-        setPosts((prev) =>
-          prev.map((p) =>
-            p.id === postId
-              ? { ...p, comments: [...(p.comments || []), commentToDelete] }
-              : p,
-          ),
-        );
-        setMyPosts((prev) =>
-          prev.map((p) =>
-            p.id === postId
-              ? { ...p, comments: [...(p.comments || []), commentToDelete] }
-              : p,
-          ),
-        );
+      setPostDetailLoading(true);
+      const token = getAuthToken();
+    
+      const response = await fetch(`https://smartmentorapi.runasp.net/api/Community/posts/${postId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        cache: 'no-cache'
+      });
+    
+      if (!response.ok) {
+        throw new Error('Failed to fetch post details');
       }
-      showNotification("Failed to delete comment", "error");
+    
+      const data = await response.json();
+    
+      if (data.success && data.data) {
+        // Sort comments by date (newest first) when fetching post detail
+        if (data.data.comments && Array.isArray(data.data.comments)) {
+          data.data.comments.sort((a, b) => {
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          });
+        }
+        setSelectedPost(data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch post detail:", err);
+    } finally {
+      setPostDetailLoading(false);
     }
   };
 
-  // ================================================
-  // 🔹 مسح كل الإشعارات
-  // ================================================
-  const clearAllNotifications = () => {
-    setNotifications([]);
-    showNotification("All notifications cleared! ✅", "success");
+  // Open post detail modal
+  const openPostDetail = async (post) => {
+    await fetchPostDetail(post.postId);
+    setPostDetailOpen(true);
   };
 
-  // ================================================
-  // 🔹 مسح إشعار واحد
-  // ================================================
-  const removeNotification = (notificationId) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+  // Filter posts by career goal
+  const handleCareerGoalFilter = async (careerGoalId) => {
+    setSelectedCareerGoalId(careerGoalId);
+    setLoading(true);
+    
+    try {
+      if (careerGoalId === null) {
+        await refreshAllPosts();
+      } else {
+        const postsData = await fetchPostsData(careerGoalId);
+        const sortedPosts = postsData.sort((a, b) => {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+        setPosts(sortedPosts);
+        sortedPosts.forEach(post => { fetchCommentsForPost(post.postId); });
+      }
+    } catch (err) {
+      setError('Failed to fetch posts');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const toggleComments = (postId) => {
-    setActiveComments(activeComments === postId ? null : postId);
+  // Clear filter
+  const handleClearFilter = () => {
+    handleCareerGoalFilter(null);
   };
 
+  // Format date
   const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    if (!dateString) return 'Unknown date';
+    
+    try {
+      const utcDate = new Date(dateString);
+      if (isNaN(utcDate.getTime())) return 'Invalid date';
+      
+      const egyptDate = new Date(utcDate.getTime() + (3 * 60 * 60 * 1000));
+      
+      const now = new Date();
+      const diffMs = now - egyptDate;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+      
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins} min ago`;
+      if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+      if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+      return egyptDate.toLocaleDateString('en-EG');
+    } catch (error) {
+      console.error('Error formatting date:', dateString, error);
+      return 'Invalid date';
+    }
   };
 
-  const isOwnPost = (post) => {
-    if (!post || !userData.id) return false;
-    return String(post.userId) === String(userData.id);
+  // Get the selected career goal name for display
+  const getSelectedCareerGoalName = () => {
+    if (!selectedCareerGoalId) return "All Posts";
+    const goal = careerGoals.find(g => g.careerGoalId === selectedCareerGoalId);
+    return goal ? goal.careerGoalName : "All Posts";
   };
 
-  const isOwnComment = (comment) => {
-    if (!comment || !userData.id) return false;
-    return String(comment.userId) === String(userData.id);
+  // Get user's primary career goal name
+  const getUserPrimaryCareerGoalName = () => {
+    if (!userCareerGoalId) return null;
+    const goal = careerGoals.find(g => g.careerGoalId === userCareerGoalId);
+    return goal ? goal.careerGoalName : null;
   };
 
-  const getSelectedCategoryName = () => {
-    if (selectedCareerGoal === "all") return "All Categories";
-    const goal = careerGoals.find((g) => g.id === selectedCareerGoal);
-    return goal?.name || "Select Category";
-  };
+  // Initialize: fetch user profile, user info, and career goals
+  useEffect(() => {
+    setAnimate(true);
+    const initialize = async () => {
+      await fetchUserProfile();
+      await fetchUserInfo();
+      await fetchCareerGoals();
+    };
+    initialize();
+  }, []);
 
-  const displayedPosts = activeTab === "my-posts" ? myPosts : posts;
+  // Fetch posts after career goals are loaded
+  useEffect(() => {
+    if (careerGoals.length > 0) {
+      refreshAllPosts();
+    }
+  }, [careerGoals]);
 
-  if (loading) {
+  // Stats
+  const totalPosts = posts.length;
+  const totalLikes = posts.reduce((sum, post) => sum + (post.likeCount || 0), 0);
+  const totalComments = posts.reduce((sum, post) => sum + (post.commentCount || 0), 0);
+
+  // Show loading while fetching user profile
+  if (userProfileLoading || careerGoalsLoading || (loading && posts.length === 0)) {
     return (
-      <div className={styles.community_container}>
-        <div className={styles.loading_container}>
-          <div className={styles.loading_spinner}></div>
-          <p>Loading community...</p>
+      <Box component="main" className={styles.community_container}>
+        <div className={styles.bg_blur_1}></div>
+        <div className={styles.bg_blur_2}></div>
+        <div className={styles.bg_blur_3}></div>
+        <div className={styles.community_content}>
+          <div className={styles.loading_container}>
+            <CircularProgress />
+            <span>Loading community posts...</span>
+          </div>
         </div>
-      </div>
+      </Box>
     );
   }
 
   return (
-    <div className={styles.community_container}>
-      {/* 🔔 New Notification Popup Toast */}
-      {newNotificationPopup && (
-        <div className={styles.notification_popup}>
-          <div className={styles.popup_icon}>
-            {newNotificationPopup.type === "like" ? (
-              <FavoriteIcon className={styles.heart_icon} />
-            ) : (
-              <CommentIcon className={styles.comment_icon} />
-            )}
-          </div>
-          <div className={styles.popup_content}>
-            <p>{newNotificationPopup.text}</p>
-            <small>{formatDate(newNotificationPopup.createdAt)}</small>
-          </div>
-          <IconButton
-            className={styles.popup_close}
-            onClick={() => setNewNotificationPopup(null)}
-            size="small"
-          >
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        </div>
-      )}
-
-      {/* Main Notification Toast */}
-      {notification && (
-        <div className={`${styles.notification} ${styles[notification.type]}`}>
-          {notification.message}
-        </div>
-      )}
-
-      {/* ================================================ */}
-      {/* 🔔 Floating Action Button - ثابت */}
-      {/* ================================================ */}
-      <button
-        className={styles.fab_button}
-        onClick={() => setShowCreateModal(true)}
-        title="Create new post"
-      >
-        <AddIcon className={styles.fab_icon} />
-      </button>
+    <Box component="main" className={styles.community_container}>
+      {/* Background decorative elements */}
+      <div className={styles.bg_blur_1}></div>
+      <div className={styles.bg_blur_2}></div>
+      <div className={styles.bg_blur_3}></div>
+      <div className={styles.particle_1}></div>
+      <div className={styles.particle_2}></div>
 
       <div className={styles.community_content}>
-        {/* Header */}
-        <div className={styles.header}>
+        {/* Header Section */}
+        <div className={`${styles.header_section} ${animate ? styles.fade_in : ""}`}>
           <div className={styles.header_left}>
-            <h2 className={styles.header_title}>Community</h2>
-            <p className={styles.header_subtitle}>
-              Share knowledge and connect with others
-            </p>
+            <div className={styles.header_icon_wrapper}>
+              <ForumIcon className={styles.header_icon} />
+            </div>
+            <div>
+              <h1 className={styles.header_title}>Community Hub</h1>
+              <p className={styles.header_subtitle}>
+                Connect, share, and learn with fellow developers
+              </p>
+            </div>
+          </div>
+          <button
+            className={styles.create_post_btn}
+            onClick={() => setCreatePostOpen(true)}
+          >
+            <AddIcon className={styles.btn_icon} />
+            Create Post
+          </button>
+        </div>
+
+        {/* User Primary Career Goal Banner */}
+        {userCareerGoalId && careerGoals.length > 0 && (
+          <div className={`${styles.primary_goal_banner} ${animate ? styles.slide_up : ""}`}>
+            <div className={styles.primary_goal_content}>
+              <span className={styles.primary_goal_icon}>🎯</span>
+              <div className={styles.primary_goal_info}>
+                <span className={styles.primary_goal_label}>Your Primary Career Goal :</span>
+                <span className={styles.primary_goal_name}>
+                  {getUserPrimaryCareerGoalName()}
+                </span>
+              </div>
+              <span className={styles.primary_goal_hint}>
+                This will be auto-selected when creating posts
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Stats Cards */}
+        <div className={styles.stats_grid}>
+          <div className={`${styles.stat_card} ${animate ? styles.slide_up : ""}`}>
+            <div className={styles.stat_icon_wrapper} style={{ background: "rgba(10, 90, 219, 0.1)" }}>
+              <ForumIcon className={styles.stat_icon} style={{ color: "#0A5ADB" }} />
+            </div>
+            <div className={styles.stat_info}>
+              <span className={styles.stat_value}>{totalPosts}</span>
+              <span className={styles.stat_label}>Total Posts</span>
+            </div>
           </div>
 
-          {/* 🔔 Notification Bell Button */}
-          <div className={styles.header_right} ref={notificationRef}>
-            <button
-              className={`${styles.notification_bell_btn} ${bellShaking ? styles.shaking : ""}`}
-              onClick={async () => {
-                const newState = !showNotifications;
+          <div className={`${styles.stat_card} ${animate ? styles.slide_up : ""}`} style={{ animationDelay: "0.1s" }}>
+            <div className={styles.stat_icon_wrapper} style={{ background: "rgba(88, 167, 181, 0.1)" }}>
+              <ThumbUpAltIcon className={styles.stat_icon} style={{ color: "#58A7B5" }} />
+            </div>
+            <div className={styles.stat_info}>
+              <span className={styles.stat_value}>{totalLikes}</span>
+              <span className={styles.stat_label}>Total Likes</span>
+            </div>
+          </div>
 
-                setShowNotifications(newState);
-                if (newState) {
-                  setBellShaking(false);
-                }
+          <div className={`${styles.stat_card} ${animate ? styles.slide_up : ""}`} style={{ animationDelay: "0.2s" }}>
+            <div className={styles.stat_icon_wrapper} style={{ background: "rgba(245, 158, 11, 0.1)" }}>
+              <PeopleIcon className={styles.stat_icon} style={{ color: "#f59e0b" }} />
+            </div>
+            <div className={styles.stat_info}>
+              <span className={styles.stat_value}>{totalComments}</span>
+              <span className={styles.stat_label}>Total Comments</span>
+            </div>
+          </div>
+        </div>
 
-                // لما يفتح الجرس
-                if (newState) {
-                  // أول fetch يحفظ البيانات القديمة
-                  if (previousPostsRef.current.length === 0) {
-                    await fetchPosts(false);
-                  } else {
-                    await fetchPosts(true);
-                  }
-                }
-              }}
-            >
-              <Badge
-                badgeContent={notifications.length}
-                className={styles.badge}
-                max={99}
+        {/* Filters Section - Show career goals that have posts AND always show user's primary goal */}
+        {(careerGoalsWithPosts.length > 0 || userCareerGoalId) && (
+          <div className={`${styles.filters_section} ${animate ? styles.slide_up : ""}`}>
+            <div className={styles.filters_header}>
+              <span className={styles.filters_label}>Filter by Career Goal:</span>
+              <div className={styles.active_filter_info}>
+                <span className={styles.active_filter_label}>Currently showing:</span>
+                <button
+                  className={`${styles.filter_chip} ${selectedCareerGoalId === null ? styles.active_filter : ""}`}
+                  onClick={handleClearFilter}
+                >
+                  All Posts
+                </button>
+                {selectedCareerGoalId !== null && (
+                  <button
+                    className={`${styles.filter_chip} ${styles.active_filter}`}
+                    onClick={() => {}}
+                  >
+                    {getSelectedCareerGoalName()}
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className={styles.filters_list}>
+              {/* Always show user's primary career goal first if it exists */}
+              {userCareerGoalId && (() => {
+                const primaryGoal = careerGoals.find(g => g.careerGoalId === userCareerGoalId);
+                return primaryGoal && (
+                  <button
+                    key={primaryGoal.careerGoalId}
+                    className={`${styles.filter_chip} ${selectedCareerGoalId === primaryGoal.careerGoalId ? styles.active_filter : ""} ${styles.primary_goal_filter}`}
+                    onClick={() => handleCareerGoalFilter(primaryGoal.careerGoalId)}
+                  >
+                    {primaryGoal.careerGoalName}
+                    <span className={styles.primary_badge}>Your Goal</span>
+                    <span className={styles.post_count_badge}>
+                      {careerGoalPostCounts[primaryGoal.careerGoalId] || 0}
+                    </span>
+                  </button>
+                );
+              })()}
+              
+              {/* Show other career goals that have posts (excluding user's primary goal if already shown) */}
+              {careerGoalsWithPosts
+                .filter(goal => goal.careerGoalId !== userCareerGoalId)
+                .map(goal => (
+                  <button
+                    key={goal.careerGoalId}
+                    className={`${styles.filter_chip} ${selectedCareerGoalId === goal.careerGoalId ? styles.active_filter : ""}`}
+                    onClick={() => handleCareerGoalFilter(goal.careerGoalId)}
+                  >
+                    {goal.careerGoalName}
+                    <span className={styles.post_count_badge}>
+                      {careerGoalPostCounts[goal.careerGoalId] || 0}
+                    </span>
+                  </button>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <Alert severity="error" className={styles.error_alert} onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
+
+        {/* Posts List */}
+        <div className={styles.posts_list}>
+          {posts.length === 0 && !loading ? (
+            <div className={styles.empty_state}>
+              <div className={styles.empty_icon}>💬</div>
+              <h3>No posts yet</h3>
+              <p>Be the first to start a discussion!</p>
+              <button className={styles.empty_create_btn} onClick={() => setCreatePostOpen(true)}>
+                Create First Post
+              </button>
+            </div>
+          ) : (
+            posts.map((post, index) => (
+              <div
+                key={post.postId}
+                className={`${styles.post_card} ${animate ? styles.slide_up : ""}`}
+                style={{ animationDelay: `${index * 0.05}s` }}
               >
-                <NotificationsIcon className={styles.bell_icon} />
-              </Badge>
-            </button>
-
-            {showNotifications && (
-              <div className={styles.notification_panel}>
-                <div className={styles.notification_panel_header}>
-                  <h3>🔔 Notifications</h3>
-                  {notifications.length > 0 && (
-                    <button
-                      className={styles.clear_all_btn}
-                      onClick={clearAllNotifications}
-                    >
-                      Clear All
-                    </button>
+                <div className={styles.post_header}>
+                  <div className={styles.author_info}>
+                    <div className={styles.author_avatar}>
+                      {post.author?.firstName?.charAt(0) + post.author?.lastName?.charAt(0) || 'U'}
+                    </div>
+                    <div className={styles.author_details}>
+                      <span className={styles.author_name}>
+                        {post.author?.firstName} {post.author?.lastName}
+                      </span>
+                      <span className={styles.post_date}>
+                        {formatDate(post.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                  {post.primaryCareerGoal && (
+                    <Chip
+                      label={post.primaryCareerGoal.careerGoalName}
+                      size="small"
+                      className={styles.career_goal_chip}
+                      style={{ backgroundColor: "#0A5ADB15", color: "#0A5ADB" }}
+                    />
                   )}
                 </div>
 
-                <div className={styles.notification_list}>
-                  {notifications.length === 0 ? (
-                    <div className={styles.empty_notifications}>
-                      <NotificationsIcon className={styles.empty_icon} />
-                      <p>No notifications yet</p>
-                      <small>
-                        We'll notify you when someone likes or comments on your
-                        posts!
-                      </small>
+                <div className={styles.post_content}>
+                  <h3 className={styles.post_title}>{post.title}</h3>
+                  <p className={styles.post_preview}>
+                    {post.contentPreview || post.content?.substring(0, 150)}
+                    {(post.contentPreview?.length > 150 || post.content?.length > 150) && "..."}
+                  </p>
+                </div>
+
+                <div className={styles.post_footer}>
+                  <div className={styles.post_stats}>
+                    <button
+                      className={`${styles.action_btn} ${post.isLikedByCurrentUser ? styles.liked : ""}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLike(post.postId, post.isLikedByCurrentUser);
+                      }}
+                    >
+                      {post.isLikedByCurrentUser ? (
+                        <FavoriteIcon className={styles.liked_icon} />
+                      ) : (
+                        <FavoriteBorderIcon className={styles.action_icon} />
+                      )}
+                      <span>{post.likeCount}</span>
+                    </button>
+                    <button
+                      className={styles.action_btn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedComments(prev => ({ ...prev, [post.postId]: !prev[post.postId] }));
+                      }}
+                    >
+                      <CommentIcon className={styles.action_icon} />
+                      <span>{post.commentCount}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Inline Comments Section */}
+                <div
+                  className={styles.inline_comments_section}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Comment Input with User Avatar */}
+                  <div className={styles.inline_comment_input_row}>
+                    <div className={styles.inline_comment_avatar}>
+                      {userInfo.firstName?.charAt(0) + userInfo.lastName?.charAt(0) || localStorage.getItem('userFirstName')?.charAt(0) + localStorage.getItem('userLastName')?.charAt(0) || 'U'}
+                    </div>
+                    <div className={styles.inline_comment_input_wrap}>
+                      <input
+                        className={styles.inline_comment_input}
+                        type="text"
+                        placeholder="Write a comment..."
+                        value={inlineCommentText[post.postId] || ''}
+                        onChange={(e) => setInlineCommentText(prev => ({ ...prev, [post.postId]: e.target.value }))}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleInlineComment(post.postId); }}
+                        disabled={inlineSubmitting[post.postId]}
+                      />
+                      <button
+                        className={styles.inline_send_btn}
+                        onClick={() => handleInlineComment(post.postId)}
+                        disabled={inlineSubmitting[post.postId] || !(inlineCommentText[post.postId] || '').trim()}
+                      >
+                        <SendIcon fontSize="small" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Comments List */}
+                  {postComments[post.postId] && postComments[post.postId].length > 0 && (
+                    <div className={styles.inline_comments_list}>
+                      {(expandedComments[post.postId]
+                        ? postComments[post.postId]
+                        : postComments[post.postId].slice(0, 2)
+                      ).map((comment) => (
+                        <div key={comment.commentId} className={styles.inline_comment_item}>
+                          <div className={styles.inline_commenter_avatar}>
+                            {comment.author?.firstName?.charAt(0) + comment.author?.lastName?.charAt(0) || 'U'}
+                          </div>
+                          <div className={styles.inline_comment_bubble}>
+                            <span className={styles.inline_commenter_name}>
+                              {comment.author?.firstName} {comment.author?.lastName}
+                            </span>
+                            <p className={styles.inline_comment_text}>{comment.content}</p>
+                            <span className={styles.inline_comment_time}>{formatDate(comment.createdAt)}</span>
+                          </div>
+                        </div>
+                      ))}
+                      {postComments[post.postId].length > 2 && (
+                        <button
+                          className={styles.inline_view_more_btn}
+                          onClick={() => setExpandedComments(prev => ({ ...prev, [post.postId]: !prev[post.postId] }))}
+                        >
+                          {expandedComments[post.postId]
+                            ? 'Show less'
+                            : `View ${postComments[post.postId].length - 2} more comment${postComments[post.postId].length - 2 > 1 ? 's' : ''}`}
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {!postComments[post.postId] ? (
+                    <div className={styles.inline_comments_loading}>
+                      <CircularProgress size={14} />
+                      <span>Loading comments...</span>
+                    </div>
+                  ) : postComments[post.postId].length === 0 && (
+                    <p className={styles.inline_no_comments}>No comments yet. Be the first!</p>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Post Detail Modal */}
+      <Dialog
+        open={postDetailOpen}
+        onClose={() => setPostDetailOpen(false)}
+        maxWidth="md"
+        fullWidth
+        className={styles.detail_dialog}
+      >
+        {postDetailLoading ? (
+          <div className={styles.detail_loading}>
+            <CircularProgress />
+          </div>
+        ) : selectedPost && (
+          <>
+            <DialogTitle className={styles.detail_header}>
+              <div className={styles.detail_title_wrapper}>
+                <div className={styles.detail_author_avatar}>
+                  {selectedPost.author?.firstName?.charAt(0) + selectedPost.author?.lastName?.charAt(0) || 'U'}
+                </div>
+                <div className={styles.detail_author_info}>
+                  <span className={styles.detail_author_name}>
+                    {selectedPost.author?.firstName} {selectedPost.author?.lastName}
+                  </span>
+                  <span className={styles.detail_post_date}>
+                    {formatDate(selectedPost.createdAt)}
+                  </span>
+                </div>
+              </div>
+              <IconButton onClick={() => setPostDetailOpen(false)}>
+                <CloseIcon />
+              </IconButton>
+            </DialogTitle>
+            <DialogContent className={styles.detail_content}>
+              <h2 className={styles.detail_title}>{selectedPost.title}</h2>
+              <p className={styles.detail_body}>{selectedPost.content}</p>
+
+              <div className={styles.detail_tags}>
+                {selectedPost.tags?.map((tag, idx) => (
+                  <Chip
+                    key={idx}
+                    label={tag.careerGoalName}
+                    size="small"
+                    className={styles.tag_chip}
+                  />
+                ))}
+              </div>
+
+              <div className={styles.detail_actions}>
+                <button
+                  className={`${styles.detail_like_btn} ${selectedPost.isLikedByCurrentUser ? styles.liked : ""}`}
+                  onClick={() => handleLike(selectedPost.postId, selectedPost.isLikedByCurrentUser)}
+                >
+                  {selectedPost.isLikedByCurrentUser ? (
+                    <FavoriteIcon />
+                  ) : (
+                    <FavoriteBorderIcon />
+                  )}
+                  <span>{selectedPost.likeCount} Likes</span>
+                </button>
+              </div>
+
+              {/* Comments Section */}
+              <div className={styles.comments_section}>
+                <h4 className={styles.comments_title}>
+                  Comments ({selectedPost.comments?.length || 0})
+                </h4>
+
+                <div className={styles.add_comment}>
+                  <TextField
+                    fullWidth
+                    placeholder="Write a comment..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    multiline
+                    rows={2}
+                    variant="outlined"
+                    className={styles.comment_input}
+                  />
+                  <button
+                    className={styles.submit_comment_btn}
+                    onClick={handleAddComment}
+                    disabled={submitting || !newComment.trim()}
+                  >
+                    <SendIcon />
+                    Comment
+                  </button>
+                </div>
+
+                <div className={styles.comments_list}>
+                  {selectedPost.comments?.length === 0 ? (
+                    <div className={styles.no_comments}>
+                      <span>No comments yet. Be the first to comment!</span>
                     </div>
                   ) : (
-                    notifications.map((n) => (
-                      <div
-                        key={n.id}
-                        className={`${styles.notification_item} ${styles[n.type]}`}
-                      >
-                        <div className={styles.notification_item_icon}>
-                          {n.type === "like" ? "❤️" : "💬"}
+                    selectedPost.comments?.map((comment) => (
+                      <div key={comment.commentId} className={styles.comment_item}>
+                        <div className={styles.comment_avatar}>
+                          {comment.author?.firstName?.charAt(0) + comment.author?.lastName?.charAt(0) || 'U'}
                         </div>
-                        <div className={styles.notification_item_content}>
-                          <p>{n.text}</p>
-                          <small>{formatDate(n.createdAt)}</small>
+                        <div className={styles.comment_content}>
+                          <div className={styles.comment_author}>
+                            <span className={styles.comment_author_name}>
+                              {comment.author?.firstName} {comment.author?.lastName}
+                            </span>
+                            <span className={styles.comment_date}>
+                              {formatDate(comment.createdAt)}
+                            </span>
+                          </div>
+                          <p className={styles.comment_text}>{comment.content}</p>
                         </div>
-                        <button
-                          className={styles.remove_notification_btn}
-                          onClick={() => removeNotification(n.id)}
-                        >
-                          <CloseIcon fontSize="small" />
-                        </button>
                       </div>
                     ))
                   )}
                 </div>
               </div>
-            )}
-          </div>
-        </div>
+            </DialogContent>
+          </>
+        )}
+      </Dialog>
 
-        {/* Tabs */}
-        <div className={styles.tabs}>
-          <button
-            className={`${styles.tab} ${activeTab === "feed" ? styles.active : ""}`}
-            onClick={() => setActiveTab("feed")}
-          >
-            <span className={styles.tab_icon}>🌐</span>
-            All Posts
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === "my-posts" ? styles.active : ""}`}
-            onClick={() => setActiveTab("my-posts")}
-          >
-            <span className={styles.tab_icon}>📝</span>
-            My Posts
-          </button>
-        </div>
+      {/* Create Post Modal */}
+      <Dialog
+        open={createPostOpen}
+        onClose={() => setCreatePostOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        className={styles.create_post_dialog}
+      >
+        <DialogTitle className={styles.create_post_header}>
+          <span>Create New Post</span>
+          <IconButton onClick={() => setCreatePostOpen(false)}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent className={styles.create_post_content}>
+          <TextField
+            fullWidth
+            label="Title"
+            placeholder="What's the title of your discussion?"
+            value={newPost.title}
+            onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
+            className={styles.create_post_input}
+            required
+          />
 
-        {/* Category Dropdown */}
-        <div className={styles.category_dropdown_wrapper} ref={categoryRef}>
-          <button
-            className={styles.category_dropdown_btn}
-            onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-          >
-            <span className={styles.dropdown_label}>Category:</span>
-            <span className={styles.dropdown_value}>
-              {getSelectedCategoryName()}
-            </span>
-            <KeyboardArrowDownIcon
-              className={`${styles.dropdown_arrow} ${showCategoryDropdown ? styles.rotated : ""}`}
-            />
-          </button>
+          <TextField
+            fullWidth
+            label="Content"
+            placeholder="Share your thoughts, questions, or experiences..."
+            value={newPost.content}
+            onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
+            multiline
+            rows={6}
+            className={styles.create_post_input}
+            required
+          />
 
-          {showCategoryDropdown && (
-            <div className={styles.category_dropdown_menu}>
-              <button
-                className={`${styles.dropdown_item} ${selectedCareerGoal === "all" ? styles.selected : ""}`}
-                onClick={() => {
-                  setSelectedCareerGoal("all");
-                  setShowCategoryDropdown(false);
-                }}
-              >
-                <span className={styles.item_icon}>🌐</span>
-                All Categories
-              </button>
-              {careerGoals.map((goal) => (
-                <button
-                  key={goal.id}
-                  className={`${styles.dropdown_item} ${selectedCareerGoal === goal.id ? styles.selected : ""}`}
-                  onClick={() => {
-                    setSelectedCareerGoal(goal.id);
-                    setShowCategoryDropdown(false);
-                  }}
-                >
-                  <span className={styles.item_icon}>📚</span>
-                  {goal.name}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Posts Section */}
-        <div className={styles.posts_section}>
-          {displayedPosts.length === 0 ? (
-            <div className={styles.empty_state}>
-              <span className={styles.empty_icon}>📝</span>
-              <h3>
-                {activeTab === "my-posts"
-                  ? "No posts yet"
-                  : "No posts in this category"}
-              </h3>
-              <p>
-                {activeTab === "my-posts"
-                  ? "Create your first post!"
-                  : "Be the first to share something!"}
-              </p>
-              {activeTab === "my-posts" && (
-                <Button
-                  className={styles.empty_btn}
-                  onClick={() => setShowCreateModal(true)}
-                >
-                  Create Post
-                </Button>
-              )}
-            </div>
-          ) : (
-            displayedPosts.map((post, index) => (
-              <div
-                key={post.id}
-                className={styles.post_card}
-                style={{ animationDelay: `${index * 0.08}s` }}
-              >
-                {/* Post Header */}
-                <div className={styles.post_header}>
-                  <div className={styles.post_author}>
-                    <Avatar
-                      {...stringAvatar(post.userName)}
-                      className={styles.post_avatar}
-                    />
-                    <div className={styles.author_info}>
-                      <h4 className={styles.author_name}>{post.userName}</h4>
-                      <div className={styles.post_meta}>
-                        <span className={styles.post_category}>
-                          {post.category}
-                        </span>
-                        <span className={styles.dot_separator}>•</span>
-                        <span className={styles.post_date}>
-                          {formatDate(post.createdAt)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {isOwnPost(post) && (
-                    <button
-                      className={styles.delete_post_btn}
-                      onClick={() => setPostToDelete(post.id)}
-                      title="Delete post"
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </button>
-                  )}
-                </div>
-
-                {/* Post Title */}
-                {post.title && (
-                  <h3 className={styles.post_title}>{post.title}</h3>
-                )}
-
-                {/* Post Content */}
-                <div className={styles.post_content_wrapper}>
-                  <p className={styles.post_content}>{post.content}</p>
-                </div>
-
-                {/* Post Footer */}
-                <div className={styles.post_footer}>
-                  <div className={styles.post_stats}>
-                    <button
-                      className={`${styles.stat_btn} ${post.isLiked ? styles.liked : ""}`}
-                      onClick={() => handleLike(post.id)}
-                    >
-                      {post.isLiked ? (
-                        <FavoriteIcon fontSize="small" />
-                      ) : (
-                        <FavoriteBorderIcon fontSize="small" />
-                      )}
-                      <span>{post.likes || 0}</span>
-                    </button>
-                    <button
-                      className={styles.stat_btn}
-                      onClick={() => toggleComments(post.id)}
-                    >
-                      <CommentIcon fontSize="small" />
-                      <span>{post.comments?.length || 0}</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Comments Section */}
-                {activeComments === post.id && (
-                  <div className={styles.comments_section}>
-                    <Divider className={styles.comment_divider} />
-
-                    {post.comments && post.comments.length > 0 ? (
-                      <div className={styles.comments_list}>
-                        {post.comments.map((comment) => (
-                          <div key={comment.id} className={styles.comment_item}>
-                            <Avatar
-                              {...stringAvatar(comment.userName)}
-                              className={styles.comment_avatar}
-                            />
-                            <div className={styles.comment_content}>
-                              <div className={styles.comment_header}>
-                                <span className={styles.comment_author}>
-                                  {comment.userName}
-                                </span>
-                                <span className={styles.comment_date}>
-                                  {formatDate(comment.createdAt)}
-                                </span>
-                              </div>
-                              <p className={styles.comment_text}>
-                                {comment.content}
-                              </p>
-                            </div>
-                            {isOwnComment(comment) && (
-                              <button
-                                className={styles.delete_comment_btn}
-                                onClick={() =>
-                                  handleDeleteComment(post.id, comment.id)
-                                }
-                                title="Delete comment"
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className={styles.no_comments}>
-                        No comments yet. Be the first! 💬
-                      </p>
-                    )}
-
-                    {/* Add Comment */}
-                    <div className={styles.add_comment}>
-                      <Avatar
-                        {...stringAvatar(userData.name)}
-                        className={styles.comment_avatar}
-                      />
-                      <div className={styles.comment_input_wrapper}>
-                        <input
-                          type="text"
-                          value={commentText[post.id] || ""}
-                          onChange={(e) =>
-                            setCommentText((prev) => ({
-                              ...prev,
-                              [post.id]: e.target.value,
-                            }))
-                          }
-                          placeholder="Write a comment..."
-                          className={styles.comment_input}
-                          onKeyPress={(e) =>
-                            e.key === "Enter" && handleAddComment(post.id)
-                          }
-                        />
-                        <IconButton
-                          className={styles.send_btn}
-                          onClick={() => handleAddComment(post.id)}
-                          disabled={submittingComment === post.id}
-                          size="small"
-                        >
-                          <SendIcon fontSize="small" />
-                        </IconButton>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* نافذة تأكيد الحذف */}
-        {postToDelete && (
-          <div
-            className={styles.confirm_overlay}
-            onClick={() => setPostToDelete(null)}
-          >
-            <div
-              className={styles.confirm_dialog}
-              onClick={(e) => e.stopPropagation()}
+          <div className={styles.create_post_actions}>
+            <Button onClick={() => setCreatePostOpen(false)} className={styles.cancel_btn}>
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleCreatePost}
+              disabled={submitting || !newPost.title.trim() || !newPost.content.trim()}
+              className={styles.submit_btn}
             >
-              <div className={styles.confirm_icon}>
-                <DeleteIcon fontSize="large" />
-              </div>
-              <h3>Delete Post?</h3>
-              <p>
-                Are you sure you want to delete this post? This action cannot be
-                undone.
-              </p>
-              <div className={styles.confirm_buttons}>
-                <button
-                  className={styles.cancel_delete_btn}
-                  onClick={() => setPostToDelete(null)}
-                >
-                  Cancel
-                </button>
-                <button
-                  className={styles.confirm_delete_btn}
-                  onClick={handleDeletePost}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
+              {submitting ? "Posting..." : "Publish Post"}
+            </Button>
           </div>
-        )}
-
-        {/* Create Post Modal */}
-        {showCreateModal && (
-          <div
-            className={styles.modal_overlay}
-            onClick={() => setShowCreateModal(false)}
-          >
-            <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-              <div className={styles.modal_header}>
-                <h3>✨ Create Post</h3>
-                <IconButton
-                  className={styles.close_btn}
-                  onClick={() => setShowCreateModal(false)}
-                >
-                  <CloseIcon />
-                </IconButton>
-              </div>
-
-              <div className={styles.modal_body}>
-                <div className={styles.modal_author}>
-                  <Avatar
-                    {...stringAvatar(userData.name)}
-                    className={styles.modal_avatar}
-                  />
-                  <div>
-                    <h4>{userData.name}</h4>
-                    <span>{userData.careerGoalName}</span>
-                  </div>
-                </div>
-
-                <input
-                  type="text"
-                  value={postTitle}
-                  onChange={(e) => setPostTitle(e.target.value)}
-                  placeholder="📌 Title your post..."
-                  className={styles.title_input}
-                  maxLength={200}
-                />
-
-                <textarea
-                  value={postContent}
-                  onChange={(e) => setPostContent(e.target.value)}
-                  placeholder="💡 What do you want to share?"
-                  className={styles.content_input}
-                  maxLength={4000}
-                />
-
-                <div className={styles.char_count}>
-                  <span
-                    className={postContent.length > 3800 ? styles.warning : ""}
-                  >
-                    {postContent.length}/4000
-                  </span>
-                </div>
-
-                <div className={styles.category_select_wrapper}>
-                  <label>📂 Category:</label>
-                  <div className={styles.category_select}>
-                    <button
-                      type="button"
-                      className={styles.cat_dropdown_btn}
-                      onClick={() =>
-                        setShowModalCategoryDropdown(!showModalCategoryDropdown)
-                      }
-                    >
-                      <span>
-                        {selectedCategory
-                          ? careerGoals.find((g) => g.id === selectedCategory)
-                              ?.name
-                          : "Select a category"}
-                      </span>
-                      <KeyboardArrowDownIcon
-                        className={`${styles.cat_arrow} ${showModalCategoryDropdown ? styles.rotated : ""}`}
-                      />
-                    </button>
-
-                    {showModalCategoryDropdown && (
-                      <div className={styles.cat_dropdown_menu}>
-                        {careerGoals.map((goal) => (
-                          <button
-                            key={goal.id}
-                            type="button"
-                            className={`${styles.cat_option} ${selectedCategory === goal.id ? styles.selected : ""}`}
-                            onClick={() => {
-                              setSelectedCategory(goal.id);
-                              setShowModalCategoryDropdown(false);
-                            }}
-                          >
-                            {goal.name}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.modal_footer}>
-                <Button
-                  className={styles.cancel_btn}
-                  onClick={() => setShowCreateModal(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  className={styles.submit_btn}
-                  onClick={handleCreatePost}
-                  disabled={
-                    creating ||
-                    !postTitle.trim() ||
-                    !postContent.trim() ||
-                    !selectedCategory
-                  }
-                >
-                  {creating ? "🚀 Publishing..." : "🚀 Publish"}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+        </DialogContent>
+      </Dialog>
+    </Box>
   );
-}
+};
+
+export default Community;
