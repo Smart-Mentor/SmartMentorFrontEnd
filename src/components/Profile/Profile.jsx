@@ -16,7 +16,7 @@ import TabPanel from '@mui/lab/TabPanel';
 import DownloadIcon from "@mui/icons-material/Download";
 import ShareIcon from "@mui/icons-material/Share";
 import { useNavigate } from "react-router-dom";
-import { getCurrentUser, getUserProfile, updateUserProfileData, getPostsByCareerGoal } from "../../Api/authenticationService";
+import { getCurrentUser, getUserProfile, updateUserProfileData, getCommunityPostsByCareerGoal } from "../../Api/authenticationService";
 import styles from "./Profile.module.css";
 
 // Import images
@@ -1047,7 +1047,7 @@ useEffect(() => {
                       className={styles.view_all_btn} 
                       onClick={() => navigate('/community')}
                     >
-                      View All Your Posts →
+                      Go to Community →
                     </button>
                   </div>
                 )}
