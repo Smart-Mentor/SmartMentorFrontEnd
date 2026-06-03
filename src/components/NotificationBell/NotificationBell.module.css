@@ -1,0 +1,281 @@
+.notification_container {
+  position: relative;
+  display: inline-block;
+}
+
+.notification_bell {
+  position: relative;
+  background: linear-gradient(135deg, #0A5ADB, #58A7B5);
+  border: none;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(10, 90, 219, 0.3);
+}
+
+.notification_bell:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(10, 90, 219, 0.4);
+}
+
+.bell_icon {
+  font-size: 24px;
+  color: white;
+}
+
+.bell_icon_active {
+  font-size: 24px;
+  color: white;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #e74c3c;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  animation: bounce 0.5s ease;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+.dropdown {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  right: 0;
+  width: 380px;
+  max-width: 90vw;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  z-index: 10000;
+  margin-bottom: 0;
+  overflow: hidden;
+  animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  background: white;
+}
+
+.dropdown_header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.header_actions {
+  display: flex;
+  gap: 8px;
+}
+
+.mark_all_btn,
+.clear_all_btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  transition: all 0.2s ease;
+}
+
+.mark_all_btn:hover {
+  background: #e8f0fe;
+  color: #0A5ADB;
+}
+
+.clear_all_btn:hover {
+  background: #fee2e2;
+  color: #e74c3c;
+}
+
+.dropdown_content {
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.empty_state {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.empty_icon {
+  font-size: 48px;
+  color: #ccc;
+  margin-bottom: 12px;
+}
+
+.empty_state p {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+}
+
+.empty_state span {
+  font-size: 12px;
+  color: #999;
+}
+
+.notification_item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid #f5f5f5;
+  position: relative;
+}
+
+.notification_item:hover {
+  background: #f8f9fa;
+}
+
+.notification_item.unread {
+  background: #e8f0fe;
+}
+
+.notification_item.unread:hover {
+  background: #dce8f8;
+}
+
+.notification_icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.like_icon {
+  font-size: 18px;
+  color: #e74c3c;
+}
+
+.comment_icon {
+  font-size: 18px;
+  color: #0A5ADB;
+}
+
+.notification_content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification_message {
+  margin: 0 0 4px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #333;
+}
+
+.notification_message strong {
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.post_title {
+  color: #0A5ADB;
+  font-size: 12px;
+}
+
+.like_count {
+  font-size: 11px;
+  color: #e74c3c;
+}
+
+.comment_preview {
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+}
+
+.notification_time {
+  font-size: 11px;
+  color: #999;
+}
+
+.unread_dot {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0A5ADB;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .dropdown {
+    width: calc(100vw - 32px);
+    right: -8px;
+  }
+}
