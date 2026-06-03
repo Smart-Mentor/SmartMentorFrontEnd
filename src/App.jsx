@@ -22,7 +22,7 @@ import AdminLayout from "./components/AdminLayout/AdminLayout";
 import AnalyticsOverview from "./components/AdminOverview/AdminOverview";
 import AdminUserGrowth from "./components/AdminUserGrowth/AdminUserGrowth";
 import Community from "./components/Community/Community";
-
+import ProjectDetails from "./components/ProjectDetails/ProjectDetails";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -65,15 +65,16 @@ function App() {
           <Route path="/learningpath" element={<LearningPath />} />
           <Route path="/Skills" element={<Skills />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/Community" element={<Community />} />
           <Route path="/studyplanner" element={<StudyPlanner />} />
           <Route path="/jobtrends" element={<JobTrends />} />
           <Route path="/gapanalysis" element={<GapAnalysis />} />
+          <Route path="/community" element={<Community />} />
           <Route path="/aimentor" element={<Aiagent />} />
           <Route path="/aimentor/recommendation" element={<RecommendationCourses />} />
           <Route path="/aimentor/roadmap" element={<RoadmapAI />} />
           <Route path="/aimentor/cv-analysis" element={<CVAnalysis />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/projects/:id" element={<ProjectDetails />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />
