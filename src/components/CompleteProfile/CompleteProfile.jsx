@@ -39,88 +39,175 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 // Complete Skills List from Backend (41 skills)
 const skillsList = [
-  { id: 2, name: "JavaScript", category: " " },
-  { id: 3, name: "Project Management", category: " " },
-  { id: 4, name: "Data Analysis", category: " " },
-  { id: 5, name: "Machine Learning", category: " " },
-  { id: 6, name: "SQL", category: " " },
-  { id: 7, name: "C++", category: " " },
-  { id: 8, name: "HTML", category: " " },
-  { id: 9, name: "CSS", category: " " },
-  { id: 10, name: "Python", category: " " },
-  { id: 11, name: "Docker", category: " " },
-  { id: 12, name: "C#", category: " " },
-  { id: 13, name: "ASP.NET Core Web API", category: " " },
-  { id: 14, name: "Entity Framework Core", category: " " },
-  { id: 15, name: "LINQ Queries", category: " " },
-  { id: 16, name: "RESTful API Design", category: " " },
-  { id: 17, name: "Dependency Injection", category: " " },
-  { id: 18, name: "HTML5", category: " " },
-  { id: 19, name: "CSS3", category: " " },
-  { id: 20, name: "JavaScript ES6+", category: " " },
-  { id: 21, name: "React.js Fundamentals", category: " " },
-  { id: 22, name: "Responsive Web Design", category: " " },
-  { id: 23, name: "SQL Server", category: " " },
-  { id: 24, name: "Database Normalization", category: " " },
-  { id: 25, name: "Writing Complex SQL Queries", category: " " },
-  { id: 26, name: "Stored Procedures", category: " " },
-  { id: 27, name: "Python Programming", category: " " },
-  { id: 28, name: "Data Analysis with Pandas", category: " " },
-  { id: 29, name: "Data Visualization", category: " " },
-  { id: 30, name: "Machine Learning Fundamentals", category: " " },
-  { id: 31, name: "Docker Containers", category: " " },
-  { id: 32, name: "CI/CD Pipelines", category: " " },
-  { id: 33, name: "Azure Cloud Basics", category: " " },
-  { id: 34, name: "OWASP Security Principles", category: " " },
-  { id: 35, name: "Authentication & Authorization (JWT)", category: " " },
-  { id: 41, name: "TypeScript", category: " " },
-];
+  {
+    "id": 1,
+    "name": "C#",
+    "category": " "
+  },
+  {
+    "id": 2,
+    "name": "ASP.NET Core Web API",
+    "category": " "
+  },
+  {
+    "id": 3,
+    "name": "Entity Framework Core",
+    "category": " "
+  },
+  {
+    "id": 4,
+    "name": "LINQ Queries",
+    "category": " "
+  },
+  {
+    "id": 5,
+    "name": "RESTful API Design",
+    "category": " "
+  },
+  {
+    "id": 6,
+    "name": "Dependency Injection",
+    "category": " "
+  },
+  {
+    "id": 7,
+    "name": "HTML5",
+    "category": " "
+  },
+  {
+    "id": 8,
+    "name": "CSS3",
+    "category": " "
+  },
+  {
+    "id": 9,
+    "name": "JavaScript ES6+",
+    "category": " "
+  },
+  {
+    "id": 10,
+    "name": "React.js Fundamentals",
+    "category": " "
+  },
+  {
+    "id": 11,
+    "name": "Responsive Web Design",
+    "category": " "
+  },
+  {
+    "id": 12,
+    "name": "SQL Server",
+    "category": " "
+  },
+  {
+    "id": 13,
+    "name": "Database Normalization",
+    "category": " "
+  },
+  {
+    "id": 14,
+    "name": "Writing Complex SQL Queries",
+    "category": " "
+  },
+  {
+    "id": 15,
+    "name": "Stored Procedures",
+    "category": " "
+  },
+  {
+    "id": 16,
+    "name": "Python Programming",
+    "category": " "
+  },
+  {
+    "id": 17,
+    "name": "Data Analysis with Pandas",
+    "category": " "
+  },
+  {
+    "id": 18,
+    "name": "Data Visualization",
+    "category": " "
+  },
+  {
+    "id": 19,
+    "name": "Machine Learning Fundamentals",
+    "category": " "
+  },
+  {
+    "id": 20,
+    "name": "Docker Containers",
+    "category": " "
+  },
+  {
+    "id": 21,
+    "name": "CI/CD Pipelines",
+    "category": " "
+  },
+  {
+    "id": 22,
+    "name": "Azure Cloud Basics",
+    "category": " "
+  },
+  {
+    "id": 23,
+    "name": "OWASP Security Principles",
+    "category": " "
+  },
+  {
+    "id": 24,
+    "name": "Authentication & Authorization (JWT)",
+    "category": " "
+  }
+]
 
 // Complete Interests List from Backend (19 interests)
 const interestsList = [
-  { id: 1, name: "Web Development", category: "Development" },
-  { id: 2, name: "Data Science", category: "Data" },
-  { id: 3, name: "Mobile App Development", category: "Development" },
-  { id: 4, name: "Cloud Computing", category: "Infrastructure" },
-  { id: 5, name: "Cybersecurity", category: "Security" },
-  { id: 6, name: "Artificial Intelligence", category: "AI/ML" },
-  { id: 7, name: "Game Development", category: "Development" },
-  { id: 8, name: "DevOps", category: "Infrastructure" },
-  { id: 9, name: "UI/UX Design", category: "Design" },
-  { id: 10, name: "Blockchain", category: "Emerging Tech" },
-  { id: 11, name: "Backend Development with .NET", category: "Development" },
-  { id: 12, name: "Frontend Web Development", category: "Development" },
-  { id: 13, name: "Full-Stack Web Applications", category: "Development" },
-  { id: 14, name: "Data Analytics and Visualization", category: "Data" },
-  { id: 15, name: "Artificial Intelligence & Machine Learning", category: "AI/ML" },
-  { id: 16, name: "Cloud Computing (Azure)", category: "Infrastructure" },
-  { id: 17, name: "DevOps & Automation", category: "Infrastructure" },
-  { id: 18, name: "Cybersecurity & Ethical Hacking", category: "Security" },
-];
+  {
+    "id": 1,
+    "name": "Backend Development with .NET"
+  },
+  {
+    "id": 2,
+    "name": "Frontend Web Development"
+  },
+  {
+    "id": 3,
+    "name": "Full-Stack Web Applications"
+  },
+  {
+    "id": 4,
+    "name": "Data Analytics and Visualization"
+  },
+  {
+    "id": 5,
+    "name": "Artificial Intelligence & Machine Learning"
+  },
+  {
+    "id": 6,
+    "name": "Cloud Computing (Azure)"
+  },
+  {
+    "id": 7,
+    "name": "DevOps & Automation"
+  },
+  {
+    "id": 8,
+    "name": "Cybersecurity & Ethical Hacking"
+  }
+]
 
 // Complete Career Goals from Backend (22 career goals)
 const careerOptions = [
-  { id: 13, value: "fullstack-developer", label: "Full-Stack Developer", icon: "⚛️", color: "#667eea", description: "Aspire to master both frontend and backend technologies" },
-  { id: 14, value: "backend-developer", label: "Backend Developer", icon: "🔧", color: "#0A5ADB", description: "Focus on server-side development, working with databases and APIs" },
-  { id: 15, value: "frontend-developer", label: "Frontend Developer", icon: "🎨", color: "#58A7B5", description: "Specialize in creating engaging user interfaces and experiences" },
-  { id: 16, value: "data-scientist", label: "Data Scientist", icon: "📊", color: "#ef4444", description: "Leverage programming skills to analyze data and derive insights" },
-  { id: 17, value: "software-engineer", label: "Software Engineer", icon: "💻", color: "#8b5cf6", description: "Design, develop, and maintain software applications" },
-  { id: 18, value: "data-analyst", label: "Data Analyst", icon: "📈", color: "#f59e0b", description: "Analyze and interpret data to help organizations make decisions" },
-  { id: 19, value: "ml-engineer", label: "Machine Learning Engineer", icon: "🤖", color: "#10b981", description: "Develop expertise in machine learning algorithms and models" },
-  { id: 20, value: "database-admin", label: "Database Administrator", icon: "🗄️", color: "#3b82f6", description: "Manage and optimize databases, ensuring data integrity" },
-  { id: 21, value: "game-developer", label: "Game Developer", icon: "🎮", color: "#ec489a", description: "Create interactive and immersive gaming experiences" },
-  { id: 22, value: "cloud-architect", label: "Cloud Solutions Architect", icon: "☁️", color: "#06b6d4", description: "Design and implement cloud-based solutions" },
-  { id: 23, value: "cybersecurity-specialist", label: "Cybersecurity Specialist", icon: "🔒", color: "#ef4444", description: "Protect systems and data from cyber threats" },
-  { id: 24, value: "ai-researcher", label: "AI Researcher", icon: "🧠", color: "#8b5cf6", description: "Conduct research in artificial intelligence" },
-  { id: 25, value: "junior-backend-dotnet", label: "Junior Backend .NET Developer", icon: "🔷", color: "#512bd4", description: "Build and maintain RESTful APIs using ASP.NET Core and SQL Server" },
-  { id: 26, value: "fullstack-dotnet", label: "Full-Stack .NET Developer", icon: "🔷", color: "#512bd4", description: "Develop complete web applications using ASP.NET Core and React.js" },
-  { id: 27, value: "frontend-react", label: "Frontend React Developer", icon: "⚛️", color: "#61dafb", description: "Create responsive user interfaces using React and modern JavaScript" },
-  { id: 28, value: "data-analyst-python", label: "Data Analyst", icon: "🐍", color: "#3776ab", description: "Analyze datasets and build dashboards using Python and SQL" },
-  { id: 29, value: "ml-engineer-python", label: "Machine Learning Engineer", icon: "🤖", color: "#10b981", description: "Develop predictive models using Python and ML frameworks" },
-  { id: 30, value: "cloud-engineer-azure", label: "Cloud Engineer (Azure)", icon: "☁️", color: "#0078d4", description: "Design and deploy scalable applications on Microsoft Azure" },
-  { id: 31, value: "devops-engineer", label: "DevOps Engineer", icon: "🚀", color: "#8b5cf6", description: "Automate deployments and manage CI/CD pipelines" },
-  { id: 32, value: "cybersecurity-analyst", label: "Cybersecurity Analyst", icon: "🔒", color: "#ef4444", description: "Secure applications by applying modern security practices" },
-];
+  { id: 1, value: "junior-backend-dotnet", label: "Junior Backend .NET Developer", icon: "🔷", color: "#512bd4", description: "Build and maintain RESTful APIs using ASP.NET Core and SQL Server." },
+  { id: 2, value: "fullstack-dotnet", label: "Full-Stack .NET Developer", icon: "🔷", color: "#512bd4", description: "Develop complete web applications using ASP.NET Core and React.js." },
+  { id: 3, value: "frontend-react", label: "Frontend React Developer", icon: "⚛️", color: "#61dafb", description: "Create responsive and interactive user interfaces using React and modern JavaScript." },
+  { id: 4, value: "data-analyst", label: "Data Analyst", icon: "📊", color: "#f59e0b", description: "Analyze datasets, generate insights, and build dashboards using Python and SQL." },
+  { id: 5, value: "ml-engineer", label: "Machine Learning Engineer", icon: "🤖", color: "#10b981", description: "Develop predictive models and AI solutions using Python and ML frameworks." },
+  { id: 6, value: "cloud-engineer-azure", label: "Cloud Engineer (Azure)", icon: "☁️", color: "#0078d4", description: "Design and deploy scalable applications on Microsoft Azure." },
+  { id: 7, value: "devops-engineer", label: "DevOps Engineer", icon: "🚀", color: "#8b5cf6", description: "Automate deployments and manage CI/CD pipelines using Docker and cloud tools." },
+  { id: 8, value: "cybersecurity-analyst", label: "Cybersecurity Analyst", icon: "🔒", color: "#ef4444", description: "Secure applications and infrastructure by applying modern security practices." }
+]
 
 // Languages
 // const languagesList = ["Arabic", "English", "French", "German", "Spanish", "Italian", "Chinese", "Japanese"];
@@ -241,7 +328,7 @@ export default function CompleteProfile() {
         return;
       }
 
-      const response = await fetch('https://smartmentorapi.runasp.net/api/User/profile', {
+      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/User/profile', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -400,7 +487,7 @@ export default function CompleteProfile() {
     
     try {
       const token = getAuthToken();
-      const response = await fetch('https://smartmentorapi.runasp.net/api/User/complete-profile', {
+      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/User/complete-profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
