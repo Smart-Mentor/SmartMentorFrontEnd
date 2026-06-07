@@ -53,7 +53,7 @@ const AdminUserGrowth = () => {
     
     try {
       const token = getAuthToken();
-      let url = `https://smartmentorapi.runasp.net/api/Admin/analytics/user-growth?groupBy=${groupBy}`;
+      let url = `https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/analytics/user-growth?groupBy=${groupBy}`;
       
       if (startDate) {
         url += `&startDate=${formatDateForAPI(startDate)}`;
