@@ -8,6 +8,8 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogContentText,
+  DialogActions,
   TextField,
   Button,
   Chip,
@@ -26,6 +28,7 @@ import {
   FavoriteBorder as FavoriteBorderIcon,
   Comment as CommentIcon,
   Send as SendIcon,
+  Delete as DeleteIcon,
 } from "@mui/icons-material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import ForumIcon from "@mui/icons-material/Forum";
@@ -53,6 +56,9 @@ const Community = () => {
   const [selectedPost, setSelectedPost] = useState(null);
   const [postDetailOpen, setPostDetailOpen] = useState(false);
   const [createPostOpen, setCreatePostOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [newPost, setNewPost] = useState({
     title: "",
     content: "",
@@ -81,6 +87,7 @@ const Community = () => {
     userId: "",
   });
   const [tabValue, setTabValue] = useState("all");
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
 
   const getAuthToken = () => localStorage.getItem("authToken");
 
@@ -89,7 +96,7 @@ const Community = () => {
       const token = getAuthToken();
       if (!token) return;
       const response = await fetch(
-        "https://smartmentorapi.runasp.net/api/auth/me",
+        "https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/auth/me",
         {
           method: "GET",
           headers: {
@@ -125,7 +132,7 @@ const Community = () => {
       const token = getAuthToken();
       if (!token) throw new Error("Please login to view community posts");
       const response = await fetch(
-        "https://smartmentorapi.runasp.net/api/User/profile",
+        "https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/User/profile",
         {
           method: "GET",
           headers: {
@@ -162,7 +169,7 @@ const Community = () => {
       const token = getAuthToken();
       if (!token) return;
       const response = await fetch(
-        "https://smartmentorapi.runasp.net/api/CareerGoal/GetAllCareerGoals",
+        "https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/CareerGoal/GetAllCareerGoals",
         {
           method: "GET",
           headers: {
@@ -193,9 +200,9 @@ const Community = () => {
     try {
       const token = getAuthToken();
       if (!token) throw new Error("Please login to view community posts");
-      let url = "https://smartmentorapi.runasp.net/api/Community/posts";
+      let url = "https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Community/posts";
       if (careerGoalId)
-        url = `https://smartmentorapi.runasp.net/api/Community/career-goals/${careerGoalId}/posts`;
+        url = `https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Community/career-goals/${careerGoalId}/posts`;
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -220,7 +227,7 @@ const Community = () => {
     try {
       const token = getAuthToken();
       const response = await fetch(
-        `https://smartmentorapi.runasp.net/api/Community/posts/${postId}`,
+        `https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Community/posts/${postId}`,
         {
           method: "GET",
           headers: {
@@ -319,7 +326,7 @@ const Community = () => {
     try {
       const token = getAuthToken();
       const response = await fetch(
-        `https://smartmentorapi.runasp.net/api/Community/posts/${postId}/comments`,
+        `https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Community/posts/${postId}/comments`,
         {
           method: "POST",
           headers: {
@@ -390,7 +397,7 @@ const Community = () => {
       const token = getAuthToken();
       const method = isCurrentlyLiked ? "DELETE" : "POST";
       const response = await fetch(
-        `https://smartmentorapi.runasp.net/api/Community/posts/${postId}/like`,
+        `https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Community/posts/${postId}/like`,
         {
           method,
           headers: {
@@ -429,6 +436,60 @@ const Community = () => {
     }
   };
 
+  const openDeleteDialog = (post, event) => {
+    event.stopPropagation();
+    setPostToDelete(post);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!postToDelete) return;
+    
+    setDeleting(true);
+    try {
+      const token = getAuthToken();
+      const response = await fetch(
+        `https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Community/posts/${postToDelete.postId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      
+      if (response.ok) {
+        setAllPosts(prev => prev.filter(post => post.postId !== postToDelete.postId));
+        setPosts(prev => prev.filter(post => post.postId !== postToDelete.postId));
+        
+        if (selectedPost && selectedPost.postId === postToDelete.postId) {
+          setPostDetailOpen(false);
+          setSelectedPost(null);
+        }
+        
+        setToast({ show: true, message: "Post deleted successfully!", type: "success" });
+        setTimeout(() => setToast({ show: false, message: "", type: "" }), 3000);
+        setDeleteDialogOpen(false);
+        setPostToDelete(null);
+      } else {
+        const errorText = await response.text();
+        throw new Error(errorText || "Failed to delete post");
+      }
+    } catch (err) {
+      console.error("Failed to delete post:", err);
+      setToast({ show: true, message: err.message || "Failed to delete post. Please try again.", type: "error" });
+      setTimeout(() => setToast({ show: false, message: "", type: "" }), 3000);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setPostToDelete(null);
+  };
+
   const handleCreatePost = async () => {
     if (!postTitle.trim() || !postContent.trim() || !selectedCategory) {
       alert("Please fill in all fields");
@@ -445,7 +506,7 @@ const Community = () => {
       };
 
       const response = await fetch(
-        "https://smartmentorapi.runasp.net/api/Community/posts",
+        "https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Community/posts",
         {
           method: "POST",
           headers: {
@@ -462,6 +523,8 @@ const Community = () => {
         setPostContent("");
         setSelectedCategory("");
         await refreshAllPosts();
+        setToast({ show: true, message: "Post created successfully!", type: "success" });
+        setTimeout(() => setToast({ show: false, message: "", type: "" }), 3000);
       } else {
         const errorText = await response.text();
         throw new Error(errorText || "Failed to create post");
@@ -495,7 +558,7 @@ const Community = () => {
     try {
       const token = getAuthToken();
       const response = await fetch(
-        `https://smartmentorapi.runasp.net/api/Community/posts/${selectedPost.postId}/comments`,
+        `https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Community/posts/${selectedPost.postId}/comments`,
         {
           method: "POST",
           headers: {
@@ -533,7 +596,7 @@ const Community = () => {
       setPostDetailLoading(true);
       const token = getAuthToken();
       const response = await fetch(
-        `https://smartmentorapi.runasp.net/api/Community/posts/${postId}`,
+        `https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Community/posts/${postId}`,
         {
           method: "GET",
           headers: {
@@ -719,19 +782,6 @@ const Community = () => {
           </button>
         </div>
 
-        {/* {userCareerGoalId && careerGoals.length > 0 && (
-          <div className={`${styles.primary_goal_banner} ${animate ? styles.slide_up : ""}`}>
-            <div className={styles.primary_goal_content}>
-              <span className={styles.primary_goal_icon}>🎯</span>
-              <div className={styles.primary_goal_info}>
-                <span className={styles.primary_goal_label}>Your Primary Career Goal :</span>
-                <span className={styles.primary_goal_name}>{getUserPrimaryCareerGoalName()}</span>
-              </div>
-              <span className={styles.primary_goal_hint}>This is your learning path, but you can post in any career goal</span>
-            </div>
-          </div>
-        )} */}
-
         <div className={styles.tabs_section}>
           <div className={styles.tabs_glass_container}>
             <button
@@ -873,17 +923,29 @@ const Community = () => {
                           </span>
                         </div>
                       </div>
-                      {post.primaryCareerGoal && (
-                        <Chip
-                          label={post.primaryCareerGoal.careerGoalName}
-                          size="small"
-                          className={styles.career_goal_chip}
-                          style={{
-                            backgroundColor: "#0A5ADB15",
-                            color: "#0A5ADB",
-                          }}
-                        />
-                      )}
+                      <div className={styles.post_header_actions}>
+                        {post.primaryCareerGoal && (
+                          <Chip
+                            label={post.primaryCareerGoal.careerGoalName}
+                            size="small"
+                            className={styles.career_goal_chip}
+                            style={{
+                              backgroundColor: "#0A5ADB15",
+                              color: "#0A5ADB",
+                            }}
+                          />
+                        )}
+                        {post.author?.userId === userInfo.userId && (
+                          <IconButton
+                            className={styles.delete_post_btn}
+                            onClick={(e) => openDeleteDialog(post, e)}
+                            size="small"
+                            title="Delete post"
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        )}
+                      </div>
                     </div>
                     <div className={styles.post_content}>
                       <h3 className={styles.post_title}>{post.title}</h3>
@@ -1048,7 +1110,7 @@ const Community = () => {
                 </p>
                 <button
                   className={styles.empty_create_btn}
-                  onClick={() => setCreatePostOpen(true)}
+                  onClick={() => setShowCreateModal(true)}
                 >
                   Create First Post
                 </button>
@@ -1075,17 +1137,27 @@ const Community = () => {
                         </span>
                       </div>
                     </div>
-                    {post.primaryCareerGoal && (
-                      <Chip
-                        label={post.primaryCareerGoal.careerGoalName}
+                    <div className={styles.post_header_actions}>
+                      {post.primaryCareerGoal && (
+                        <Chip
+                          label={post.primaryCareerGoal.careerGoalName}
+                          size="small"
+                          className={styles.career_goal_chip}
+                          style={{
+                            backgroundColor: "#0A5ADB15",
+                            color: "#0A5ADB",
+                          }}
+                        />
+                      )}
+                      <IconButton
+                        className={styles.delete_post_btn}
+                        onClick={(e) => openDeleteDialog(post, e)}
                         size="small"
-                        className={styles.career_goal_chip}
-                        style={{
-                          backgroundColor: "#0A5ADB15",
-                          color: "#0A5ADB",
-                        }}
-                      />
-                    )}
+                        title="Delete post"
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </div>
                   </div>
                   <div className={styles.post_content}>
                     <h3 className={styles.post_title}>{post.title}</h3>
@@ -1235,6 +1307,40 @@ const Community = () => {
         )}
       </div>
 
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCancelDelete}
+        className={styles.delete_dialog}
+      >
+        <DialogTitle className={styles.delete_dialog_title}>
+          <DeleteIcon className={styles.delete_dialog_icon} />
+          Delete Post
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText className={styles.delete_dialog_text}>
+            Are you sure you want to delete this post? This action cannot be undone and all comments will be permanently removed.
+          </DialogContentText>
+          {postToDelete && (
+            <Box className={styles.delete_post_preview}>
+              <strong>"{postToDelete.title}"</strong>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions className={styles.delete_dialog_actions}>
+          <Button onClick={handleCancelDelete} className={styles.cancel_delete_btn}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleConfirmDelete} 
+            className={styles.confirm_delete_btn}
+            disabled={deleting}
+          >
+            {deleting ? "Deleting..." : "Delete"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Dialog
         open={postDetailOpen}
         onClose={() => {
@@ -1268,9 +1374,24 @@ const Community = () => {
                     </span>
                   </div>
                 </div>
-                <IconButton onClick={() => setPostDetailOpen(false)}>
-                  <CloseIcon />
-                </IconButton>
+                <div className={styles.detail_header_actions}>
+                  {selectedPost.author?.userId === userInfo.userId && (
+                    <IconButton
+                      className={styles.detail_delete_btn}
+                      onClick={() => {
+                        setPostDetailOpen(false);
+                        openDeleteDialog(selectedPost, { stopPropagation: () => {} });
+                      }}
+                      size="small"
+                      title="Delete post"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  )}
+                  <IconButton onClick={() => setPostDetailOpen(false)}>
+                    <CloseIcon />
+                  </IconButton>
+                </div>
               </DialogTitle>
               <DialogContent className={styles.detail_content}>
                 <h2 className={styles.detail_title}>{selectedPost.title}</h2>
@@ -1490,6 +1611,12 @@ const Community = () => {
               </Button>
             </div>
           </div>
+        </div>
+      )}
+
+      {toast.show && (
+        <div className={`${styles.toast} ${styles[toast.type]}`}>
+          {toast.message}
         </div>
       )}
     </Box>

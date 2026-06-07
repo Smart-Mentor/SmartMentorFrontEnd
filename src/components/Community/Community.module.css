@@ -1592,3 +1592,171 @@
     justify-content: center;
   }
 }
+/* Delete Dialog Styles */
+.delete_dialog :global(.MuiPaper-root) {
+  border-radius: 20px;
+  padding: 8px;
+  min-width: 400px;
+}
+
+.delete_dialog_title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #ef4444;
+  font-size: 24px;
+  font-weight: 700;
+  padding: 24px 24px 8px 24px;
+}
+
+.delete_dialog_icon {
+  font-size: 28px;
+  color: #ef4444;
+}
+
+.delete_dialog_text {
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.delete_post_preview {
+  background: #f8fafc;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-top: 16px;
+  color: #1e293b;
+  font-size: 14px;
+  border-left: 3px solid #ef4444;
+}
+
+.delete_dialog_actions {
+  padding: 8px 24px 24px 24px;
+  gap: 12px;
+}
+
+.cancel_delete_btn {
+  color: #64748b !important;
+  padding: 8px 20px !important;
+  border-radius: 40px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+}
+
+.cancel_delete_btn:hover {
+  background: #f1f5f9 !important;
+}
+
+.confirm_delete_btn {
+  background: #ef4444 !important;
+  color: white !important;
+  padding: 8px 24px !important;
+  border-radius: 40px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3) !important;
+}
+
+.confirm_delete_btn:hover:not(:disabled) {
+  background: #dc2626 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
+}
+
+.confirm_delete_btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Post Header Actions */
+.post_header_actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Delete Post Button */
+.delete_post_btn {
+  color: #94a3b8 !important;
+  transition: all 0.2s ease !important;
+}
+
+.delete_post_btn:hover {
+  color: #ef4444 !important;
+  background: #fee2e2 !important;
+}
+
+/* Detail Header Actions */
+.detail_header_actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail_delete_btn {
+  color: #94a3b8 !important;
+  transition: all 0.2s ease !important;
+}
+
+.detail_delete_btn:hover {
+  color: #ef4444 !important;
+  background: #fee2e2 !important;
+}
+
+/* Toast Notification */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 1100;
+  animation: slideInRight 0.3s ease;
+}
+
+.toast.success {
+  background: #10b981;
+  color: white;
+}
+
+.toast.error {
+  background: #ef4444;
+  color: white;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Update responsive styles */
+@media (max-width: 480px) {
+  .post_header_actions {
+    gap: 8px;
+  }
+  
+  .delete_dialog :global(.MuiPaper-root) {
+    min-width: 90%;
+    margin: 16px;
+  }
+  
+  .delete_dialog_title {
+    font-size: 20px;
+    padding: 20px 20px 8px 20px;
+  }
+  
+  .delete_dialog_actions {
+    padding: 8px 20px 20px 20px;
+  }
+}
