@@ -39,7 +39,7 @@ export default function LearningPath() {
         throw new Error('No authentication token found. Please login again.');
       }
 
-      const profileResponse = await fetch('https://smartmentorapi.runasp.net/api/User/profile', {
+      const profileResponse = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/User/profile', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -72,7 +72,7 @@ export default function LearningPath() {
   // Fetch gap analysis data from API
   const fetchGapAnalysis = async (token, careerGoalName) => {
     try {
-      const response = await fetch('https://smartmentorapi.runasp.net/api/GapAnalysis/gap-analysis', {
+      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/GapAnalysis/gap-analysis', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
