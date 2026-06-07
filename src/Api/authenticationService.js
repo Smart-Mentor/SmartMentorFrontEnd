@@ -1,5 +1,5 @@
 // 🔥 Base API URL
-const API_BASE_URL = "https://smartmentorapi.runasp.net/api";
+const API_BASE_URL = "https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api";
 
 /**
  * 🔹 Helper function to handle API responses
