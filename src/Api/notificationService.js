@@ -1,6 +1,6 @@
 // services/notificationService.js
 
-const API_BASE_URL = 'https://smartmentorapi.runasp.net/api';
+const API_BASE_URL = 'https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api';
 
 // Get auth token from localStorage
 const getAuthToken = () => localStorage.getItem('authToken');
@@ -19,10 +19,10 @@ export const getCurrentUserId = () => {
   return null;
 };
 
-// Fetch all career goals (IDs 13-32)
+// Fetch all career goals (IDs 1-8)
 const getAllCareerGoalIds = () => {
-  // Based on your API, career goals from 13 to 32
-  return Array.from({ length: 20 }, (_, i) => i + 13);
+  // Based on your API, career goals from 1 to 8
+  return Array.from({ length: 8 }, (_, i) => i + 1);
 };
 
 // Fetch all posts for a specific career goal
