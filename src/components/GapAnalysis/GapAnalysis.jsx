@@ -16,7 +16,7 @@ const GapAnalysis = () => {
   const [gapData, setGapData] = useState(null);
 
   // API endpoint
-  const API_URL = "https://smartmentorapi.runasp.net/api/gapanalysis/gap-analysis";
+  const API_URL = "https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/gapanalysis/gap-analysis";
   const token = localStorage.getItem("authToken");
 
   useEffect(() => {
