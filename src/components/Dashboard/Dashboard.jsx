@@ -32,8 +32,8 @@ const Dashboard = () => {
   const [postsLoading, setPostsLoading] = useState(false);
   const [hoveredCard, setHoveredCard] = useState(null);
 
-  const API_URL_GAP = "https://smartmentorapi.runasp.net/api/gapanalysis/gap-analysis";
-  const COMMUNITY_BASE_URL = "https://smartmentorapi.runasp.net/api/community";
+  const API_URL_GAP = "https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/gapanalysis/gap-analysis";
+  const COMMUNITY_BASE_URL = "https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/community";
 
   // AI Models data
   const aiModels = [
@@ -144,7 +144,7 @@ const Dashboard = () => {
     }
 
     try {
-      const profileResponse = await fetch('https://smartmentorapi.runasp.net/api/User/profile', {
+      const profileResponse = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/User/profile', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -186,7 +186,7 @@ const Dashboard = () => {
 
     setPostsLoading(true);
     try {
-      const careerGoalIds = Array.from({ length: 20 }, (_, i) => i + 13);
+      const careerGoalIds = Array.from({ length: 8 }, (_, i) => i + 1);
       
       const fetchPromises = careerGoalIds.map(async (careerGoalId) => {
         try {
