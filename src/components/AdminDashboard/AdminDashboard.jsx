@@ -123,7 +123,7 @@ const AdminDashboard = () => {
   const fetchUsersFromAPI = async () => {
     try {
       const token = getAuthToken();
-      const response = await fetch('https://smartmentorapi.runasp.net/api/Admin/users/profile-summaries', {
+      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/users/profile-summaries', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -172,7 +172,7 @@ const AdminDashboard = () => {
   const deleteUser = async (userId) => {
     try {
       const token = getAuthToken();
-      const response = await fetch(`https://smartmentorapi.runasp.net/api/Admin/users/${userId}`, {
+      const response = await fetch(`https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/users/${userId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -190,7 +190,7 @@ const AdminDashboard = () => {
   const fetchUserRoles = async (userId) => {
     try {
       const token = getAuthToken();
-      const response = await fetch(`https://smartmentorapi.runasp.net/api/Admin/users/${userId}/roles`, {
+      const response = await fetch(`https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/users/${userId}/roles`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -213,7 +213,7 @@ const AdminDashboard = () => {
   const assignRoleToUser = async (userId, roleName) => {
     try {
       const token = getAuthToken();
-      const response = await fetch('https://smartmentorapi.runasp.net/api/Admin/users/assign-role', {
+      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/users/assign-role', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -232,7 +232,7 @@ const AdminDashboard = () => {
   const removeRoleFromUser = async (userId, roleName) => {
     try {
       const token = getAuthToken();
-      const response = await fetch('https://smartmentorapi.runasp.net/api/Admin/users/remove-role', {
+      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/users/remove-role', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -253,7 +253,7 @@ const AdminDashboard = () => {
   const fetchSkills = async () => {
     try {
       const token = getAuthToken();
-      const response = await fetch('https://smartmentorapi.runasp.net/api/Admin/skills', {
+      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/skills', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -276,7 +276,7 @@ const AdminDashboard = () => {
   const createSkill = async (skillData) => {
     try {
       const token = getAuthToken();
-      const response = await fetch('https://smartmentorapi.runasp.net/api/Admin/skills', {
+      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/skills', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -295,7 +295,7 @@ const AdminDashboard = () => {
   const updateSkill = async (skillId, skillData) => {
     try {
       const token = getAuthToken();
-      const response = await fetch(`https://smartmentorapi.runasp.net/api/Admin/skills/${skillId}`, {
+      const response = await fetch(`https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/skills/${skillId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -314,7 +314,7 @@ const AdminDashboard = () => {
   const deleteSkill = async (skillId) => {
     try {
       const token = getAuthToken();
-      const response = await fetch(`https://smartmentorapi.runasp.net/api/Admin/skills/${skillId}`, {
+      const response = await fetch(`https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/skills/${skillId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -334,7 +334,7 @@ const AdminDashboard = () => {
   const fetchInterests = async () => {
     try {
       const token = getAuthToken();
-      const response = await fetch('https://smartmentorapi.runasp.net/api/Admin/interests', {
+      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/interests', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -357,7 +357,7 @@ const AdminDashboard = () => {
   const createInterest = async (interestData) => {
     try {
       const token = getAuthToken();
-      const response = await fetch('https://smartmentorapi.runasp.net/api/Admin/interests', {
+      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/interests', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -378,7 +378,7 @@ const AdminDashboard = () => {
   const fetchCareerGoals = async () => {
     try {
       const token = getAuthToken();
-      const response = await fetch('https://smartmentorapi.runasp.net/api/Admin/careergoals', {
+      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/careergoals', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -401,7 +401,7 @@ const AdminDashboard = () => {
   const createCareerGoal = async (goalData) => {
     try {
       const token = getAuthToken();
-      const response = await fetch('https://smartmentorapi.runasp.net/api/Admin/careergoal', {
+      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/careergoal', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -422,7 +422,7 @@ const AdminDashboard = () => {
   const fetchMasterData = async () => {
     try {
       const token = getAuthToken();
-      const response = await fetch('https://smartmentorapi.runasp.net/api/Admin/MasterData', {
+      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/MasterData', {
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -448,7 +448,7 @@ const AdminDashboard = () => {
   const assignSkillToGoal = async (assignmentData) => {
     try {
       const token = getAuthToken();
-      const response = await fetch('https://smartmentorapi.runasp.net/api/Admin/career-goals/assign-skill', {
+      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/career-goals/assign-skill', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -594,16 +594,16 @@ const AdminDashboard = () => {
   // ==================== MODAL HANDLERS ====================
   
   // User Modal Handlers
-  const handleEditUser = (user) => {
-    setModalType("user");
-    setModalMode("edit");
-    setCurrentUser({
-      ...user,
-      skills: Array.isArray(user.skills) ? user.skills.join(", ") : user.skills,
-      interests: Array.isArray(user.interests) ? user.interests.join(", ") : user.interests
-    });
-    setShowModal(true);
-  };
+  // const handleEditUser = (user) => {
+  //   setModalType("user");
+  //   setModalMode("edit");
+  //   setCurrentUser({
+  //     ...user,
+  //     skills: Array.isArray(user.skills) ? user.skills.join(", ") : user.skills,
+  //     interests: Array.isArray(user.interests) ? user.interests.join(", ") : user.interests
+  //   });
+  //   setShowModal(true);
+  // };
 
   // Skill Modal Handlers
   const handleAddSkill = () => {
@@ -969,7 +969,7 @@ const AdminDashboard = () => {
                   <td className={styles.email_cell}>{user.email}</td>
                   <td>
                     <div className={styles.action_icons}>
-                      <EditIcon className={styles.edit_icon} onClick={() => handleEditUser(user)} />
+                      {/* <EditIcon className={styles.edit_icon} onClick={() => handleEditUser(user)} /> */}
                       <AssignmentIcon className={styles.role_icon} onClick={() => handleManageRoles(user)} />
                       <DeleteIcon className={styles.delete_icon} onClick={() => handleDeleteUser(user.id, user.name)} />
                     </div>
