@@ -13,7 +13,7 @@ const AnalyticsOverview = () => {
   const fetchAnalytics = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("https://smartmentorapi.runasp.net/api/Admin/analytics/overview", {
+      const response = await fetch("https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/analytics/overview", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
