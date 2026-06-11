@@ -600,6 +600,12 @@
   .skills_content {
     padding: 16px;
   }
+
+  .skill_info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
   
   .header_title {
     font-size: 24px;
@@ -615,10 +621,13 @@
   
   .skill_header {
     flex-direction: column;
+    display: flex;
+    align-items: center;
   }
   
   .skill_percentage {
     text-align: left;
+    display: flex;
   }
 }
 
