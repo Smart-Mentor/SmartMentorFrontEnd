@@ -684,8 +684,8 @@ const GapAnalysis = () => {
                 ))
               ) : (
                 <div className={styles.no_skills_message}>
-                  <CheckCircleIcon style={{ color: '#10b981', fontSize: 48 }} />
-                  <p>Excellent! All skills are mastered!</p>
+                  {/* <CheckCircleIcon style={{ color: '#10b981', fontSize: 48 }} /> */}
+                  <p>No skills to improve!</p>
                 </div>
               )}
             </div>
