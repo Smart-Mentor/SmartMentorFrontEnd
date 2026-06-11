@@ -19,10 +19,13 @@ export const getCurrentUserId = () => {
   return null;
 };
 
-// Fetch all career goals (IDs 1-8)
+// Fetch all career goals (IDs: 1-9, 11, 18, 19, 26-35)
 const getAllCareerGoalIds = () => {
-  // Based on your API, career goals from 1 to 8
-  return Array.from({ length: 8 }, (_, i) => i + 1);
+  return [
+    ...Array.from({ length: 9 }, (_, i) => i + 1), // 1 to 9
+    11, 18, 19,
+    ...Array.from({ length: 10 }, (_, i) => i + 26) // 26 to 35
+  ];
 };
 
 // Fetch all posts for a specific career goal
