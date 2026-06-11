@@ -680,7 +680,7 @@ useEffect(() => {
             <div className={styles.contact_item}>
               <EmailOutlinedIcon />
               <Typography>{userData.email}</Typography>
-              <span className={styles.read_only_badge}>Verified</span>
+              {/* <span className={styles.read_only_badge}>Verified</span> */}
             </div>
             <div className={styles.contact_item}>
               <LocationOnOutlinedIcon />
