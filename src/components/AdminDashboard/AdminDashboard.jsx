@@ -1077,7 +1077,7 @@ const AdminDashboard = () => {
             <tr>
               <th>ID</th>
               <th>Interest Name</th>
-              <th>Actions</th>
+              {/* <th>Actions</th> */}
             </tr>
           </thead>
           <tbody>
@@ -1085,11 +1085,11 @@ const AdminDashboard = () => {
               <tr key={interest.id}>
                 <td>{interest.id}</td>
                 <td>{interest.name}</td>
-                <td>
+                {/* <td>
                   <div className={styles.action_icons}>
                     <EditIcon className={styles.edit_icon} onClick={() => handleEditInterest(interest)} />
                   </div>
-                </td>
+                </td> */}
               </tr>
             ))}
           </tbody>
@@ -1118,7 +1118,7 @@ const AdminDashboard = () => {
               <th>ID</th>
               <th>Goal Name</th>
               <th>Description</th>
-              <th>Actions</th>
+              {/* <th>Actions</th> */}
             </tr>
           </thead>
           <tbody>
@@ -1127,11 +1127,11 @@ const AdminDashboard = () => {
                 <td>{goal.id}</td>
                 <td>{goal.name}</td>
                 <td>{goal.description || "-"}</td>
-                <td>
+                {/* <td>
                   <div className={styles.action_icons}>
                     <EditIcon className={styles.edit_icon} onClick={() => handleEditGoal(goal)} />
                   </div>
-                </td>
+                </td> */}
               </tr>
             ))}
           </tbody>
