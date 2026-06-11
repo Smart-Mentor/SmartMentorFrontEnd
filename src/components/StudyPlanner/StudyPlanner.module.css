@@ -1175,3 +1175,92 @@
     gap: 5px;
   }
 }
+
+/* ==================== DAY CARD ==================== */
+.day_card {
+  background: #f9f9f9;
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.12); /* Added subtle border for all day cards */
+}
+
+.day_card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border-color: rgba(10, 90, 219, 0.25); /* Border darkens on hover */
+}
+
+/* Today Card Highlight - KEPT EXACTLY THE SAME */
+.today_card {
+  border: 2px solid #0A5ADB;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+  box-shadow: 0 4px 12px rgba(10, 90, 219, 0.15);
+}
+
+/* Override hover for today_card to keep it exactly the same */
+.today_card:hover {
+  border: 2px solid #0A5ADB; /* Keep the same border */
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Past Card */
+.past_card {
+  opacity: 0.85;
+  background: #fafafa;
+  border-color: rgba(156, 163, 175, 0.3); /* Softer border for past days */
+}
+
+/* Override hover for past_card */
+.past_card:hover {
+  border-color: rgba(156, 163, 175, 0.5);
+}
+
+/* ==================== DAY HEADER ==================== */
+.day_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: white;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+/* ==================== DAY TASKS ==================== */
+.day_tasks {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.day_tasks.expanded {
+  max-height: 800px;
+}
+
+.schedule_task {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+/* Last task shouldn't have bottom border */
+.schedule_task:last-child {
+  border-bottom: none;
+}
+
+/* ==================== DAY FOOTER ==================== */
+.day_footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: #f5f5f5;
+  font-size: 11px;
+  color: #666;
+  border-top: 1px solid #e0e0e0;
+}
