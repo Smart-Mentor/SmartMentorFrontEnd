@@ -68,12 +68,13 @@ function App() {
           <Route path="/gapanalysis" element={<GapAnalysis />} />
           <Route path="/community" element={<Community />} />
           <Route path="/aimentor" element={<Aiagent />} />
-          <Route path="/aimentor/recommendation" element={<RecommendationCourses />} />
-          <Route path="/aimentor/roadmap" element={<RoadmapAI />} />
-          <Route path="/aimentor/cv-analysis" element={<CVAnalysis />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/projects/:id" element={<ProjectDetails />} />
         </Route>
+        
+          <Route path="/aimentor/recommendation" element={<ProtectedRoute><RecommendationCourses /></ProtectedRoute>} />
+          <Route path="/aimentor/roadmap" element={<ProtectedRoute><RoadmapAI /></ProtectedRoute>} />
+          <Route path="/aimentor/cv-analysis" element={<ProtectedRoute><CVAnalysis /></ProtectedRoute>} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>
