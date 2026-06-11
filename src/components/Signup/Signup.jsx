@@ -488,7 +488,7 @@ export default function Signup() {
                   </span>
                 </div>
                 <span>
-                  I agree to the <Link to="/terms">Terms</Link> and <Link to="/privacy">Privacy Policy</Link>
+                  I agree to the <span style={{color:"#0A5ADB", fontWeight:"600"}}>Terms</span> and <span style={{color:"#0A5ADB", fontWeight:"600"}}>Privacy Policy</span>
                 </span>
               </label>
 
@@ -524,20 +524,20 @@ export default function Signup() {
             </form>
 
             {/* Divider */}
-            <div className={styles.divider}>
+            {/* <div className={styles.divider}>
               <span>or continue with</span>
-            </div>
+            </div> */}
 
             {/* Social Login */}
             <div className={styles.social_login}>
-              <button className={styles.social_btn} disabled={loading}>
+              {/* <button className={styles.social_btn} disabled={loading}>
                 <i className="fab fa-google"></i>
                 <span>Google</span>
               </button>
               <button className={styles.social_btn} disabled={loading}>
                 <i className="fab fa-github"></i>
                 <span>GitHub</span>
-              </button>
+              </button> */}
             </div>
 
             {/* Footer */}
