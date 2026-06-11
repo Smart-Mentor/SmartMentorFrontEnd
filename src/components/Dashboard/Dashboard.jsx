@@ -186,7 +186,12 @@ const Dashboard = () => {
 
     setPostsLoading(true);
     try {
-      const careerGoalIds = Array.from({ length: 8 }, (_, i) => i + 1);
+      const careerGoalIds = [
+      ...Array.from({ length: 9 }, (_, i) => i + 1), // 1 to 9
+      11, 18, 19,
+      ...Array.from({ length: 10 }, (_, i) => i + 26) // 26 to 35
+    ];
+
       
       const fetchPromises = careerGoalIds.map(async (careerGoalId) => {
         try {
