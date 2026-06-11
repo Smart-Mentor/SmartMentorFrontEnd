@@ -28,162 +28,87 @@ import Portfolio from "../../assets/File_dock.png";
 
 // ---------- Backend static data (from the provided lists) ----------
 const SKILLS_LIST = [
-  {
-    "id": 1,
-    "name": "C#",
-    "category": " "
-  },
-  {
-    "id": 2,
-    "name": "ASP.NET Core Web API",
-    "category": " "
-  },
-  {
-    "id": 3,
-    "name": "Entity Framework Core",
-    "category": " "
-  },
-  {
-    "id": 4,
-    "name": "LINQ Queries",
-    "category": " "
-  },
-  {
-    "id": 5,
-    "name": "RESTful API Design",
-    "category": " "
-  },
-  {
-    "id": 6,
-    "name": "Dependency Injection",
-    "category": " "
-  },
-  {
-    "id": 7,
-    "name": "HTML5",
-    "category": " "
-  },
-  {
-    "id": 8,
-    "name": "CSS3",
-    "category": " "
-  },
-  {
-    "id": 9,
-    "name": "JavaScript ES6+",
-    "category": " "
-  },
-  {
-    "id": 10,
-    "name": "React.js Fundamentals",
-    "category": " "
-  },
-  {
-    "id": 11,
-    "name": "Responsive Web Design",
-    "category": " "
-  },
-  {
-    "id": 12,
-    "name": "SQL Server",
-    "category": " "
-  },
-  {
-    "id": 13,
-    "name": "Database Normalization",
-    "category": " "
-  },
-  {
-    "id": 14,
-    "name": "Writing Complex SQL Queries",
-    "category": " "
-  },
-  {
-    "id": 15,
-    "name": "Stored Procedures",
-    "category": " "
-  },
-  {
-    "id": 16,
-    "name": "Python Programming",
-    "category": " "
-  },
-  {
-    "id": 17,
-    "name": "Data Analysis with Pandas",
-    "category": " "
-  },
-  {
-    "id": 18,
-    "name": "Data Visualization",
-    "category": " "
-  },
-  {
-    "id": 19,
-    "name": "Machine Learning Fundamentals",
-    "category": " "
-  },
-  {
-    "id": 20,
-    "name": "Docker Containers",
-    "category": " "
-  },
-  {
-    "id": 21,
-    "name": "CI/CD Pipelines",
-    "category": " "
-  },
-  {
-    "id": 22,
-    "name": "Azure Cloud Basics",
-    "category": " "
-  },
-  {
-    "id": 23,
-    "name": "OWASP Security Principles",
-    "category": " "
-  },
-  {
-    "id": 24,
-    "name": "Authentication & Authorization (JWT)",
-    "category": " "
-  }
-]
+  { id: 1, name: "C#", category: " " },
+  { id: 2, name: "ASP.NET Core Web API", category: " " },
+  { id: 3, name: "Entity Framework Core", category: " " },
+  { id: 4, name: "LINQ Queries", category: " " },
+  { id: 5, name: "RESTful API Design", category: " " },
+  { id: 6, name: "Dependency Injection", category: " " },
+  { id: 7, name: "HTML5", category: " " },
+  { id: 8, name: "CSS3", category: " " },
+  { id: 9, name: "JavaScript ES6+", category: " " },
+  { id: 10, name: "React.js Fundamentals", category: " " },
+  { id: 11, name: "Responsive Web Design", category: " " },
+  { id: 12, name: "SQL Server", category: " " },
+  { id: 13, name: "Database Normalization", category: " " },
+  { id: 14, name: "Writing Complex SQL Queries", category: " " },
+  { id: 15, name: "Stored Procedures", category: " " },
+  { id: 16, name: "Python Programming", category: " " },
+  { id: 17, name: "Data Analysis with Pandas", category: " " },
+  { id: 18, name: "Data Visualization", category: " " },
+  { id: 19, name: "Machine Learning Fundamentals", category: " " },
+  { id: 20, name: "Docker Containers", category: " " },
+  { id: 21, name: "CI/CD Pipelines", category: " " },
+  { id: 22, name: "Azure Cloud Basics", category: " " },
+  { id: 23, name: "OWASP Security Principles", category: " " },
+  { id: 24, name: "Authentication & Authorization (JWT)", category: " " },
+  { id: 25, name: "React Hooks", category: " " },
+  { id: 26, name: "State Management (Redux)", category: " " },
+  { id: 27, name: "Tailwind CSS", category: " " },
+  { id: 28, name: "Unit Testing (xUnit)", category: " " },
+  { id: 29, name: "Microservices Architecture", category: " " },
+  { id: 30, name: "SOLID Principles", category: " " },
+  { id: 31, name: "Design Patterns", category: " " },
+  { id: 32, name: "PostgreSQL", category: " " },
+  { id: 33, name: "MongoDB", category: " " },
+  { id: 34, name: "NumPy", category: " " },
+  { id: 35, name: "Scikit-learn", category: " " },
+  { id: 36, name: "TensorFlow", category: " " },
+  { id: 37, name: "Kubernetes", category: " " },
+  { id: 38, name: "Terraform", category: " " },
+  { id: 39, name: "Azure App Services", category: " " },
+  { id: 40, name: "Azure Functions", category: " " },
+  { id: 41, name: "SQL Injection Prevention", category: " " },
+  { id: 42, name: "XSS & CSRF Protection", category: " " },
+  { id: 43, name: "Git & Version Control", category: " " },
+  { id: 44, name: "Agile / Scrum", category: " " },
+  { id: 45, name: "TypeScript", category: " " },
+  { id: 46, name: "Next.js", category: " " },
+  { id: 47, name: "System Design", category: " " },
+  { id: 48, name: "Message Queues (RabbitMQ)", category: " " },
+  { id: 49, name: "OWASP Top 10", category: " " },
+  { id: 50, name: "ETL Pipelines", category: " " },
+  { id: 51, name: "Jupyter Notebooks", category: " " },
+  { id: 52, name: "GitHub Actions", category: " " },
+  { id: 53, name: "Monitoring (Prometheus)", category: " " },
+  { id: 54, name: "React Router", category: " " },
+  { id: 55, name: "Responsive Design", category: " " }
+];
 
 const INTERESTS_LIST = [
-  {
-    "id": 1,
-    "name": "Backend Development with .NET"
-  },
-  {
-    "id": 2,
-    "name": "Frontend Web Development"
-  },
-  {
-    "id": 3,
-    "name": "Full-Stack Web Applications"
-  },
-  {
-    "id": 4,
-    "name": "Data Analytics and Visualization"
-  },
-  {
-    "id": 5,
-    "name": "Artificial Intelligence & Machine Learning"
-  },
-  {
-    "id": 6,
-    "name": "Cloud Computing (Azure)"
-  },
-  {
-    "id": 7,
-    "name": "DevOps & Automation"
-  },
-  {
-    "id": 8,
-    "name": "Cybersecurity & Ethical Hacking"
-  }
-]
+  { id: 1, name: "Backend Development with .NET" },
+  { id: 2, name: "Frontend Web Development" },
+  { id: 3, name: "Full-Stack Web Applications" },
+  { id: 4, name: "Data Analytics and Visualization" },
+  { id: 5, name: "Artificial Intelligence & Machine Learning" },
+  { id: 6, name: "Cloud Computing (Azure)" },
+  { id: 7, name: "DevOps & Automation" },
+  { id: 8, name: "Cybersecurity & Ethical Hacking" },
+  { id: 9, name: "Software Architecture & System Design" },
+  { id: 10, name: "Mobile App Development (React Native)" },
+  { id: 11, name: "Quality Assurance & Test Automation" },
+  { id: 12, name: "Site Reliability & System Observability" },
+  { id: 13, name: "Database Design & Administration" },
+  { id: 14, name: "Technical Product Management" },
+  { id: 15, name: "Blockchain & Decentralized Applications" },
+  { id: 16, name: "Embedded Systems & IoT" },
+  { id: 17, name: "Security Architecture & Threat Modeling" },
+  { id: 18, name: "Platform Engineering & Internal Tooling" },
+  { id: 19, name: "Data Engineering & ETL Pipelines" },
+  { id: 20, name: "MLOps & AI System Architecture" },
+  { id: 21, name: "TypeScript Full-Stack Development" },
+  { id: 22, name: "Game Development & Interactive Experiences" }
+];
 
 const CAREER_GOALS_LIST = [
   { id: 1, name: "Junior Backend .NET Developer", description: "Build and maintain RESTful APIs using ASP.NET Core and SQL Server." },
@@ -193,8 +118,22 @@ const CAREER_GOALS_LIST = [
   { id: 5, name: "Machine Learning Engineer", description: "Develop predictive models and AI solutions using Python and ML frameworks." },
   { id: 6, name: "Cloud Engineer (Azure)", description: "Design and deploy scalable applications on Microsoft Azure." },
   { id: 7, name: "DevOps Engineer", description: "Automate deployments and manage CI/CD pipelines using Docker and cloud tools." },
-  { id: 8, name: "Cybersecurity Analyst", description: "Secure applications and infrastructure by applying modern security practices." }
-]
+  { id: 8, name: "Cybersecurity Analyst", description: "Secure applications and infrastructure by applying modern security practices." },
+  { id: 9, name: "Senior Backend .NET Developer", description: "Lead backend architecture, mentor juniors, and design scalable distributed systems." },
+  { id: 11, name: "Software Architect", description: "Design high-level system architecture and make strategic technology decisions." },
+  { id: 18, name: "Mobile Developer (React Native)", description: "Build cross-platform mobile apps using React Native and modern JavaScript." },
+  { id: 19, name: "QA Automation Engineer", description: "Write automated tests and build CI/CD testing pipelines for quality assurance." },
+  { id: 26, name: "Site Reliability Engineer", description: "Ensure system reliability, observability, and incident response at scale." },
+  { id: 27, name: "Database Developer", description: "Design optimized database schemas, stored procedures, and performance tuning." },
+  { id: 28, name: "Technical Product Manager", description: "Bridge engineering and business to deliver impactful technical products." },
+  { id: 29, name: "Blockchain Developer", description: "Build decentralized applications and smart contracts on blockchain platforms." },
+  { id: 30, name: "Embedded Systems Engineer", description: "Develop firmware and software for microcontrollers and IoT devices." },
+  { id: 31, name: "Security Architect", description: "Design enterprise security frameworks and threat mitigation strategies." },
+  { id: 32, name: "Platform Engineer", description: "Build internal developer platforms and tooling to improve engineering velocity." },
+  { id: 33, name: "Data Engineer", description: "Build and maintain ETL pipelines, data warehouses, and data infrastructure." },
+  { id: 34, name: "AI/ML Architect", description: "Design end-to-end machine learning systems and MLOps pipelines." },
+  { id: 35, name: "Full-Stack TypeScript Developer", description: "Build type-safe full-stack applications with TypeScript, Node.js, and React." }
+];
 
 function stringAvatar(name) {
   const names = name.split(" ");
@@ -505,7 +444,9 @@ const fetchAllUserPosts = useCallback(async (userId) => {
 
   try {
     setLoadingPosts(true);
-    const allCareerGoals = CAREER_GOALS_LIST.filter(cg => cg.id >= 1 && cg.id <= 8);
+    const allCareerGoals = CAREER_GOALS_LIST.filter(cg => 
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 18, 19, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35].includes(cg.id)
+    );
     let allUserPosts = [];
 
     // Fetch posts from each career goal
