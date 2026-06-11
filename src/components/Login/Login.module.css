@@ -1605,3 +1605,34 @@
     border-radius: 12px;
   }
 }
+/* Resend Button Container & Button */
+.resend_container {
+  text-align: center;
+  margin-top: 12px;
+}
+
+.resend_button {
+  background: none;
+  border: none;
+  color: #0A5ADB;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 12px;
+  transition: all 0.3s ease;
+}
+
+.resend_button:hover:not(.disabled) {
+  color: #58A7B5;
+  text-decoration: underline;
+}
+
+.resend_button.disabled {
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* Slightly wider popup for verification modal (optional) */
+.popup_card {
+  max-width: 480px; /* already present, but can be adjusted */
+}

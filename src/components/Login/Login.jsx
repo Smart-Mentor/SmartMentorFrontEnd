@@ -1,9 +1,9 @@
 // 🔹 Imports
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import styles from "./Login.module.css";
 import logo from "../../assets/sign in logo.png";
-import { loginUser, forgotPassword, resetPassword } from "../../api/authenticationService";
+import { loginUser, forgotPassword, resetPassword, verifyEmail, resendVerificationCode } from "../../api/authenticationService";
 
 // 🔹 Login Component
 export default function Login() {
@@ -20,6 +20,9 @@ export default function Login() {
   const [animate, setAnimate] = useState(false);
   const navigate = useNavigate();
 
+  // Store original credentials for automatic re-login after verification
+  const pendingCredentials = useRef({ email: "", password: "" });
+
   // 🔹 Forgot / Reset Password Popup States
   const [showForgotPopup, setShowForgotPopup] = useState(false);
   const [showResetPopup, setShowResetPopup] = useState(false);
@@ -30,6 +33,16 @@ export default function Login() {
   const [popupError, setPopupError] = useState("");
   const [popupSuccess, setPopupSuccess] = useState("");
   const [popupLoading, setPopupLoading] = useState(false);
+
+  // 🔹 Verification Modal States
+  const [showVerificationPopup, setShowVerificationPopup] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [verificationToken, setVerificationToken] = useState("");
+  const [resendDisabled, setResendDisabled] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const [verificationError, setVerificationError] = useState("");
+  const [verificationSuccess, setVerificationSuccess] = useState("");
+  const [verificationLoading, setVerificationLoading] = useState(false);
 
   // --- Animation on mount ---
   useEffect(() => {
@@ -56,24 +69,23 @@ export default function Login() {
         setError("");
         setLoading(true);
         
-        // Store admin token or admin flag
         const loginData = {
-        ...formData,
-        email: formData.email.toLowerCase()
-      };
+          ...formData,
+          email: formData.email.toLowerCase()
+        };
 
-      const response = await loginUser(loginData);
+        const response = await loginUser(loginData);
 
-      if (response.isSuccessful && response.token) {
-        localStorage.setItem("token", response.token);
-        localStorage.setItem("userRole", "admin");
-        localStorage.removeItem("verificationToken");}
+        if (response.isSuccessful && response.token) {
+          localStorage.setItem("token", response.token);
+          localStorage.setItem("userRole", "admin");
+          localStorage.removeItem("verificationToken");
+        }
         
         if (rememberMe) {
           localStorage.setItem("rememberMe", "true");
         }
         
-        // Navigate to admin dashboard
         navigate("/admin/dashboard", { replace: true });
         return;
       } catch (err) {
@@ -84,15 +96,20 @@ export default function Login() {
       return;
     }
 
-    // 🔹 Regular user login flow (also make email case-insensitive)
+    // 🔹 Regular user login flow
     try {
       setError("");
       setLoading(true);
 
-      // Convert email to lowercase before sending to API
       const loginData = {
         ...formData,
         email: formData.email.toLowerCase()
+      };
+
+      // Store credentials for possible re‑login after verification
+      pendingCredentials.current = {
+        email: loginData.email,
+        password: loginData.password
       };
 
       const response = await loginUser(loginData);
@@ -106,7 +123,13 @@ export default function Login() {
           localStorage.setItem("rememberMe", "true");
         }
 
-        navigate("/completeprofile", { replace: true });
+        // Check if email is confirmed
+        if (response.user && response.user.emailConfirmed === false) {
+          setVerificationToken(response.verificationToken);
+          setShowVerificationPopup(true);
+        } else {
+          navigate("/completeprofile", { replace: true });
+        }
         return;
       }
 
@@ -129,11 +152,99 @@ export default function Login() {
     }
   };
 
+  // 🔹 Verification Submit Handler (with automatic re‑login)
+  const handleVerificationSubmit = async (e) => {
+    e.preventDefault();
+    if (!verificationCode) {
+      setVerificationError("Please enter the verification code");
+      return;
+    }
+
+    try {
+      setVerificationLoading(true);
+      setVerificationError("");
+      setVerificationSuccess("");
+
+      // 1. Verify the code
+      const result = await verifyEmail({
+        verificationToken: verificationToken,
+        code: verificationCode
+      });
+
+      if (result.isSuccessful || result.message?.toLowerCase().includes("success")) {
+        setVerificationSuccess("✅ Email verified successfully! Logging you in...");
+
+        // 2. Re‑login with the same credentials to obtain a fresh token
+        const newLoginResponse = await loginUser(pendingCredentials.current);
+
+        if (newLoginResponse.isSuccessful && newLoginResponse.token) {
+          // Update token and user data in localStorage
+          localStorage.setItem("token", newLoginResponse.token);
+          localStorage.setItem("userRole", "user");
+          if (rememberMe) {
+            localStorage.setItem("rememberMe", "true");
+          }
+
+          // 3. Close modal and navigate
+          setTimeout(() => {
+            setShowVerificationPopup(false);
+            setVerificationCode("");
+            setVerificationToken("");
+            navigate("/completeprofile", { replace: true });
+          }, 1000);
+        } else {
+          // If re‑login fails, ask user to log in again manually
+          setVerificationError("Verification succeeded, but we couldn't log you in. Please try logging in again.");
+          setTimeout(() => {
+            setShowVerificationPopup(false);
+            setVerificationCode("");
+            setVerificationToken("");
+            window.location.reload(); // reset login form
+          }, 2000);
+        }
+      } else {
+        setVerificationError(result.message || "Verification failed. Please check your code.");
+      }
+    } catch (err) {
+      setVerificationError(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setVerificationLoading(false);
+    }
+  };
+
+  // 🔹 Resend Verification Code Handler
+  const handleResendCode = async () => {
+    if (resendDisabled) return;
+
+    try {
+      setResendDisabled(true);
+      setCountdown(60);
+      setVerificationError("");
+      setVerificationSuccess("");
+
+      await resendVerificationCode(verificationToken);
+      setVerificationSuccess("📧 A new verification code has been sent to your email.");
+
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setResendDisabled(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (err) {
+      setVerificationError(err.message || "Failed to resend code. Please try again.");
+      setResendDisabled(false);
+    }
+  };
+
   // 🔹 Step 1: Send Reset Code
   const handleForgotSubmit = async (e) => {
     e.preventDefault();
     
-    // Prevent password reset for admin account (case-insensitive)
     if (forgotEmail.toLowerCase() === "admin@gmail.com") {
       setPopupError("Admin password reset is not allowed through this form");
       return;
@@ -149,7 +260,6 @@ export default function Login() {
       setPopupError("");
       setPopupSuccess("");
 
-      // Convert email to lowercase for API call
       const res = await forgotPassword(forgotEmail.toLowerCase());
 
       if (res.message?.toLowerCase().includes("sent") || res.isSuccessful) {
@@ -179,7 +289,6 @@ export default function Login() {
 
     const email = localStorage.getItem("resetEmail");
     
-    // Prevent password reset for admin account (case-insensitive)
     if (email && email.toLowerCase() === "admin@gmail.com") {
       setPopupError("Admin password reset is not allowed through this form");
       return;
@@ -236,7 +345,7 @@ export default function Login() {
   // --- UI Render ---
   return (
     <div className={styles.login_page}>
-      {/* Background decorative elements */}
+      {/* Background decorative elements (unchanged) */}
       <div className={styles.bg_blur_1}></div>
       <div className={styles.bg_blur_2}></div>
       <div className={styles.bg_blur_3}></div>
@@ -248,14 +357,12 @@ export default function Login() {
         <div className={`${styles.shape} ${styles.shape_5}`}></div>
       </div>
 
-      {/* Main Container - Split Layout */}
+      {/* Main Container - Split Layout (unchanged) */}
       <div className={`${styles.login_container} ${animate ? styles.animate_in : ''}`}>
         
-        {/* Left Side - Welcome Section */}
+        {/* Left Side - Welcome Section (unchanged) */}
         <div className={`${styles.welcome_section} ${animate ? styles.fade_in_left : ''}`}>
           <div className={styles.welcome_content}>
-            
-            {/* Animated Logo */}
             <div className={`${styles.logo_section} ${animate ? styles.scale_in : ''}`}>
               <div className={styles.logo_hero}>
                 <div className={styles.logo_orb_1}></div>
@@ -268,7 +375,6 @@ export default function Login() {
               <h1 className={styles.brand_name}>SmartMentor</h1>
             </div>
 
-            {/* Welcome Text */}
             <div className={`${styles.welcome_text} ${animate ? styles.fade_in_up : ''}`} style={{ animationDelay: '0.2s' }}>
               <h2 className={styles.welcome_title}>
                 Welcome Back to <span className={styles.gradient_text}>Your Journey</span>
@@ -278,7 +384,6 @@ export default function Login() {
               </p>
             </div>
 
-            {/* Features */}
             <div className={`${styles.features_list} ${animate ? styles.fade_in_up : ''}`} style={{ animationDelay: '0.3s' }}>
               <div className={`${styles.feature_item} ${animate ? styles.slide_in_right : ''}`} style={{ animationDelay: '0.4s' }}>
                 <span className={styles.feature_icon}>🎯</span>
@@ -298,7 +403,6 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Stats */}
             <div className={`${styles.stats_section} ${animate ? styles.fade_in_up : ''}`} style={{ animationDelay: '0.8s' }}>
               <div className={`${styles.stat_item} ${animate ? styles.bounce_in : ''}`} style={{ animationDelay: '0.9s' }}>
                 <span className={styles.stat_number}>10K+</span>
@@ -317,7 +421,6 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Decorative Elements */}
           <div className={styles.decorative_1}></div>
           <div className={styles.decorative_2}></div>
           <div className={styles.decorative_3}></div>
@@ -325,11 +428,9 @@ export default function Login() {
           <div className={styles.floating_dots}></div>
         </div>
 
-        {/* Right Side - Login Form */}
+        {/* Right Side - Login Form (unchanged) */}
         <div className={`${styles.form_section} ${animate ? styles.fade_in_right : ''}`}>
           <div className={styles.form_card}>
-            
-            {/* Form Header */}
             <div className={`${styles.form_header} ${animate ? styles.fade_in_up : ''}`}>
               <div className={`${styles.form_badge} ${animate ? styles.bounce_in : ''}`}>
                 <span className={styles.badge_icon}>👋</span>
@@ -339,10 +440,7 @@ export default function Login() {
               <p className={styles.form_subtitle}>Enter your credentials to access your account</p>
             </div>
 
-            {/* Login Form */}
             <form onSubmit={handleSubmit} className={`${styles.login_form} ${animate ? styles.fade_in_up : ''}`} style={{ animationDelay: '0.2s' }}>
-              
-              {/* Email */}
               <div className={`${styles.input_group} ${animate ? styles.slide_in_up : ''}`} style={{ animationDelay: '0.3s' }}>
                 <label>Email Address</label>
                 <div className={styles.input_wrapper}>
@@ -360,7 +458,6 @@ export default function Login() {
                 </div>
               </div>
 
-              {/* Password */}
               <div className={`${styles.input_group} ${animate ? styles.slide_in_up : ''}`} style={{ animationDelay: '0.4s' }}>
                 <label>Password</label>
                 <div className={styles.input_wrapper}>
@@ -384,7 +481,6 @@ export default function Login() {
                 </div>
               </div>
 
-              {/* Options */}
               <div className={`${styles.options} ${animate ? styles.fade_in : ''}`} style={{ animationDelay: '0.5s' }}>
                 <label className={styles.checkbox_wrapper}>
                   <input
@@ -412,7 +508,6 @@ export default function Login() {
                 </button>
               </div>
 
-              {/* Error Message */}
               {error && (
                 <div className={`${styles.error_message} ${styles.shake}`}>
                   <i className="fas fa-exclamation-circle"></i>
@@ -420,7 +515,6 @@ export default function Login() {
                 </div>
               )}
 
-              {/* Submit Button */}
               <button 
                 type="submit" 
                 className={`${styles.login_button} ${loading ? styles.loading : ''} ${animate ? styles.slide_in_up : ''}`}
@@ -446,24 +540,21 @@ export default function Login() {
               </button>
             </form>
 
-            {/* Divider */}
-            <div className={`${styles.divider} ${animate ? styles.fade_in : ''}`} style={{ animationDelay: '0.7s' }}>
+            {/* <div className={`${styles.divider} ${animate ? styles.fade_in : ''}`} style={{ animationDelay: '0.7s' }}>
               <span>or continue with</span>
-            </div>
+            </div> */}
 
-            {/* Social Login */}
             <div className={`${styles.social_login} ${animate ? styles.fade_in_up : ''}`} style={{ animationDelay: '0.8s' }}>
-              <button className={`${styles.social_btn} ${styles.google_btn}`} disabled={loading}>
+              {/* <button className={`${styles.social_btn} ${styles.google_btn}`} disabled={loading}>
                 <span className={styles.social_icon}><i className="fab fa-google"></i></span>
                 <span>Google</span>
               </button>
               <button className={`${styles.social_btn} ${styles.github_btn}`} disabled={loading}>
                 <span className={styles.social_icon}><i className="fab fa-github"></i></span>
                 <span>GitHub</span>
-              </button>
+              </button> */}
             </div>
 
-            {/* Footer */}
             <div className={`${styles.footer} ${animate ? styles.fade_in : ''}`} style={{ animationDelay: '0.9s' }}>
               <p>
                 Don't have an account? <Link to="/signup">Sign Up <i className="fas fa-arrow-right"></i></Link>
@@ -473,14 +564,13 @@ export default function Login() {
         </div>
       </div>
 
-      {/* 🔹 Popup 1: Forgot Password */}
+      {/* 🔹 Popup 1: Forgot Password (unchanged) */}
       {showForgotPopup && (
         <div className={styles.popup_overlay} onClick={closeAllPopups}>
           <div className={styles.popup_card} onClick={(e) => e.stopPropagation()}>
             <button className={styles.popup_close} onClick={closeAllPopups}>
               <i className="fas fa-times"></i>
             </button>
-
             <div className={styles.popup_header}>
               <div className={`${styles.reset_icon} ${styles.pulse_anim}`}>
                 <span>🔑</span>
@@ -488,7 +578,6 @@ export default function Login() {
               <h3>Reset Password</h3>
               <p>Enter your email to receive reset code</p>
             </div>
-
             <form onSubmit={handleForgotSubmit} className={styles.popup_form}>
               <div className={styles.input_group}>
                 <label>Email Address</label>
@@ -501,21 +590,18 @@ export default function Login() {
                   disabled={popupLoading}
                 />
               </div>
-
               {popupError && (
                 <div className={`${styles.popup_error} ${styles.shake}`}>
                   <i className="fas fa-exclamation-circle"></i>
                   {popupError}
                 </div>
               )}
-
               {popupSuccess && (
                 <div className={`${styles.popup_success} ${styles.popup_success_anim}`}>
                   <i className="fas fa-check-circle"></i>
                   {popupSuccess}
                 </div>
               )}
-
               <button
                 type="submit"
                 className={`${styles.popup_button} ${popupLoading ? styles.loading : ''}`}
@@ -524,12 +610,7 @@ export default function Login() {
                 <span>{popupLoading ? "Sending..." : "Send Code"}</span>
                 {!popupLoading && <i className="fas fa-paper-plane"></i>}
               </button>
-
-              <button
-                type="button"
-                className={styles.popup_back}
-                onClick={closeAllPopups}
-              >
+              <button type="button" className={styles.popup_back} onClick={closeAllPopups}>
                 <i className="fas fa-arrow-left"></i> Back to Login
               </button>
             </form>
@@ -537,14 +618,13 @@ export default function Login() {
         </div>
       )}
 
-      {/* 🔹 Popup 2: Reset Password */}
+      {/* 🔹 Popup 2: Reset Password (unchanged) */}
       {showResetPopup && (
         <div className={styles.popup_overlay} onClick={closeAllPopups}>
           <div className={`${styles.popup_card} ${styles.popup_enter}`} onClick={(e) => e.stopPropagation()}>
             <button className={styles.popup_close} onClick={closeAllPopups}>
               <i className="fas fa-times"></i>
             </button>
-
             <div className={styles.popup_header}>
               <div className={`${styles.reset_icon} ${styles.pulse_anim}`}>
                 <span>🔒</span>
@@ -552,7 +632,6 @@ export default function Login() {
               <h3>New Password</h3>
               <p>Enter the code and your new password</p>
             </div>
-
             <form onSubmit={handleResetSubmit} className={styles.popup_form}>
               <div className={styles.input_group}>
                 <label>Reset Code</label>
@@ -565,7 +644,6 @@ export default function Login() {
                   disabled={popupLoading}
                 />
               </div>
-
               <div className={styles.input_group}>
                 <label>New Password</label>
                 <input
@@ -577,7 +655,6 @@ export default function Login() {
                   disabled={popupLoading}
                 />
               </div>
-
               <div className={styles.input_group}>
                 <label>Confirm Password</label>
                 <input
@@ -589,21 +666,18 @@ export default function Login() {
                   disabled={popupLoading}
                 />
               </div>
-
               {popupError && (
                 <div className={`${styles.popup_error} ${styles.shake}`}>
                   <i className="fas fa-exclamation-circle"></i>
                   {popupError}
                 </div>
               )}
-
               {popupSuccess && (
                 <div className={`${styles.popup_success} ${styles.popup_success_anim}`}>
                   <i className="fas fa-check-circle"></i>
                   {popupSuccess}
                 </div>
               )}
-
               <button
                 type="submit"
                 className={`${styles.popup_button} ${popupLoading ? styles.loading : ''}`}
@@ -612,7 +686,6 @@ export default function Login() {
                 <span>{popupLoading ? "Resetting..." : "Reset Password"}</span>
                 {!popupLoading && <i className="fas fa-check"></i>}
               </button>
-
               <button
                 type="button"
                 className={styles.popup_back}
@@ -624,6 +697,95 @@ export default function Login() {
                 }}
               >
                 <i className="fas fa-arrow-left"></i> Back
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 🔹 Popup 3: Email Verification Modal (with auto re‑login) */}
+      {showVerificationPopup && (
+        <div className={styles.popup_overlay} onClick={() => {}}>
+          <div className={styles.popup_card} onClick={(e) => e.stopPropagation()}>
+            <button
+              className={styles.popup_close}
+              onClick={() => {
+                setShowVerificationPopup(false);
+                setVerificationCode("");
+                setVerificationToken("");
+                setVerificationError("");
+                setVerificationSuccess("");
+              }}
+            >
+              <i className="fas fa-times"></i>
+            </button>
+
+            <div className={styles.popup_header}>
+              <div className={`${styles.reset_icon} ${styles.pulse_anim}`}>
+                <span>✉️</span>
+              </div>
+              <h3>Verify Your Email</h3>
+              <p>Please enter the 6‑digit code sent to your email address</p>
+            </div>
+
+            <form onSubmit={handleVerificationSubmit} className={styles.popup_form}>
+              <div className={styles.input_group}>
+                <label>Verification Code</label>
+                <input
+                  type="text"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)}
+                  placeholder="Enter 6‑digit code"
+                  maxLength="6"
+                  required
+                  disabled={verificationLoading}
+                />
+              </div>
+
+              {verificationError && (
+                <div className={`${styles.popup_error} ${styles.shake}`}>
+                  <i className="fas fa-exclamation-circle"></i>
+                  {verificationError}
+                </div>
+              )}
+
+              {verificationSuccess && (
+                <div className={`${styles.popup_success} ${styles.popup_success_anim}`}>
+                  <i className="fas fa-check-circle"></i>
+                  {verificationSuccess}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className={`${styles.popup_button} ${verificationLoading ? styles.loading : ''}`}
+                disabled={verificationLoading}
+              >
+                <span>{verificationLoading ? "Verifying..." : "Verify Email"}</span>
+                {!verificationLoading && <i className="fas fa-check"></i>}
+              </button>
+
+              <div className={styles.resend_container}>
+                <button
+                  type="button"
+                  className={`${styles.resend_button} ${resendDisabled ? styles.disabled : ''}`}
+                  onClick={handleResendCode}
+                  disabled={resendDisabled}
+                >
+                  {resendDisabled ? `Resend code in ${countdown}s` : "Resend Code"}
+                </button>
+              </div>
+
+              <button
+                type="button"
+                className={styles.popup_back}
+                onClick={() => {
+                  setShowVerificationPopup(false);
+                  setVerificationCode("");
+                  setVerificationToken("");
+                }}
+              >
+                <i className="fas fa-arrow-left"></i> Back to Login
               </button>
             </form>
           </div>
