@@ -44,7 +44,7 @@ const Dashboard = () => {
       icon: "📚", 
       color: "#0A5ADB",
       gradient: "linear-gradient(135deg, rgb(22, 73, 129), rgb(50 75 118))",
-      description: "Discover personalized courses tailored to your career goals",
+      description: "Find courses that fit your career",
       features: [
         "Smart course matching",
         "Skill-based recommendations",
