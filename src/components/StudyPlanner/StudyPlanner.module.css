@@ -1,4 +1,4 @@
-/* Study Planner Container */
+/* ==================== CONTAINER ==================== */
 .study_planner_container {
   min-height: 100vh;
   background: linear-gradient(135deg, #eff6fe 0%, #e8f0fa 100%);
@@ -6,7 +6,7 @@
   overflow-x: hidden;
 }
 
-/* Background Blurs */
+/* ==================== BACKGROUND BLURS ==================== */
 .bg_blur_1 {
   position: fixed;
   top: -100px;
@@ -55,6 +55,7 @@
   }
 }
 
+/* ==================== CONTENT ==================== */
 .study_planner_content {
   padding: 24px;
   max-width: 1400px;
@@ -63,7 +64,7 @@
   z-index: 1;
 }
 
-/* Animations */
+/* ==================== ANIMATIONS ==================== */
 @keyframes fadeInUp {
   to {
     opacity: 1;
@@ -96,7 +97,7 @@
   animation: slideUp 0.5s ease-out forwards;
 }
 
-/* Header Section */
+/* ==================== HEADER SECTION ==================== */
 .header_section {
   display: flex;
   justify-content: space-between;
@@ -143,11 +144,20 @@
   margin: 0;
 }
 
+.header_date {
+  font-size: 13px;
+  color: #666;
+  margin-top: 4px;
+}
+
 .header_right {
   display: flex;
   gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
+/* ==================== WEEK BADGE ==================== */
 .week_badge {
   display: flex;
   align-items: center;
@@ -165,7 +175,164 @@
   font-size: 16px;
 }
 
-/* Progress Card */
+/* ==================== WEEK RANGE ==================== */
+.week_range {
+  font-size: 12px;
+  color: #0A5ADB;
+  background: rgba(10, 90, 219, 0.1);
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-left: 8px;
+}
+
+/* ==================== WEEK NAVIGATION ==================== */
+.week_navigation {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.nav_button {
+  background: white;
+  border: 1px solid #e0e0e0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.nav_button:hover:not(:disabled) {
+  background: #f0f0f0;
+  transform: translateY(-1px);
+}
+
+.nav_button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.nav_button_current {
+  background: #10b981;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.nav_button_current:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+/* ==================== CAREER INFO CARD ==================== */
+.career_info_card {
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 24px;
+  color: white;
+  transition: transform 0.3s ease;
+}
+
+.career_info_card:hover {
+  transform: translateY(-3px);
+}
+
+.career_info_content {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.career_icon {
+  font-size: 64px;
+}
+
+.career_details {
+  flex: 1;
+}
+
+.career_details h3 {
+  margin: 0 0 8px;
+  font-size: 24px;
+}
+
+.career_details p {
+  margin: 0 0 16px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.career_stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.career_stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat_value {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.stat_label {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.career_skills_tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.career_skill_tag {
+  font-size: 11px;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+}
+
+/* ==================== WEEKLY FOCUS CARD ==================== */
+.weekly_focus_card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.focus_icon {
+  font-size: 28px;
+}
+
+.focus_label {
+  font-size: 12px;
+  color: #666;
+  display: block;
+}
+
+.focus_area {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0A5ADB;
+}
+
+/* ==================== PROGRESS CARD ==================== */
 .progress_card {
   background: white;
   border-radius: 24px;
@@ -173,9 +340,6 @@
   margin-bottom: 32px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
-  opacity: 0;
-  transform: translateY(30px);
-  animation: slideUp 0.5s ease-out forwards;
 }
 
 .progress_card:hover {
@@ -200,6 +364,7 @@
 
 .progress_icon {
   font-size: 32px;
+  color: #0A5ADB;
 }
 
 .progress_title {
@@ -276,37 +441,7 @@
   display: inline-block;
 }
 
-.streak_badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: #fff3e3;
-  border-radius: 30px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #f59e0b;
-}
-
-/* Today's Focus Section */
-.today_section {
-  background: white;
-  border-radius: 24px;
-  padding: 24px;
-  margin-bottom: 32px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-  opacity: 0;
-  transform: translateY(30px);
-  animation: slideUp 0.5s ease-out forwards;
-  animation-delay: 0.1s;
-}
-
-.today_section:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
-}
-
+/* ==================== SECTION HEADER ==================== */
 .section_header {
   display: flex;
   justify-content: space-between;
@@ -349,9 +484,24 @@
   color: #0A5ADB;
 }
 
+/* ==================== TODAY'S FOCUS SECTION ==================== */
+.today_section {
+  background: white;
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.today_section:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
 .today_tasks_grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 16px;
 }
 
@@ -376,6 +526,7 @@
   background: #f0fdf4;
 }
 
+/* ==================== CHECKBOX ==================== */
 .task_checkbox {
   position: relative;
 }
@@ -404,6 +555,7 @@
   border-color: #10b981;
 }
 
+/* ==================== TASK CONTENT ==================== */
 .task_content {
   flex: 1;
 }
@@ -411,7 +563,7 @@
 .task_header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 10px;
   flex-wrap: wrap;
   gap: 8px;
@@ -444,6 +596,7 @@
   gap: 12px;
   font-size: 12px;
   color: #666;
+  margin-bottom: 8px;
 }
 
 .task_time, .task_duration, .task_type {
@@ -456,7 +609,34 @@
   font-size: 12px;
 }
 
-/* Weekly Schedule Section */
+.task_notes {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 11px;
+  color: #666;
+}
+
+.task_resources {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.resource_tag {
+  padding: 2px 8px;
+  background: rgba(10, 90, 219, 0.1);
+  border-radius: 12px;
+  color: #0A5ADB;
+  font-size: 10px;
+}
+
+/* ==================== WEEKLY SCHEDULE SECTION ==================== */
 .schedule_section {
   background: white;
   border-radius: 24px;
@@ -464,10 +644,6 @@
   margin-bottom: 32px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
-  opacity: 0;
-  transform: translateY(30px);
-  animation: slideUp 0.5s ease-out forwards;
-  animation-delay: 0.2s;
 }
 
 .schedule_section:hover {
@@ -477,11 +653,12 @@
 
 .weekly_grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 20px;
   margin-top: 20px;
 }
 
+/* ==================== DAY CARD ==================== */
 .day_card {
   background: #f9f9f9;
   border-radius: 20px;
@@ -494,6 +671,40 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
+/* Today Card Highlight */
+.today_card {
+  border: 2px solid #0A5ADB;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+  box-shadow: 0 4px 12px rgba(10, 90, 219, 0.15);
+}
+
+/* Past Card */
+.past_card {
+  opacity: 0.85;
+  background: #fafafa;
+}
+
+/* Missed Task */
+.missed_task {
+  opacity: 0.7;
+  background: #fef2f2;
+}
+
+.missed_task .task_title {
+  color: #dc2626;
+}
+
+/* Past Badge */
+.past_badge {
+  font-size: 10px;
+  font-weight: 600;
+  background: #9ca3af;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+/* ==================== DAY HEADER ==================== */
 .day_header {
   display: flex;
   justify-content: space-between;
@@ -514,6 +725,13 @@
   flex-direction: column;
 }
 
+.day_name_wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .day_name {
   font-size: 18px;
   font-weight: 700;
@@ -525,12 +743,51 @@
   color: #999;
 }
 
+.day_full_date {
+  font-size: 10px;
+  color: #999;
+  display: block;
+  margin-top: 2px;
+}
+
+.today_badge {
+  font-size: 10px;
+  font-weight: 600;
+  background: #0A5ADB;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.day_hours_badge {
+  font-size: 10px;
+  font-weight: 500;
+  color: #0A5ADB;
+  background: rgba(10, 90, 219, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-top: 4px;
+  display: inline-block;
+}
+
+.day_rest_badge {
+  font-size: 10px;
+  font-weight: 500;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-top: 4px;
+  display: inline-block;
+}
+
 .day_stats {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
+/* ==================== DAY PROGRESS CIRCLE ==================== */
 .day_progress_circle {
   width: 45px;
   height: 45px;
@@ -570,6 +827,7 @@
   transition: transform 0.3s ease;
 }
 
+/* ==================== DAY TASKS ==================== */
 .day_tasks {
   max-height: 0;
   overflow: hidden;
@@ -577,7 +835,7 @@
 }
 
 .day_tasks.expanded {
-  max-height: 500px;
+  max-height: 800px;
 }
 
 .schedule_task {
@@ -598,9 +856,15 @@
   background: rgba(16, 185, 129, 0.05);
 }
 
+.schedule_task.completed .task_title {
+  text-decoration: line-through;
+  color: #999;
+}
+
+/* ==================== TASK LABEL ==================== */
 .task_label {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   cursor: pointer;
   flex: 1;
@@ -609,6 +873,7 @@
 .task_check {
   display: flex;
   align-items: center;
+  margin-top: 2px;
 }
 
 .checked_icon {
@@ -621,9 +886,17 @@
   font-size: 20px;
 }
 
+/* ==================== TASK DETAILS ==================== */
 .task_details {
+  flex: 1;
+}
+
+.task_title_row {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
 }
 
 .task_title {
@@ -632,14 +905,30 @@
   color: #1a1a2e;
 }
 
+.task_type_badge_small {
+  font-size: 9px;
+  padding: 2px 6px;
+  background: #e8e8e8;
+  border-radius: 10px;
+  color: #666;
+}
+
 .task_meta_small {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   font-size: 11px;
   color: #999;
   margin-top: 4px;
 }
 
+.task_notes_small {
+  margin-top: 4px;
+  font-size: 10px;
+  color: #888;
+}
+
+/* ==================== TASK BADGES ==================== */
 .task_badges {
   display: flex;
   align-items: center;
@@ -656,6 +945,7 @@
   font-size: 14px;
 }
 
+/* ==================== DAY FOOTER ==================== */
 .day_footer {
   display: flex;
   justify-content: space-between;
@@ -666,7 +956,13 @@
   border-top: 1px solid #e0e0e0;
 }
 
-/* Tip Section */
+.day_completed, .day_hours {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ==================== TIP SECTION ==================== */
 .tip_section {
   background: linear-gradient(135deg, rgba(10, 90, 219, 0.05), rgba(88, 167, 181, 0.05));
   border-radius: 20px;
@@ -699,16 +995,36 @@
   font-size: 13px;
   color: #666;
   margin: 0;
+  line-height: 1.5;
 }
 
-/* Responsive Design */
+/* ==================== NO TASKS MESSAGE ==================== */
+.no_tasks_message {
+  padding: 20px;
+  text-align: center;
+  color: #999;
+  font-size: 13px;
+}
+
+/* ==================== COMPLETED TASK STYLES ==================== */
+.schedule_task.completed .task_title {
+  text-decoration: line-through;
+  color: #999;
+}
+
+.today_task_card.completed .task_name {
+  text-decoration: line-through;
+  color: #999;
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
 @media (max-width: 1024px) {
   .study_planner_content {
     padding: 20px;
   }
   
   .weekly_grid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
 }
 
@@ -719,6 +1035,10 @@
   
   .header_title {
     font-size: 24px;
+  }
+  
+  .header_date {
+    font-size: 11px;
   }
   
   .progress_title {
@@ -747,6 +1067,57 @@
   
   .progress_stats {
     text-align: left;
+  }
+  
+  .week_range {
+    display: none;
+  }
+  
+  .day_full_date {
+    display: none;
+  }
+  
+  .career_info_content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .career_stats {
+    justify-content: center;
+  }
+  
+  .career_skills_tags {
+    justify-content: center;
+  }
+  
+  .weekly_focus_card {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .week_navigation {
+    margin-top: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .header_right {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  
+  .tip_content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .progress_footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .day_name_wrapper {
+    flex-wrap: wrap;
   }
 }
 
@@ -778,24 +1149,29 @@
     align-items: flex-start;
   }
   
-  .tip_content {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .progress_footer {
+  .day_header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 12px;
   }
-}
-
-/* Completed Task Styles */
-.schedule_task.completed .task_title {
-  text-decoration: line-through;
-  color: #999;
-}
-
-.today_task_card.completed .task_name {
-  text-decoration: line-through;
-  color: #999;
+  
+  .day_stats {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .schedule_task {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .task_badges {
+    align-self: flex-end;
+  }
+  
+  .day_footer {
+    flex-direction: column;
+    gap: 5px;
+  }
 }
