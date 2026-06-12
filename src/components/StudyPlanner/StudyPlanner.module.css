@@ -85,6 +85,17 @@
   }
 }
 
+@keyframes slideInTask {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .fade_in {
   opacity: 0;
   transform: translateY(20px);
@@ -653,22 +664,32 @@
 
 .weekly_grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
   gap: 20px;
   margin-top: 20px;
+  align-items: start;
 }
 
 /* ==================== DAY CARD ==================== */
 .day_card {
   background: #f9f9f9;
   border-radius: 20px;
-  overflow: hidden;
   transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  position: relative;
+  isolation: isolate;
+  z-index: 1;
+  overflow: hidden;
 }
 
 .day_card:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border-color: rgba(10, 90, 219, 0.25);
+  z-index: 2;
 }
 
 /* Today Card Highlight */
@@ -678,10 +699,21 @@
   box-shadow: 0 4px 12px rgba(10, 90, 219, 0.15);
 }
 
+.today_card:hover {
+  border: 2px solid #0A5ADB;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
 /* Past Card */
 .past_card {
   opacity: 0.85;
   background: #fafafa;
+  border-color: rgba(156, 163, 175, 0.3);
+}
+
+.past_card:hover {
+  border-color: rgba(156, 163, 175, 0.5);
 }
 
 /* Missed Task */
@@ -704,6 +736,16 @@
   border-radius: 12px;
 }
 
+/* Today Badge */
+.today_badge {
+  font-size: 10px;
+  font-weight: 600;
+  background: #0A5ADB;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
 /* ==================== DAY HEADER ==================== */
 .day_header {
   display: flex;
@@ -714,6 +756,11 @@
   cursor: pointer;
   transition: background 0.3s ease;
   border-bottom: 2px solid #f0f0f0;
+  border-radius: 20px 20px 0 0;
+  flex-wrap: wrap;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .day_header:hover {
@@ -723,6 +770,7 @@
 .day_info {
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 .day_name_wrapper {
@@ -748,15 +796,6 @@
   color: #999;
   display: block;
   margin-top: 2px;
-}
-
-.today_badge {
-  font-size: 10px;
-  font-weight: 600;
-  background: #0A5ADB;
-  color: white;
-  padding: 2px 8px;
-  border-radius: 12px;
 }
 
 .day_hours_badge {
@@ -785,6 +824,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 /* ==================== DAY PROGRESS CIRCLE ==================== */
@@ -827,17 +867,23 @@
   transition: transform 0.3s ease;
 }
 
-/* ==================== DAY TASKS ==================== */
+/* ==================== DAY TASKS - SMOOTH TRANSITION ==================== */
 .day_tasks {
-  max-height: 0;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: grid-template-rows;
+}
+
+.day_tasks > div {
   overflow: hidden;
-  transition: max-height 0.4s ease;
 }
 
 .day_tasks.expanded {
-  max-height: 800px;
+  grid-template-rows: 1fr;
 }
 
+/* Task items styling */
 .schedule_task {
   display: flex;
   justify-content: space-between;
@@ -845,11 +891,32 @@
   padding: 12px 20px;
   border-bottom: 1px solid #f0f0f0;
   transition: all 0.3s ease;
+  flex-wrap: wrap;
+  gap: 10px;
+  opacity: 0;
+  transform: translateY(-10px);
 }
+
+.day_tasks.expanded .schedule_task {
+  animation: slideInTask 0.3s ease forwards;
+}
+
+/* Staggered animation delays */
+.schedule_task:nth-child(1) { animation-delay: 0.05s; }
+.schedule_task:nth-child(2) { animation-delay: 0.10s; }
+.schedule_task:nth-child(3) { animation-delay: 0.15s; }
+.schedule_task:nth-child(4) { animation-delay: 0.20s; }
+.schedule_task:nth-child(5) { animation-delay: 0.25s; }
+.schedule_task:nth-child(6) { animation-delay: 0.30s; }
+.schedule_task:nth-child(7) { animation-delay: 0.35s; }
+.schedule_task:nth-child(8) { animation-delay: 0.40s; }
+.schedule_task:nth-child(9) { animation-delay: 0.45s; }
+.schedule_task:nth-child(10) { animation-delay: 0.50s; }
 
 .schedule_task:hover {
   background: rgba(10, 90, 219, 0.05);
   transform: translateX(5px);
+  transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .schedule_task.completed {
@@ -861,6 +928,11 @@
   color: #999;
 }
 
+/* Last task shouldn't have bottom border */
+.schedule_task:last-child {
+  border-bottom: none;
+}
+
 /* ==================== TASK LABEL ==================== */
 .task_label {
   display: flex;
@@ -868,6 +940,7 @@
   gap: 12px;
   cursor: pointer;
   flex: 1;
+  min-width: 0;
 }
 
 .task_check {
@@ -879,16 +952,28 @@
 .checked_icon {
   color: #10b981;
   font-size: 20px;
+  transition: transform 0.2s ease;
+}
+
+.checked_icon:hover {
+  transform: scale(1.1);
 }
 
 .unchecked_icon {
   color: #ccc;
   font-size: 20px;
+  transition: transform 0.2s ease;
+}
+
+.unchecked_icon:hover {
+  transform: scale(1.1);
 }
 
 /* ==================== TASK DETAILS ==================== */
 .task_details {
   flex: 1;
+  min-width: 0;
+  word-break: break-word;
 }
 
 .task_title_row {
@@ -903,6 +988,7 @@
   font-size: 14px;
   font-weight: 500;
   color: #1a1a2e;
+  word-break: break-word;
 }
 
 .task_type_badge_small {
@@ -954,6 +1040,10 @@
   font-size: 11px;
   color: #666;
   border-top: 1px solid #e0e0e0;
+  border-radius: 0 0 20px 20px;
+  margin-top: auto;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .day_completed, .day_hours {
@@ -1059,6 +1149,7 @@
   
   .weekly_grid {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
   
   .progress_header {
@@ -1119,6 +1210,30 @@
   .day_name_wrapper {
     flex-wrap: wrap;
   }
+  
+  .day_header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .day_stats {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .schedule_task {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .task_badges {
+    align-self: flex-end;
+  }
+  
+  .day_footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1150,117 +1265,14 @@
   }
   
   .day_header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-  
-  .day_stats {
-    width: 100%;
-    justify-content: space-between;
+    padding: 12px 16px;
   }
   
   .schedule_task {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  
-  .task_badges {
-    align-self: flex-end;
+    padding: 10px 16px;
   }
   
   .day_footer {
-    flex-direction: column;
-    gap: 5px;
+    padding: 8px 16px;
   }
-}
-
-/* ==================== DAY CARD ==================== */
-.day_card {
-  background: #f9f9f9;
-  border-radius: 20px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.12); /* Added subtle border for all day cards */
-}
-
-.day_card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  border-color: rgba(10, 90, 219, 0.25); /* Border darkens on hover */
-}
-
-/* Today Card Highlight - KEPT EXACTLY THE SAME */
-.today_card {
-  border: 2px solid #0A5ADB;
-  background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
-  box-shadow: 0 4px 12px rgba(10, 90, 219, 0.15);
-}
-
-/* Override hover for today_card to keep it exactly the same */
-.today_card:hover {
-  border: 2px solid #0A5ADB; /* Keep the same border */
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-
-/* Past Card */
-.past_card {
-  opacity: 0.85;
-  background: #fafafa;
-  border-color: rgba(156, 163, 175, 0.3); /* Softer border for past days */
-}
-
-/* Override hover for past_card */
-.past_card:hover {
-  border-color: rgba(156, 163, 175, 0.5);
-}
-
-/* ==================== DAY HEADER ==================== */
-.day_header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  background: white;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  border-bottom: 2px solid #f0f0f0;
-}
-
-/* ==================== DAY TASKS ==================== */
-.day_tasks {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.4s ease;
-}
-
-.day_tasks.expanded {
-  max-height: 800px;
-}
-
-.schedule_task {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 20px;
-  border-bottom: 1px solid #f0f0f0;
-  transition: all 0.3s ease;
-}
-
-/* Last task shouldn't have bottom border */
-.schedule_task:last-child {
-  border-bottom: none;
-}
-
-/* ==================== DAY FOOTER ==================== */
-.day_footer {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 20px;
-  background: #f5f5f5;
-  font-size: 11px;
-  color: #666;
-  border-top: 1px solid #e0e0e0;
 }

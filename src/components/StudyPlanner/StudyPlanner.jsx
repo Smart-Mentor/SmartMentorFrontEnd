@@ -28,14 +28,13 @@ const StudyPlanner = () => {
   // Order of days
   const WEEK_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-  // API configuration - UPDATED to match GapAnalysis.jsx
+  // API configuration
   const API_URL = "https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/gapanalysis/gap-analysis";
   const token = localStorage.getItem("authToken");
 
   useEffect(() => {
     setAnimate(true);
     fetchCareerFromGapAnalysis();
-    // Update current date every day at midnight
     const interval = setInterval(() => {
       setCurrentDate(new Date());
     }, 24 * 60 * 60 * 1000);
@@ -64,15 +63,12 @@ const StudyPlanner = () => {
       const data = await response.json();
       console.log("Gap analysis data received:", data);
       
-      // Extract career goal from API response (matching GapAnalysis.jsx structure)
       let careerFromAPI = data.careerGoalName || data.careerGoal || data.targetCareer;
       
-      // If no career goal found, try to determine from skills
       if (!careerFromAPI && data.missingSkills && data.missingSkills.length > 0) {
         careerFromAPI = determineCareerFromSkills(data.missingSkills);
       }
       
-      // Default fallback
       if (!careerFromAPI) {
         careerFromAPI = "Software Engineer";
       }
@@ -86,19 +82,16 @@ const StudyPlanner = () => {
       const totalWeeksCount = getTotalWeeks(careerFromAPI);
       setTotalWeeksState(totalWeeksCount);
       
-      // Load saved week
       const savedWeek = localStorage.getItem(`studyPlanner_${careerFromAPI.replace(/\s/g, '')}_currentWeek`);
       const initialWeek = savedWeek ? parseInt(savedWeek) : 1;
       setCurrentWeek(initialWeek);
       
-      // Generate schedule for the current week based on today's date
       generateScheduleForWeek(staticCareerData, initialWeek);
       
     } catch (err) {
       console.error("Error fetching gap analysis data:", err);
       setError(err.message);
       
-      // Fallback to default career
       const defaultCareer = "Software Engineer";
       setCareerGoal(defaultCareer);
       const defaultData = getCareerData(defaultCareer);
@@ -136,7 +129,6 @@ const StudyPlanner = () => {
     return "Software Engineer";
   };
 
-  // Get the start date of the week (Monday) for a given week number
   const getWeekStartDate = (weekNumber) => {
     const today = new Date(currentDate);
     const currentDayOfWeek = today.getDay();
@@ -144,7 +136,6 @@ const StudyPlanner = () => {
     const currentWeekStart = new Date(today);
     currentWeekStart.setDate(today.getDate() - daysToMonday);
     
-    // Calculate week offset (week 1 is current week)
     const weekOffset = weekNumber - 1;
     const targetWeekStart = new Date(currentWeekStart);
     targetWeekStart.setDate(currentWeekStart.getDate() + (weekOffset * 7));
@@ -152,7 +143,6 @@ const StudyPlanner = () => {
     return targetWeekStart;
   };
 
-  // Format date
   const formatDate = (date) => {
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
@@ -170,7 +160,6 @@ const StudyPlanner = () => {
     });
   };
 
-  // Generate schedule for a specific week
   const generateScheduleForWeek = (career, weekNumber) => {
     const weekStart = getWeekStartDate(weekNumber);
     const weekPlan = getCurrentWeekTasks(career.title, weekNumber);
@@ -180,7 +169,6 @@ const StudyPlanner = () => {
       return;
     }
     
-    // Get all dates for the week
     const weekDates = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date(weekStart);
@@ -188,11 +176,9 @@ const StudyPlanner = () => {
       weekDates.push(date);
     }
     
-    // Get today's date for comparison
     const todayDate = new Date(currentDate);
     todayDate.setHours(0, 0, 0, 0);
     
-    // Build schedule for each day of the week
     const schedule = WEEK_DAYS.map((day, index) => {
       const dayPlan = weekPlan.days[day];
       const date = weekDates[index];
@@ -240,7 +226,10 @@ const StudyPlanner = () => {
       };
     });
     
-    setWeeklySchedule(schedule);
+    const uniqueSchedule = schedule.filter((day, index, self) => 
+      index === self.findIndex(d => d.day === day.day)
+    );
+    setWeeklySchedule(uniqueSchedule);
   };
 
   const getTaskCategory = (taskName) => {
@@ -266,7 +255,6 @@ const StudyPlanner = () => {
     return "Development";
   };
 
-  // Load saved progress
   useEffect(() => {
     if (weeklySchedule.length > 0 && careerGoal) {
       const savedKey = `studyPlanner_${careerGoal.replace(/\s/g, '')}_week${currentWeek}`;
@@ -278,7 +266,6 @@ const StudyPlanner = () => {
     }
   }, [weeklySchedule, careerGoal, currentWeek]);
 
-  // Save progress
   useEffect(() => {
     if (weeklySchedule.length > 0 && careerGoal && Object.keys(completedTasks).length > 0) {
       const saveKey = `studyPlanner_${careerGoal.replace(/\s/g, '')}_week${currentWeek}`;
@@ -287,7 +274,6 @@ const StudyPlanner = () => {
     }
   }, [completedTasks, careerGoal, currentWeek]);
 
-  // Calculate progress
   useEffect(() => {
     if (weeklySchedule.length === 0) return;
     
@@ -657,52 +643,55 @@ const StudyPlanner = () => {
                     </div>
                   </div>
 
+                  {/* Day Tasks with smooth transition wrapper */}
                   <div className={`${styles.day_tasks} ${expandedDays[day.day] ? styles.expanded : ""}`}>
-                    {day.tasks.length > 0 ? (
-                      day.tasks.map((task, taskIdx) => (
-                        <div key={task.id || taskIdx} className={`${styles.schedule_task} ${completedTasks[task.id] ? styles.completed : ""} ${task.isPast && !completedTasks[task.id] ? styles.missed_task : ""}`}>
-                          <label className={styles.task_label}>
-                            <input
-                              type="checkbox"
-                              checked={completedTasks[task.id] || false}
-                              onChange={() => toggleTask(task.id)}
-                              className={styles.checkbox}
-                              disabled={task.isPast && !completedTasks[task.id]}
-                            />
-                            <span className={styles.task_check}>
-                              {completedTasks[task.id] ? 
-                                <CheckCircleIcon className={styles.checked_icon} /> : 
-                                <RadioButtonUncheckedIcon className={styles.unchecked_icon} />
-                              }
-                            </span>
-                            <div className={styles.task_details}>
-                              <div className={styles.task_title_row}>
-                                <span className={styles.task_title}>{task.name}</span>
-                                <span className={styles.task_type_badge_small}>{task.type}</span>
-                              </div>
-                              <div className={styles.task_meta_small}>
-                                <span>🕐 {task.time}</span>
-                                <span>⏱️ {task.duration}</span>
-                                <span>📚 {task.category}</span>
-                              </div>
-                              {task.notes && (
-                                <div className={styles.task_notes_small}>
-                                  <small>💡 {task.notes}</small>
+                    <div>
+                      {day.tasks.length > 0 ? (
+                        day.tasks.map((task, taskIdx) => (
+                          <div key={task.id || taskIdx} className={`${styles.schedule_task} ${completedTasks[task.id] ? styles.completed : ""} ${task.isPast && !completedTasks[task.id] ? styles.missed_task : ""}`}>
+                            <label className={styles.task_label}>
+                              <input
+                                type="checkbox"
+                                checked={completedTasks[task.id] || false}
+                                onChange={() => toggleTask(task.id)}
+                                className={styles.checkbox}
+                                disabled={task.isPast && !completedTasks[task.id]}
+                              />
+                              <span className={styles.task_check}>
+                                {completedTasks[task.id] ? 
+                                  <CheckCircleIcon className={styles.checked_icon} /> : 
+                                  <RadioButtonUncheckedIcon className={styles.unchecked_icon} />
+                                }
+                              </span>
+                              <div className={styles.task_details}>
+                                <div className={styles.task_title_row}>
+                                  <span className={styles.task_title}>{task.name}</span>
+                                  <span className={styles.task_type_badge_small}>{task.type}</span>
                                 </div>
-                              )}
+                                <div className={styles.task_meta_small}>
+                                  <span>🕐 {task.time}</span>
+                                  <span>⏱️ {task.duration}</span>
+                                  <span>📚 {task.category}</span>
+                                </div>
+                                {task.notes && (
+                                  <div className={styles.task_notes_small}>
+                                    <small>💡 {task.notes}</small>
+                                  </div>
+                                )}
+                              </div>
+                            </label>
+                            <div className={styles.task_badges}>
+                              <span className={styles.priority_dot} style={{ background: getPriorityColor(task.priority) }} />
+                              <span className={styles.task_type_badge}>{getTaskTypeIcon(task.type)}</span>
                             </div>
-                          </label>
-                          <div className={styles.task_badges}>
-                            <span className={styles.priority_dot} style={{ background: getPriorityColor(task.priority) }} />
-                            <span className={styles.task_type_badge}>{getTaskTypeIcon(task.type)}</span>
                           </div>
+                        ))
+                      ) : (
+                        <div className={styles.no_tasks_message}>
+                          🎉 No tasks scheduled - Enjoy your day off!
                         </div>
-                      ))
-                    ) : (
-                      <div className={styles.no_tasks_message}>
-                        🎉 No tasks scheduled - Enjoy your day off!
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
 
                   {day.hasTasks && (
