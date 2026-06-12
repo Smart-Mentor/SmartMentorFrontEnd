@@ -1218,7 +1218,7 @@
   
   .day_stats {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-end;
   }
   
   .schedule_task {
