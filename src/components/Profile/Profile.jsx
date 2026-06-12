@@ -82,7 +82,6 @@ const SKILLS_LIST = [
   { id: 52, name: "GitHub Actions", category: " " },
   { id: 53, name: "Monitoring (Prometheus)", category: " " },
   { id: 54, name: "React Router", category: " " },
-  { id: 55, name: "Responsive Design", category: " " }
 ];
 
 const INTERESTS_LIST = [

@@ -37,7 +37,7 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 // ==================== COMPLETE BACKEND DATA ====================
 
-// Complete Skills List from Backend (55 skills)
+// Complete Skills List from Backend (54 skills)
 const skillsList = [
   { id: 1, name: "C#", category: "Backend" },
   { id: 2, name: "ASP.NET Core Web API", category: "Backend" },
@@ -93,7 +93,6 @@ const skillsList = [
   { id: 52, name: "GitHub Actions", category: "DevOps" },
   { id: 53, name: "Monitoring (Prometheus)", category: "DevOps" },
   { id: 54, name: "React Router", category: "Frontend" },
-  { id: 55, name: "Responsive Design", category: "Frontend" }
 ];
 
 // Complete Interests List from Backend (19 interests)
