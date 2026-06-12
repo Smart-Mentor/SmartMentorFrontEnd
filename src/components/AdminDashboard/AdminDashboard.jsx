@@ -28,11 +28,15 @@ const AdminDashboard = () => {
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [showSkillDeleteConfirm, setShowSkillDeleteConfirm] = useState(false);
+  const [skillToDelete, setSkillToDelete] = useState(null);
+  const [showGoalDeleteConfirm, setShowGoalDeleteConfirm] = useState(false);
+  const [goalToDelete, setGoalToDelete] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertTitle, setAlertTitle] = useState("");
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("users"); // users, skills, interests, goals
+  const [activeTab, setActiveTab] = useState("users");
   
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,7 +60,7 @@ const AdminDashboard = () => {
   // Modal states for different entities
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState("add");
-  const [modalType, setModalType] = useState("user"); // user, skill, interest, goal
+  const [modalType, setModalType] = useState("user");
   const [currentUser, setCurrentUser] = useState({
     id: null,
     name: "",
@@ -102,6 +106,13 @@ const AdminDashboard = () => {
     priority: 1
   });
 
+  // State for removing skill from goal
+  const [showRemoveSkillModal, setShowRemoveSkillModal] = useState(false);
+  const [removeSkillAssignment, setRemoveSkillAssignment] = useState({
+    careerGoalId: "",
+    skillId: ""
+  });
+
   // Get unique career goals and top skills for filter options
   const uniqueCareerGoals = [...new Set(users.map(u => u.careerGoal))];
   const uniqueTopSkills = [...new Set(users.map(u => u.topSkill))];
@@ -119,7 +130,6 @@ const AdminDashboard = () => {
 
   // ==================== USER MANAGEMENT ENDPOINTS ====================
   
-  // GET /api/Admin/users - Fetch all users
   const fetchUsersFromAPI = async () => {
     try {
       const token = getAuthToken();
@@ -168,7 +178,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // DELETE /api/Admin/users/{userId} - Delete single user
   const deleteUser = async (userId) => {
     try {
       const token = getAuthToken();
@@ -186,7 +195,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // GET /api/Admin/users/{userId}/roles - Fetch user roles
   const fetchUserRoles = async (userId) => {
     try {
       const token = getAuthToken();
@@ -209,7 +217,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // POST /api/Admin/users/assign-role - Assign role to user
   const assignRoleToUser = async (userId, roleName) => {
     try {
       const token = getAuthToken();
@@ -228,7 +235,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // POST /api/Admin/users/remove-role - Remove role from user
   const removeRoleFromUser = async (userId, roleName) => {
     try {
       const token = getAuthToken();
@@ -249,7 +255,6 @@ const AdminDashboard = () => {
 
   // ==================== SKILL MANAGEMENT ENDPOINTS ====================
   
-  // GET /api/Admin/skills - Fetch all skills
   const fetchSkills = async () => {
     try {
       const token = getAuthToken();
@@ -272,7 +277,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // POST /api/Admin/skills - Create new skill
   const createSkill = async (skillData) => {
     try {
       const token = getAuthToken();
@@ -291,7 +295,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // PUT /api/Admin/skills/{skillId} - Update skill
   const updateSkill = async (skillId, skillData) => {
     try {
       const token = getAuthToken();
@@ -310,7 +313,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // DELETE /api/Admin/skills/{skillId} - Delete skill
   const deleteSkill = async (skillId) => {
     try {
       const token = getAuthToken();
@@ -330,7 +332,6 @@ const AdminDashboard = () => {
 
   // ==================== INTEREST MANAGEMENT ENDPOINTS ====================
   
-  // GET /api/Admin/interests - Fetch all interests
   const fetchInterests = async () => {
     try {
       const token = getAuthToken();
@@ -353,7 +354,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // POST /api/Admin/interests - Create new interest
   const createInterest = async (interestData) => {
     try {
       const token = getAuthToken();
@@ -374,7 +374,6 @@ const AdminDashboard = () => {
 
   // ==================== CAREER GOAL MANAGEMENT ENDPOINTS ====================
   
-  // GET /api/Admin/careergoals - Fetch all career goals
   const fetchCareerGoals = async () => {
     try {
       const token = getAuthToken();
@@ -397,7 +396,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // POST /api/Admin/careergoal - Create new career goal
   const createCareerGoal = async (goalData) => {
     try {
       const token = getAuthToken();
@@ -416,9 +414,42 @@ const AdminDashboard = () => {
     }
   };
 
+  const deleteCareerGoal = async (careerGoalId) => {
+    try {
+      const token = getAuthToken();
+      const response = await fetch(`https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/career-goals/${careerGoalId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Error deleting career goal:', error);
+      return false;
+    }
+  };
+
+  const removeSkillFromGoal = async (careerGoalId, skillId) => {
+    try {
+      const token = getAuthToken();
+      const response = await fetch(`https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/career-goals/${careerGoalId}/skills/${skillId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Error removing skill from career goal:', error);
+      return false;
+    }
+  };
+
   // ==================== MASTER DATA ENDPOINT ====================
   
-  // GET /api/Admin/MasterData - Fetch all master data
   const fetchMasterData = async () => {
     try {
       const token = getAuthToken();
@@ -444,7 +475,6 @@ const AdminDashboard = () => {
 
   // ==================== SKILL-GOAL ASSIGNMENT ENDPOINT ====================
   
-  // POST /api/Admin/career-goals/assign-skill - Assign skill to career goal
   const assignSkillToGoal = async (assignmentData) => {
     try {
       const token = getAuthToken();
@@ -501,7 +531,6 @@ const AdminDashboard = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
 
-  // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
     setSelectAll(false);
@@ -525,7 +554,6 @@ const AdminDashboard = () => {
     setSelectAll(!selectAll);
   };
 
-  // Bulk Delete - Multiple Rows
   const handleBulkDelete = () => {
     if (selectedUsers.length === 0) return;
     setShowBulkDeleteConfirm(true);
@@ -560,7 +588,6 @@ const AdminDashboard = () => {
     setShowBulkDeleteConfirm(false);
   };
 
-  // Single Delete User
   const handleDeleteUser = (id, name) => {
     setUserToDelete({ id, name });
     setShowDeleteConfirm(true);
@@ -593,19 +620,6 @@ const AdminDashboard = () => {
 
   // ==================== MODAL HANDLERS ====================
   
-  // User Modal Handlers
-  // const handleEditUser = (user) => {
-  //   setModalType("user");
-  //   setModalMode("edit");
-  //   setCurrentUser({
-  //     ...user,
-  //     skills: Array.isArray(user.skills) ? user.skills.join(", ") : user.skills,
-  //     interests: Array.isArray(user.interests) ? user.interests.join(", ") : user.interests
-  //   });
-  //   setShowModal(true);
-  // };
-
-  // Skill Modal Handlers
   const handleAddSkill = () => {
     setModalType("skill");
     setModalMode("add");
@@ -620,21 +634,33 @@ const AdminDashboard = () => {
     setShowModal(true);
   };
 
-  const handleDeleteSkill = async (skillId, skillName) => {
-    const success = await deleteSkill(skillId);
+  const handleDeleteSkill = (skillId, skillName) => {
+    setSkillToDelete({ id: skillId, name: skillName });
+    setShowSkillDeleteConfirm(true);
+  };
+
+  const confirmSkillDelete = async () => {
+    if (!skillToDelete) return;
+    const success = await deleteSkill(skillToDelete.id);
     if (success) {
       await fetchSkills();
       setAlertTitle("Skill Deleted");
-      setAlertMessage(`Skill "${skillName}" has been removed successfully.`);
+      setAlertMessage(`Skill "${skillToDelete.name}" has been removed successfully.`);
       setShowAlert(true);
     } else {
       setAlertTitle("Error");
-      setAlertMessage(`Failed to delete skill "${skillName}".`);
+      setAlertMessage(`Failed to delete skill "${skillToDelete.name}".`);
       setShowAlert(true);
     }
+    setShowSkillDeleteConfirm(false);
+    setSkillToDelete(null);
   };
 
-  // Interest Modal Handlers
+  const cancelSkillDelete = () => {
+    setShowSkillDeleteConfirm(false);
+    setSkillToDelete(null);
+  };
+
   const handleAddInterest = () => {
     setModalType("interest");
     setModalMode("add");
@@ -642,14 +668,6 @@ const AdminDashboard = () => {
     setShowModal(true);
   };
 
-  const handleEditInterest = (interest) => {
-    setModalType("interest");
-    setModalMode("edit");
-    setCurrentInterest(interest);
-    setShowModal(true);
-  };
-
-  // Career Goal Modal Handlers
   const handleAddGoal = () => {
     setModalType("goal");
     setModalMode("add");
@@ -657,14 +675,34 @@ const AdminDashboard = () => {
     setShowModal(true);
   };
 
-  const handleEditGoal = (goal) => {
-    setModalType("goal");
-    setModalMode("edit");
-    setCurrentGoal(goal);
-    setShowModal(true);
+  const handleDeleteCareerGoalHandler = (goalId, goalName) => {
+    setGoalToDelete({ id: goalId, name: goalName });
+    setShowGoalDeleteConfirm(true);
   };
 
-  // Role Assignment Handler
+  const confirmGoalDelete = async () => {
+    if (!goalToDelete) return;
+    const success = await deleteCareerGoal(goalToDelete.id);
+    if (success) {
+      await fetchCareerGoals();
+      await fetchMasterData();
+      setAlertTitle("Career Goal Deleted");
+      setAlertMessage(`Career goal "${goalToDelete.name}" has been removed successfully.`);
+      setShowAlert(true);
+    } else {
+      setAlertTitle("Error");
+      setAlertMessage(`Failed to delete career goal "${goalToDelete.name}". It may be referenced by existing users.`);
+      setShowAlert(true);
+    }
+    setShowGoalDeleteConfirm(false);
+    setGoalToDelete(null);
+  };
+
+  const cancelGoalDelete = () => {
+    setShowGoalDeleteConfirm(false);
+    setGoalToDelete(null);
+  };
+
   const handleManageRoles = async (user) => {
     setSelectedUserForRole(user);
     await fetchUserRoles(user.id);
@@ -704,12 +742,22 @@ const AdminDashboard = () => {
     }
   };
 
-  // Skill-Goal Assignment Handler
   const handleOpenSkillGoalModal = () => {
     setShowSkillGoalModal(true);
   };
 
+  const handleOpenRemoveSkillModal = () => {
+    setShowRemoveSkillModal(true);
+  };
+
   const handleAssignSkillToGoal = async () => {
+    if (!skillGoalAssignment.careerGoalId || !skillGoalAssignment.skillId) {
+      setAlertTitle("Missing Selection");
+      setAlertMessage("Please select both a career goal and a skill.");
+      setShowAlert(true);
+      return;
+    }
+
     const success = await assignSkillToGoal(skillGoalAssignment);
     if (success) {
       setAlertTitle("Success");
@@ -724,7 +772,39 @@ const AdminDashboard = () => {
     }
   };
 
-  // Save Handler (Generic)
+  const handleRemoveSkillFromGoal = async () => {
+    if (!removeSkillAssignment.careerGoalId || !removeSkillAssignment.skillId) {
+      setAlertTitle("Missing Selection");
+      setAlertMessage("Please select both a career goal and a skill to remove.");
+      setShowAlert(true);
+      return;
+    }
+
+    const success = await removeSkillFromGoal(
+      removeSkillAssignment.careerGoalId, 
+      removeSkillAssignment.skillId
+    );
+    
+    if (success) {
+      const careerGoal = masterData.careerGoals.find(
+        goal => goal.id === parseInt(removeSkillAssignment.careerGoalId)
+      );
+      const skill = masterData.skills.find(
+        s => s.id === parseInt(removeSkillAssignment.skillId)
+      );
+      
+      setAlertTitle("Skill Removed");
+      setAlertMessage(`Skill "${skill?.name || ''}" has been removed from "${careerGoal?.name || ''}" successfully.`);
+      setShowAlert(true);
+      setShowRemoveSkillModal(false);
+      setRemoveSkillAssignment({ careerGoalId: "", skillId: "" });
+    } else {
+      setAlertTitle("Error");
+      setAlertMessage("Failed to remove skill from career goal. The skill may not be assigned to this goal.");
+      setShowAlert(true);
+    }
+  };
+
   const handleSave = async () => {
     if (modalType === "user") {
       await handleSaveUser();
@@ -839,13 +919,15 @@ const AdminDashboard = () => {
     setShowModal(false);
     setShowRoleModal(false);
     setShowSkillGoalModal(false);
+    setShowRemoveSkillModal(false);
     setCurrentUser({ id: null, name: "", skills: "", interests: "", careerGoal: "", email: "", topSkill: "" });
     setCurrentSkill({ id: null, name: "", category: "" });
     setCurrentInterest({ id: null, name: "" });
     setCurrentGoal({ id: null, name: "", description: "" });
+    setSkillGoalAssignment({ careerGoalId: "", skillId: "", requiredLevel: 1, priority: 1 });
+    setRemoveSkillAssignment({ careerGoalId: "", skillId: "" });
   };
 
-  // Clear all filters
   const clearFilters = () => {
     setFilters({ careerGoal: "", topSkill: "" });
     setSearchTerm("");
@@ -858,7 +940,6 @@ const AdminDashboard = () => {
     setAlertTitle("");
   };
 
-  // Pagination handlers
   const goToPage = (page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
@@ -903,7 +984,6 @@ const AdminDashboard = () => {
 
   const hasActiveFilters = filters.careerGoal !== "" || filters.topSkill !== "" || searchTerm !== "";
 
-  // Render different content based on active tab
   const renderTabContent = () => {
     switch(activeTab) {
       case "users":
@@ -969,7 +1049,6 @@ const AdminDashboard = () => {
                   <td className={styles.email_cell}>{user.email}</td>
                   <td>
                     <div className={styles.action_icons}>
-                      {/* <EditIcon className={styles.edit_icon} onClick={() => handleEditUser(user)} /> */}
                       <AssignmentIcon className={styles.role_icon} onClick={() => handleManageRoles(user)} />
                       <DeleteIcon className={styles.delete_icon} onClick={() => handleDeleteUser(user.id, user.name)} />
                     </div>
@@ -1077,7 +1156,6 @@ const AdminDashboard = () => {
             <tr>
               <th>ID</th>
               <th>Interest Name</th>
-              {/* <th>Actions</th> */}
             </tr>
           </thead>
           <tbody>
@@ -1085,11 +1163,6 @@ const AdminDashboard = () => {
               <tr key={interest.id}>
                 <td>{interest.id}</td>
                 <td>{interest.name}</td>
-                {/* <td>
-                  <div className={styles.action_icons}>
-                    <EditIcon className={styles.edit_icon} onClick={() => handleEditInterest(interest)} />
-                  </div>
-                </td> */}
               </tr>
             ))}
           </tbody>
@@ -1109,6 +1182,9 @@ const AdminDashboard = () => {
           <button className={styles.assign_btn} onClick={handleOpenSkillGoalModal}>
             <CategoryIcon /> Assign Skill to Goal
           </button>
+          <button className={styles.remove_skill_goal_btn} onClick={handleOpenRemoveSkillModal}>
+            <DeleteIcon /> Remove Skill from Goal
+          </button>
         </div>
       </div>
       <div className={styles.management_table_container}>
@@ -1118,7 +1194,7 @@ const AdminDashboard = () => {
               <th>ID</th>
               <th>Goal Name</th>
               <th>Description</th>
-              {/* <th>Actions</th> */}
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -1127,16 +1203,20 @@ const AdminDashboard = () => {
                 <td>{goal.id}</td>
                 <td>{goal.name}</td>
                 <td>{goal.description || "-"}</td>
-                {/* <td>
+                <td>
                   <div className={styles.action_icons}>
-                    <EditIcon className={styles.edit_icon} onClick={() => handleEditGoal(goal)} />
+                    <DeleteIcon 
+                      className={styles.delete_icon} 
+                      onClick={() => handleDeleteCareerGoalHandler(goal.id, goal.name)} 
+                    />
                   </div>
-                </td> */}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
     </div>
   );
 
@@ -1151,7 +1231,6 @@ const AdminDashboard = () => {
 
   return (
     <div className={styles.dashboard_content}>
-      {/* Header Section - Removed logout button since it's now in layout */}
       <div className={`${styles.header_section} ${animate ? styles.fade_in : ""}`}>
         <div className={styles.breadcrumb}>
           <span className={styles.breadcrumb_home}>User Management</span>
@@ -1160,7 +1239,6 @@ const AdminDashboard = () => {
         <p className={styles.page_subtitle}>View, edit, and manage all platform users</p>
       </div>
 
-      {/* Stats Cards */}
       <div className={`${styles.stats_cards} ${animate ? styles.slide_up : ""}`}>
         <div className={styles.stat_card}>
           <div className={styles.stat_icon_wrapper} style={{ background: '#e0f2fe' }}>
@@ -1200,7 +1278,6 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Tab Navigation - Keep for switching between users/skills/interests/goals */}
       <div className={styles.tab_navigation}>
         <button className={`${styles.tab_btn} ${activeTab === "users" ? styles.tab_active : ""}`} onClick={() => setActiveTab("users")}>
           <PeopleIcon /> Users
@@ -1216,7 +1293,6 @@ const AdminDashboard = () => {
         </button>
       </div>
 
-      {/* Search and Actions Bar (only for users tab) */}
       {activeTab === "users" && (
         <>
           <div className={`${styles.search_bar} ${animate ? styles.slide_up : ""}`}>
@@ -1258,7 +1334,6 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Bulk Delete Bar */}
           {selectedUsers.length > 0 && (
             <div className={`${styles.bulk_delete_bar} ${animate ? styles.slide_up : ""}`}>
               <div className={styles.bulk_delete_info}>
@@ -1271,7 +1346,6 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* Active Filters Display */}
           {hasActiveFilters && (
             <div className={styles.active_filters}>
               <span className={styles.active_filters_label}>Active Filters:</span>
@@ -1284,12 +1358,50 @@ const AdminDashboard = () => {
         </>
       )}
 
-      {/* Main Content */}
       <div className={`${styles.table_section} ${animate ? styles.slide_up : ""}`}>
         {renderTabContent()}
       </div>
 
-      {/* Modals (keep all your existing modals) */}
+      {/* Skill Delete Confirmation Modal */}
+      {showSkillDeleteConfirm && skillToDelete && (
+        <div className={styles.modal_overlay} onClick={cancelSkillDelete}>
+          <div className={styles.confirm_modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.confirm_modal_header}>
+              <div className={styles.confirm_icon_wrapper}><DeleteIcon className={styles.confirm_icon} /></div>
+              <h3 className={styles.confirm_title}>Delete Skill</h3>
+            </div>
+            <div className={styles.confirm_modal_body}>
+              <p>Are you sure you want to delete <strong>{skillToDelete.name}</strong>?</p>
+              <p className={styles.confirm_warning}>This action cannot be undone.</p>
+            </div>
+            <div className={styles.confirm_modal_footer}>
+              <button className={styles.confirm_cancel_btn} onClick={cancelSkillDelete}>Cancel</button>
+              <button className={styles.confirm_delete_btn} onClick={confirmSkillDelete}>Delete Skill</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Career Goal Delete Confirmation Modal */}
+      {showGoalDeleteConfirm && goalToDelete && (
+        <div className={styles.modal_overlay} onClick={cancelGoalDelete}>
+          <div className={styles.confirm_modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.confirm_modal_header}>
+              <div className={styles.confirm_icon_wrapper}><DeleteIcon className={styles.confirm_icon} /></div>
+              <h3 className={styles.confirm_title}>Delete Career Goal</h3>
+            </div>
+            <div className={styles.confirm_modal_body}>
+              <p>Are you sure you want to delete <strong>{goalToDelete.name}</strong>?</p>
+              <p className={styles.confirm_warning}>This action cannot be undone. Users assigned to this goal may be affected.</p>
+            </div>
+            <div className={styles.confirm_modal_footer}>
+              <button className={styles.confirm_cancel_btn} onClick={cancelGoalDelete}>Cancel</button>
+              <button className={styles.confirm_delete_btn} onClick={confirmGoalDelete}>Delete Goal</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Single Delete Confirmation Modal */}
       {showDeleteConfirm && userToDelete && (
         <div className={styles.modal_overlay} onClick={cancelSingleDelete}>
@@ -1410,41 +1522,127 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* Skill-Goal Assignment Modal */}
+      {/* Assign Skill to Goal Modal */}
       {showSkillGoalModal && (
         <div className={styles.modal_overlay} onClick={closeModal}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modal_header}>
               <h2 className={styles.modal_title}>Assign Skill to Career Goal</h2>
-              <button className={styles.modal_close} onClick={closeModal}><CloseIcon /></button>
+              <button className={styles.modal_close} onClick={closeModal}>
+                <CloseIcon />
+              </button>
             </div>
             <div className={styles.modal_body}>
               <div className={styles.form_group}>
                 <label className={styles.form_label}>Career Goal</label>
-                <select className={styles.form_select} value={skillGoalAssignment.careerGoalId} onChange={(e) => setSkillGoalAssignment({...skillGoalAssignment, careerGoalId: e.target.value})}>
+                <select 
+                  className={styles.form_select} 
+                  value={skillGoalAssignment.careerGoalId} 
+                  onChange={(e) => setSkillGoalAssignment({...skillGoalAssignment, careerGoalId: e.target.value})}
+                >
                   <option value="">Select Career Goal</option>
-                  {masterData.careerGoals.map(goal => <option key={goal.id} value={goal.id}>{goal.name}</option>)}
+                  {masterData.careerGoals.map(goal => (
+                    <option key={goal.id} value={goal.id}>{goal.name}</option>
+                  ))}
                 </select>
               </div>
               <div className={styles.form_group}>
                 <label className={styles.form_label}>Skill</label>
-                <select className={styles.form_select} value={skillGoalAssignment.skillId} onChange={(e) => setSkillGoalAssignment({...skillGoalAssignment, skillId: e.target.value})}>
+                <select 
+                  className={styles.form_select} 
+                  value={skillGoalAssignment.skillId} 
+                  onChange={(e) => setSkillGoalAssignment({...skillGoalAssignment, skillId: e.target.value})}
+                >
                   <option value="">Select Skill</option>
-                  {masterData.skills.map(skill => <option key={skill.id} value={skill.id}>{skill.name}</option>)}
+                  {masterData.skills.map(skill => (
+                    <option key={skill.id} value={skill.id}>{skill.name}</option>
+                  ))}
                 </select>
               </div>
               <div className={styles.form_group}>
                 <label className={styles.form_label}>Required Level (1-3)</label>
-                <input type="number" className={styles.form_input} min="1" max="3" value={skillGoalAssignment.requiredLevel} onChange={(e) => setSkillGoalAssignment({...skillGoalAssignment, requiredLevel: parseInt(e.target.value)})} />
+                <input 
+                  type="number" 
+                  className={styles.form_input} 
+                  min="1" 
+                  max="3" 
+                  value={skillGoalAssignment.requiredLevel} 
+                  onChange={(e) => setSkillGoalAssignment({...skillGoalAssignment, requiredLevel: parseInt(e.target.value)})} 
+                />
               </div>
               <div className={styles.form_group}>
                 <label className={styles.form_label}>Priority (1-10)</label>
-                <input type="number" className={styles.form_input} min="1" max="10" value={skillGoalAssignment.priority} onChange={(e) => setSkillGoalAssignment({...skillGoalAssignment, priority: parseInt(e.target.value)})} />
+                <input 
+                  type="number" 
+                  className={styles.form_input} 
+                  min="1" 
+                  max="10" 
+                  value={skillGoalAssignment.priority} 
+                  onChange={(e) => setSkillGoalAssignment({...skillGoalAssignment, priority: parseInt(e.target.value)})} 
+                />
               </div>
             </div>
             <div className={styles.modal_footer}>
               <button className={styles.modal_cancel} onClick={closeModal}>Cancel</button>
               <button className={styles.modal_save} onClick={handleAssignSkillToGoal}>Assign Skill</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Remove Skill from Goal Modal */}
+      {showRemoveSkillModal && (
+        <div className={styles.modal_overlay} onClick={closeModal}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modal_header}>
+              <h2 className={styles.modal_title}>Remove Skill from Career Goal</h2>
+              <button className={styles.modal_close} onClick={closeModal}>
+                <CloseIcon />
+              </button>
+            </div>
+            <div className={styles.modal_body}>
+              <div className={styles.form_group}>
+                <label className={styles.form_label}>Select Career Goal</label>
+                <select 
+                  className={styles.form_select} 
+                  value={removeSkillAssignment.careerGoalId} 
+                  onChange={(e) => setRemoveSkillAssignment({
+                    ...removeSkillAssignment, 
+                    careerGoalId: e.target.value
+                  })}
+                >
+                  <option value="">Select Career Goal</option>
+                  {masterData.careerGoals.map(goal => (
+                    <option key={goal.id} value={goal.id}>{goal.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={styles.form_group}>
+                <label className={styles.form_label}>Select Skill to Remove</label>
+                <select 
+                  className={styles.form_select} 
+                  value={removeSkillAssignment.skillId} 
+                  onChange={(e) => setRemoveSkillAssignment({
+                    ...removeSkillAssignment, 
+                    skillId: e.target.value
+                  })}
+                >
+                  <option value="">Select Skill</option>
+                  {masterData.skills.map(skill => (
+                    <option key={skill.id} value={skill.id}>{skill.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className={styles.warning_box}>
+                <WarningIcon className={styles.warning_icon} />
+                <span>This will remove the selected skill from the career goal. The skill itself will not be deleted.</span>
+              </div>
+            </div>
+            <div className={styles.modal_footer}>
+              <button className={styles.modal_cancel} onClick={closeModal}>Cancel</button>
+              <button className={styles.confirm_delete_btn} onClick={handleRemoveSkillFromGoal}>
+                Remove Skill
+              </button>
             </div>
           </div>
         </div>
