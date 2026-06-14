@@ -109,7 +109,7 @@ const navigate = useNavigate();
           <div className={styles.buttons}>
           <button 
             className={styles.btn_primary}
-            onClick={() => navigate('/login')}
+            onClick={() => navigate('/dashboard')}
           >
             <span>Start Your Journey</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -307,7 +307,7 @@ const navigate = useNavigate();
             <p className={styles.cta_desc}>Join thousands who transformed their careers</p>
             <div className={styles.cta_buttons}>
               <button className={styles.cta_btn}
-              onClick={() => navigate('/login')}>
+              onClick={() => navigate('/dashboard')}>
                 Get Started Free
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M5 12h14M12 5l7 7-7 7"/>
