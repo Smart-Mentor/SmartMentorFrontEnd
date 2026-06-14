@@ -741,6 +741,7 @@
   box-shadow: 0 4px 16px rgba(10, 90, 219, 0.3);
   position: relative;
   overflow: hidden;
+  margin-bottom: 30px;
 }
 
 .login_button::before {
@@ -804,94 +805,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* Divider */
-.divider {
-  text-align: center;
-  margin: 28px 0;
-  position: relative;
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: calc(50% - 80px);
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
-}
-
-.divider::before { left: 0; }
-.divider::after { right: 0; }
-
-.divider span {
-  background: white;
-  padding: 0 16px;
-  font-size: 13px;
-  color: #94a3b8;
-  font-weight: 600;
-}
-
-/* Social Login */
-.social_login {
-  display: flex;
-  gap: 14px;
-  margin-bottom: 28px;
-}
-
-.social_btn {
-  flex: 1;
-  padding: 14px;
-  background: white;
-  border: 2px solid #e2e8f0;
-  border-radius: 14px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-  color: #334155;
-}
-
-.social_btn:hover:not(:disabled) {
-  border-color: #0A5ADB;
-  background: rgba(10, 90, 219, 0.04);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  color: #0A5ADB;
-}
-
-.social_btn:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.social_btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.social_icon {
-  font-size: 18px;
-  transition: transform 0.3s ease;
-}
-
-.social_btn:hover .social_icon {
-  transform: scale(1.2);
-}
-
-.google_btn:hover {
-  border-color: #ea4335;
-  color: #ea4335;
-}
-
-.github_btn:hover {
-  border-color: #333;
-  color: #333;
-}
-
 /* Footer */
 .footer {
   text-align: center;
@@ -951,7 +864,7 @@
 .popup_card {
   position: relative;
   width: 100%;
-  max-width: 460px;
+  max-width: 480px;
   background: white;
   border-radius: 24px;
   padding: 48px 44px;
@@ -1092,6 +1005,87 @@
   color: #94a3b8;
 }
 
+/* Password Strength Styles for Reset Popup */
+.password_wrapper {
+  position: relative;
+}
+
+.password_wrapper input {
+  padding-right: 44px;
+}
+
+.password_strength_container {
+  margin-top: -6px;
+  margin-bottom: 12px;
+}
+
+.password_strength {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: -4px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.strength_bars_wrapper {
+  flex: 1;
+  height: 6px;
+  background-color: #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.strength_bars_fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strength_label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+  min-width: 80px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.password_requirements {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px 12px;
+  padding: 8px 0;
+  font-size: 10px;
+}
+
+.req_item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #94a3b8;
+  transition: color 0.3s ease;
+  font-size: 10px;
+}
+
+.req_item span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  font-size: 10px;
+}
+
+.req_met {
+  color: #10b981;
+}
+
+.req_met span {
+  color: #10b981;
+  font-weight: bold;
+}
+
 .popup_error {
   background: #fef2f2;
   color: #b91c1c;
@@ -1207,6 +1201,33 @@
 
 .popup_back:hover i {
   transform: translateX(-3px);
+}
+
+/* Resend Button Container & Button */
+.resend_container {
+  text-align: center;
+  margin-top: 12px;
+}
+
+.resend_button {
+  background: none;
+  border: none;
+  color: #0A5ADB;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 12px;
+  transition: all 0.3s ease;
+}
+
+.resend_button:hover:not(.disabled) {
+  color: #58A7B5;
+  text-decoration: underline;
+}
+
+.resend_button.disabled {
+  color: #94a3b8;
+  cursor: not-allowed;
 }
 
 /* ============================================
@@ -1357,15 +1378,6 @@
     font-size: 14px;
   }
 
-  .social_login {
-    gap: 10px;
-  }
-
-  .social_btn {
-    padding: 12px;
-    font-size: 13px;
-  }
-
   .popup_card {
     padding: 36px 28px;
     border-radius: 20px;
@@ -1379,6 +1391,11 @@
     width: 64px;
     height: 64px;
     font-size: 28px;
+  }
+
+  .password_requirements {
+    grid-template-columns: 1fr;
+    gap: 4px;
   }
 }
 
@@ -1516,29 +1533,6 @@
     border-radius: 12px;
   }
 
-  .divider {
-    margin: 20px 0;
-  }
-
-  .divider span {
-    font-size: 12px;
-  }
-
-  .social_login {
-    gap: 8px;
-    margin-bottom: 20px;
-  }
-
-  .social_btn {
-    padding: 10px;
-    font-size: 12px;
-    border-radius: 12px;
-  }
-
-  .social_icon {
-    font-size: 16px;
-  }
-
   .footer {
     font-size: 13px;
   }
@@ -1587,6 +1581,23 @@
     border-radius: 12px;
   }
 
+  .strength_label {
+    font-size: 9px;
+    min-width: 70px;
+  }
+
+  .strength_bars_wrapper {
+    height: 5px;
+  }
+
+  .password_requirements {
+    gap: 4px;
+  }
+
+  .req_item {
+    font-size: 9px;
+  }
+
   .popup_error,
   .popup_success {
     padding: 12px 14px;
@@ -1604,35 +1615,4 @@
     font-size: 13px;
     border-radius: 12px;
   }
-}
-/* Resend Button Container & Button */
-.resend_container {
-  text-align: center;
-  margin-top: 12px;
-}
-
-.resend_button {
-  background: none;
-  border: none;
-  color: #0A5ADB;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 8px 12px;
-  transition: all 0.3s ease;
-}
-
-.resend_button:hover:not(.disabled) {
-  color: #58A7B5;
-  text-decoration: underline;
-}
-
-.resend_button.disabled {
-  color: #94a3b8;
-  cursor: not-allowed;
-}
-
-/* Slightly wider popup for verification modal (optional) */
-.popup_card {
-  max-width: 480px; /* already present, but can be adjusted */
 }

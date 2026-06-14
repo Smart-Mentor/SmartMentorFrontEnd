@@ -34,6 +34,18 @@ export default function Login() {
   const [popupSuccess, setPopupSuccess] = useState("");
   const [popupLoading, setPopupLoading] = useState(false);
 
+  // 🔹 Reset Password Strength States
+  const [resetPasswordValidation, setResetPasswordValidation] = useState({
+    hasMinLength: false,
+    hasUpperCase: false,
+    hasLowerCase: false,
+    hasNumber: false,
+    hasSpecialChar: false,
+  });
+  const [showResetPasswordReqs, setShowResetPasswordReqs] = useState(false);
+  const [showResetNewPassword, setShowResetNewPassword] = useState(false);
+  const [showResetConfirmPassword, setShowResetConfirmPassword] = useState(false);
+
   // 🔹 Verification Modal States
   const [showVerificationPopup, setShowVerificationPopup] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
@@ -43,6 +55,17 @@ export default function Login() {
   const [verificationError, setVerificationError] = useState("");
   const [verificationSuccess, setVerificationSuccess] = useState("");
   const [verificationLoading, setVerificationLoading] = useState(false);
+
+  // --- Password Validation Function ---
+  const validatePassword = (password) => {
+    return {
+      hasMinLength: password.length >= 6,
+      hasUpperCase: /[A-Z]/.test(password),
+      hasLowerCase: /[a-z]/.test(password),
+      hasNumber: /[0-9]/.test(password),
+      hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    };
+  };
 
   // --- Animation on mount ---
   useEffect(() => {
@@ -283,6 +306,21 @@ export default function Login() {
     }
   };
 
+  // 🔹 Handle Reset New Password Change
+  const handleResetNewPasswordChange = (e) => {
+    const value = e.target.value;
+    setNewPassword(value);
+    const validation = validatePassword(value);
+    setResetPasswordValidation(validation);
+    if (popupError) setPopupError("");
+  };
+
+  // 🔹 Handle Reset Confirm Password Change
+  const handleResetConfirmPasswordChange = (e) => {
+    setConfirmPassword(e.target.value);
+    if (popupError) setPopupError("");
+  };
+
   // 🔹 Step 2: Reset Password
   const handleResetSubmit = async (e) => {
     e.preventDefault();
@@ -291,6 +329,29 @@ export default function Login() {
     
     if (email && email.toLowerCase() === "admin@gmail.com") {
       setPopupError("Admin password reset is not allowed through this form");
+      return;
+    }
+
+    // Validate password strength
+    const validation = validatePassword(newPassword);
+    if (!validation.hasMinLength) {
+      setPopupError("Password must be at least 6 characters");
+      return;
+    }
+    if (!validation.hasUpperCase) {
+      setPopupError("Password must contain an uppercase letter (A-Z)");
+      return;
+    }
+    if (!validation.hasLowerCase) {
+      setPopupError("Password must contain a lowercase letter (a-z)");
+      return;
+    }
+    if (!validation.hasNumber) {
+      setPopupError("Password must contain a number (0-9)");
+      return;
+    }
+    if (!validation.hasSpecialChar) {
+      setPopupError("Password must contain a special character (!@#$%^&*)");
       return;
     }
 
@@ -322,6 +383,13 @@ export default function Login() {
           setResetCode("");
           setNewPassword("");
           setConfirmPassword("");
+          setResetPasswordValidation({
+            hasMinLength: false,
+            hasUpperCase: false,
+            hasLowerCase: false,
+            hasNumber: false,
+            hasSpecialChar: false,
+          });
         }, 2000);
       } else {
         setPopupError(res.message || "Failed to reset password");
@@ -345,7 +413,7 @@ export default function Login() {
   // --- UI Render ---
   return (
     <div className={styles.login_page}>
-      {/* Background decorative elements (unchanged) */}
+      {/* Background decorative elements */}
       <div className={styles.bg_blur_1}></div>
       <div className={styles.bg_blur_2}></div>
       <div className={styles.bg_blur_3}></div>
@@ -357,10 +425,10 @@ export default function Login() {
         <div className={`${styles.shape} ${styles.shape_5}`}></div>
       </div>
 
-      {/* Main Container - Split Layout (unchanged) */}
+      {/* Main Container - Split Layout */}
       <div className={`${styles.login_container} ${animate ? styles.animate_in : ''}`}>
         
-        {/* Left Side - Welcome Section (unchanged) */}
+        {/* Left Side - Welcome Section */}
         <div className={`${styles.welcome_section} ${animate ? styles.fade_in_left : ''}`}>
           <div className={styles.welcome_content}>
             <div className={`${styles.logo_section} ${animate ? styles.scale_in : ''}`}>
@@ -428,7 +496,7 @@ export default function Login() {
           <div className={styles.floating_dots}></div>
         </div>
 
-        {/* Right Side - Login Form (unchanged) */}
+        {/* Right Side - Login Form */}
         <div className={`${styles.form_section} ${animate ? styles.fade_in_right : ''}`}>
           <div className={styles.form_card}>
             <div className={`${styles.form_header} ${animate ? styles.fade_in_up : ''}`}>
@@ -540,21 +608,6 @@ export default function Login() {
               </button>
             </form>
 
-            {/* <div className={`${styles.divider} ${animate ? styles.fade_in : ''}`} style={{ animationDelay: '0.7s' }}>
-              <span>or continue with</span>
-            </div> */}
-
-            <div className={`${styles.social_login} ${animate ? styles.fade_in_up : ''}`} style={{ animationDelay: '0.8s' }}>
-              {/* <button className={`${styles.social_btn} ${styles.google_btn}`} disabled={loading}>
-                <span className={styles.social_icon}><i className="fab fa-google"></i></span>
-                <span>Google</span>
-              </button>
-              <button className={`${styles.social_btn} ${styles.github_btn}`} disabled={loading}>
-                <span className={styles.social_icon}><i className="fab fa-github"></i></span>
-                <span>GitHub</span>
-              </button> */}
-            </div>
-
             <div className={`${styles.footer} ${animate ? styles.fade_in : ''}`} style={{ animationDelay: '0.9s' }}>
               <p>
                 Don't have an account? <Link to="/signup">Sign Up <i className="fas fa-arrow-right"></i></Link>
@@ -564,7 +617,7 @@ export default function Login() {
         </div>
       </div>
 
-      {/* 🔹 Popup 1: Forgot Password (unchanged) */}
+      {/* 🔹 Popup 1: Forgot Password */}
       {showForgotPopup && (
         <div className={styles.popup_overlay} onClick={closeAllPopups}>
           <div className={styles.popup_card} onClick={(e) => e.stopPropagation()}>
@@ -618,7 +671,7 @@ export default function Login() {
         </div>
       )}
 
-      {/* 🔹 Popup 2: Reset Password (unchanged) */}
+      {/* 🔹 Popup 2: Reset Password (with password strength indicator) */}
       {showResetPopup && (
         <div className={styles.popup_overlay} onClick={closeAllPopups}>
           <div className={`${styles.popup_card} ${styles.popup_enter}`} onClick={(e) => e.stopPropagation()}>
@@ -644,40 +697,126 @@ export default function Login() {
                   disabled={popupLoading}
                 />
               </div>
+              
               <div className={styles.input_group}>
                 <label>New Password</label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password"
-                  required
-                  disabled={popupLoading}
-                />
+                <div className={styles.password_wrapper}>
+                  <input
+                    type={showResetNewPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={handleResetNewPasswordChange}
+                    onFocus={() => setShowResetPasswordReqs(true)}
+                    onBlur={() => {
+                      if (newPassword === "" || Object.values(resetPasswordValidation).every(v => v === true)) {
+                        setShowResetPasswordReqs(false);
+                      }
+                    }}
+                    placeholder="Enter new password"
+                    required
+                    disabled={popupLoading}
+                  />
+                  <button
+                    type="button"
+                    className={styles.password_toggle}
+                    onClick={() => setShowResetNewPassword(!showResetNewPassword)}
+                  >
+                    <i className={`fa-solid ${showResetNewPassword ? "fa-eye" : "fa-eye-slash"}`}></i>
+                  </button>
+                </div>
               </div>
+
+              {/* Password Strength Indicator for Reset */}
+              <div className={styles.password_strength_container}>
+                <div className={styles.password_strength}>
+                  <div className={styles.strength_bars_wrapper}>
+                    <div 
+                      className={styles.strength_bars_fill}
+                      style={{ 
+                        width: `${(Object.values(resetPasswordValidation).filter(v => v === true).length / 5) * 100}%`,
+                        backgroundColor: (() => {
+                          const percent = (Object.values(resetPasswordValidation).filter(v => v === true).length / 5);
+                          if (percent <= 0.2) return '#ff4444';
+                          if (percent <= 0.4) return '#ff8844';
+                          if (percent <= 0.6) return '#ffcc44';
+                          if (percent <= 0.8) return '#88cc44';
+                          return '#44ff44';
+                        })()
+                      }}
+                    ></div>
+                  </div>
+                  <span className={styles.strength_label}>
+                    {newPassword.length === 0 && "Enter password"}
+                    {newPassword.length > 0 && 
+                      (() => {
+                        const percent = (Object.values(resetPasswordValidation).filter(v => v === true).length / 5) * 100;
+                        if (percent === 0) return "Very Weak";
+                        if (percent <= 20) return "Weak";
+                        if (percent <= 40) return "Fair";
+                        if (percent <= 60) return "Good";
+                        if (percent <= 80) return "Strong";
+                        return "Very Strong";
+                      })()
+                    }
+                  </span>
+                </div>
+                  
+                {/* Password Requirements List */}
+                {(showResetPasswordReqs || newPassword.length > 0) && (
+                  <div className={styles.password_requirements}>
+                    <div className={`${styles.req_item} ${resetPasswordValidation.hasMinLength ? styles.req_met : ''}`}>
+                      <span>{resetPasswordValidation.hasMinLength ? '✓' : '○'}</span> At least 6 characters
+                    </div>
+                    <div className={`${styles.req_item} ${resetPasswordValidation.hasUpperCase ? styles.req_met : ''}`}>
+                      <span>{resetPasswordValidation.hasUpperCase ? '✓' : '○'}</span> Uppercase letter (A-Z)
+                    </div>
+                    <div className={`${styles.req_item} ${resetPasswordValidation.hasLowerCase ? styles.req_met : ''}`}>
+                      <span>{resetPasswordValidation.hasLowerCase ? '✓' : '○'}</span> Lowercase letter (a-z)
+                    </div>
+                    <div className={`${styles.req_item} ${resetPasswordValidation.hasNumber ? styles.req_met : ''}`}>
+                      <span>{resetPasswordValidation.hasNumber ? '✓' : '○'}</span> Number (0-9)
+                    </div>
+                    <div className={`${styles.req_item} ${resetPasswordValidation.hasSpecialChar ? styles.req_met : ''}`}>
+                      <span>{resetPasswordValidation.hasSpecialChar ? '✓' : '○'}</span> Special character (!@#$%^&*)
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className={styles.input_group}>
                 <label>Confirm Password</label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm new password"
-                  required
-                  disabled={popupLoading}
-                />
+                <div className={styles.password_wrapper}>
+                  <input
+                    type={showResetConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={handleResetConfirmPasswordChange}
+                    placeholder="Confirm new password"
+                    required
+                    disabled={popupLoading}
+                  />
+                  <button
+                    type="button"
+                    className={styles.password_toggle}
+                    onClick={() => setShowResetConfirmPassword(!showResetConfirmPassword)}
+                  >
+                    <i className={`fa-solid ${showResetConfirmPassword ? "fa-eye" : "fa-eye-slash"}`}></i>
+                  </button>
+                </div>
               </div>
+
               {popupError && (
                 <div className={`${styles.popup_error} ${styles.shake}`}>
                   <i className="fas fa-exclamation-circle"></i>
                   {popupError}
                 </div>
               )}
+
               {popupSuccess && (
                 <div className={`${styles.popup_success} ${styles.popup_success_anim}`}>
                   <i className="fas fa-check-circle"></i>
                   {popupSuccess}
                 </div>
               )}
+
               <button
                 type="submit"
                 className={`${styles.popup_button} ${popupLoading ? styles.loading : ''}`}
@@ -686,6 +825,7 @@ export default function Login() {
                 <span>{popupLoading ? "Resetting..." : "Reset Password"}</span>
                 {!popupLoading && <i className="fas fa-check"></i>}
               </button>
+              
               <button
                 type="button"
                 className={styles.popup_back}
@@ -694,6 +834,16 @@ export default function Login() {
                   setShowForgotPopup(true);
                   setPopupError("");
                   setPopupSuccess("");
+                  setNewPassword("");
+                  setConfirmPassword("");
+                  setResetCode("");
+                  setResetPasswordValidation({
+                    hasMinLength: false,
+                    hasUpperCase: false,
+                    hasLowerCase: false,
+                    hasNumber: false,
+                    hasSpecialChar: false,
+                  });
                 }}
               >
                 <i className="fas fa-arrow-left"></i> Back
@@ -703,7 +853,7 @@ export default function Login() {
         </div>
       )}
 
-      {/* 🔹 Popup 3: Email Verification Modal (with auto re‑login) */}
+      {/* 🔹 Popup 3: Email Verification Modal */}
       {showVerificationPopup && (
         <div className={styles.popup_overlay} onClick={() => {}}>
           <div className={styles.popup_card} onClick={(e) => e.stopPropagation()}>
