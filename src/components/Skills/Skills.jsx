@@ -122,7 +122,7 @@ const SkillsPage = () => {
       console.log("Gap Analysis Data:", gapData);
       
       // Process missingSkills for Recommended Skills
-      if (gapData.missingSkills && Array.isArray(gapData.missingSkills)) {
+      if (gapData.missingSkills && Array.isArray(gapData.missingSkills) && gapData.missingSkills.length > 0) {
         const formattedRecommended = gapData.missingSkills.map((skill, index) => ({
           name: skill.skillName || skill.name || `Skill ${skill.skillId}`,
           demand: skill.demand || `+${Math.floor(Math.random() * 30) + 30}%`,
@@ -132,19 +132,12 @@ const SkillsPage = () => {
         }));
         setRecommendedSkills(formattedRecommended);
       } else {
-        // Default recommended skills if none from API
-        setRecommendedSkills([
-          { name: "GraphQL", demand: "+45%", color: "#E10098" },
-          { name: "Next.js", demand: "+52%", color: "#000000" },
-          { name: "Redis", demand: "+38%", color: "#DC382D" },
-          { name: "PostgreSQL", demand: "+41%", color: "#336791" },
-          { name: "AWS", demand: "+55%", color: "#FF9900" },
-          { name: "Docker", demand: "+48%", color: "#2496ED" },
-        ]);
+        // Empty array when no missing skills
+        setRecommendedSkills([]);
       }
       
-      // Process weakSkills for Areas to Improve
-      if (gapData.weakSkills && Array.isArray(gapData.weakSkills)) {
+      // Process weakSkills for Areas to Improve (keeping data but not displaying)
+      if (gapData.weakSkills && Array.isArray(gapData.weakSkills) && gapData.weakSkills.length > 0) {
         const formattedWeakSkills = gapData.weakSkills.map((skill, index) => {
           // Convert proficiency level to consistent format
           let levelText = "medium";
@@ -175,30 +168,15 @@ const SkillsPage = () => {
         });
         setWeakSkills(formattedWeakSkills);
       } else {
-        // Default weak skills if none from API
-        setWeakSkills([
-          { name: "System Design", level: "high", impact: "Critical", priority: 1 },
-          { name: "Testing", level: "medium", impact: "High", priority: 2 },
-          { name: "CI/CD", level: "medium", impact: "High", priority: 3 },
-        ]);
+        // Empty array when no weak skills
+        setWeakSkills([]);
       }
     } catch (error) {
       console.error("Failed to fetch gap analysis:", error);
       setGapAnalysisError(error.message || "Failed to load skill recommendations");
-      // Set default data on error
-      setRecommendedSkills([
-        { name: "GraphQL", demand: "+45%", color: "#E10098" },
-        { name: "Next.js", demand: "+52%", color: "#000000" },
-        { name: "Redis", demand: "+38%", color: "#DC382D" },
-        { name: "PostgreSQL", demand: "+41%", color: "#336791" },
-        { name: "AWS", demand: "+55%", color: "#FF9900" },
-        { name: "Docker", demand: "+48%", color: "#2496ED" },
-      ]);
-      setWeakSkills([
-        { name: "System Design", level: "high", impact: "Critical", priority: 1 },
-        { name: "Testing", level: "medium", impact: "High", priority: 2 },
-        { name: "CI/CD", level: "medium", impact: "High", priority: 3 },
-      ]);
+      // Set empty arrays on error
+      setRecommendedSkills([]);
+      setWeakSkills([]);
     } finally {
       setGapAnalysisLoading(false);
     }
@@ -317,8 +295,8 @@ const SkillsPage = () => {
             </div>
           </div>
 
-          {/* Bottom Grid Skeleton */}
-          <div className={styles.bottom_grid}>
+          {/* Bottom Grid Skeleton - Only Recommended Skills */}
+          <div className={styles.bottom_grid_single}>
             <div className={styles.recommended_section}>
               <Skeleton variant="text" width={180} height={28} />
               <Skeleton variant="text" width={140} height={20} />
@@ -327,21 +305,6 @@ const SkillsPage = () => {
                   <div key={index} className={styles.tag_item}>
                     <Skeleton variant="text" width={120} height={20} />
                     <Skeleton variant="rounded" width={28} height={28} />
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className={styles.improve_section}>
-              <Skeleton variant="text" width={180} height={28} />
-              <Skeleton variant="text" width={140} height={20} />
-              <div className={styles.improve_list}>
-                {[1, 2, 3].map((_, index) => (
-                  <div key={index} className={styles.improve_item}>
-                    <div>
-                      <Skeleton variant="text" width={120} height={20} />
-                      <Skeleton variant="text" width={100} height={16} />
-                    </div>
-                    <Skeleton variant="rounded" width={120} height={36} />
                   </div>
                 ))}
               </div>
@@ -497,10 +460,6 @@ const SkillsPage = () => {
                         <div className={styles.skill_dot} style={{ background: skill.color }}></div>
                         <span className={styles.skill_name}>{skill.name}</span>
                       </div>
-                      <div className={styles.skill_meta}>
-                        <span className={styles.skill_projects}>📁 {skill.projects} projects</span>
-                        <span className={styles.skill_experience}>⏱️ {skill.experience}</span>
-                      </div>
                     </div>
                     <div className={styles.skill_percentage}>
                       <span className={styles.percentage_value}>{skill.level}%</span>
@@ -538,36 +497,42 @@ const SkillsPage = () => {
           </div>
         </div>
 
-        {/* Bottom Section */}
-        <div className={styles.bottom_grid}>
-          {/* Recommended Skills - from missingSkills */}
-          <div className={`${styles.recommended_section} ${animate ? styles.slide_up : ""}`}>
-            <div className={styles.section_header}>
-              <div>
-                <h2 className={styles.section_title}>Recommended Skills</h2>
-                <p className={styles.section_subtitle}>
-                  {gapAnalysisLoading ? "Loading recommendations..." : "Skills that complement your profile"}
-                </p>
-              </div>
-              <span className={styles.trending_badge}>🔥 Trending</span>
+        {/* Recommended Skills Section - Full Width */}
+        <div className={`${styles.recommended_section_full} ${animate ? styles.slide_up : ""}`}>
+          <div className={styles.section_header}>
+            <div>
+              <h2 className={styles.section_title}>Recommended Skills</h2>
+              <p className={styles.section_subtitle}>
+                {gapAnalysisLoading ? "Loading recommendations..." : "Skills that complement your profile"}
+              </p>
             </div>
+            {recommendedSkills.length > 0 && !gapAnalysisLoading && <span className={styles.trending_badge}>🔥 Trending</span>}
+          </div>
 
+          {gapAnalysisLoading ? (
+            <div className={styles.loading_indicator}>
+              <span>Updating recommendations...</span>
+            </div>
+          ) : recommendedSkills.length > 0 ? (
             <div className={styles.tags_container}>
               {recommendedSkills.map((item, i) => (
                 <div key={i} className={styles.tag_item}>
                   <div className={styles.tag_content}>
                     <span className={styles.tag_name}>{item.name}</span>
-                    <span className={styles.tag_demand}>{item.demand}</span>
                   </div>
                 </div>
               ))}
             </div>
-            {gapAnalysisLoading && (
-              <div className={styles.loading_indicator}>
-                <span>Updating recommendations...</span>
-              </div>
-            )}
-          </div>
+          ) : (
+            <div className={styles.max_reached_container}>
+              <div className={styles.max_reached_icon}>🏆</div>
+              <h3 className={styles.max_reached_title}>You've Reached the Peak!</h3>
+              <p className={styles.max_reached_message}>
+                Great job! You've mastered all recommended skills for your current track.
+                Keep maintaining your expertise or explore new advanced pathways.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </Box>
