@@ -27,6 +27,27 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
 
+  // --- Field Validation States ---
+  const [fieldErrors, setFieldErrors] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  // --- Password Validation States ---
+  const [passwordValidation, setPasswordValidation] = useState({
+    hasMinLength: false,
+    hasUpperCase: false,
+    hasLowerCase: false,
+    hasNumber: false,
+    hasSpecialChar: false,
+  });
+
+  // --- Show password requirements flag ---
+  const [showPasswordReqs, setShowPasswordReqs] = useState(false);
+
   const navigate = useNavigate();
 
   // --- Verification Popup States ---
@@ -38,11 +59,117 @@ export default function Signup() {
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
 
-  // --- Input Change Handler ---
+  // --- Password Validation Function ---
+  const validatePassword = (password) => {
+    return {
+      hasMinLength: password.length >= 6,
+      hasUpperCase: /[A-Z]/.test(password),
+      hasLowerCase: /[a-z]/.test(password),
+      hasNumber: /[0-9]/.test(password),
+      hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    };
+  };
+
+  // --- Validate Single Field ---
+  const validateField = (name, value) => {
+    switch (name) {
+      case "firstName":
+        if (!value.trim()) return "First name is required";
+        if (value.trim().length < 2) return "First name must be at least 2 characters";
+        if (!/^[a-zA-Z\s]*$/.test(value)) return "First name can only contain letters";
+        return "";
+      
+      case "lastName":
+        if (!value.trim()) return "Last name is required";
+        if (value.trim().length < 2) return "Last name must be at least 2 characters";
+        if (!/^[a-zA-Z\s]*$/.test(value)) return "Last name can only contain letters";
+        return "";
+      
+      case "email":
+        if (!value.trim()) return "Email is required";
+        const emailRegex = /^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/;
+        if (!emailRegex.test(value)) return "Please enter a valid email address";
+        return "";
+      
+      case "password":
+        if (!value) return "Password is required";
+        const validation = validatePassword(value);
+        if (!validation.hasMinLength) return "At least 6 characters required";
+        if (!validation.hasUpperCase) return "Add an uppercase letter (A-Z)";
+        if (!validation.hasLowerCase) return "Add a lowercase letter (a-z)";
+        if (!validation.hasNumber) return "Add a number (0-9)";
+        if (!validation.hasSpecialChar) return "Add a special character (!@#$%^&*)";
+        return "";
+      
+      case "confirmPassword":
+        if (!value) return "Please confirm your password";
+        if (value !== formData.password) return "Passwords do not match";
+        return "";
+      
+      default:
+        return "";
+    }
+  };
+
+  // --- Input Change Handler with Validation ---
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    
+    // Clear general errors
     if (error) setError("");
     if (success) setSuccess("");
+    
+    // Validate the field
+    const fieldError = validateField(name, value);
+    setFieldErrors(prev => ({ ...prev, [name]: fieldError }));
+    
+    // Special handling for password to update validation indicators
+    if (name === "password") {
+      const validation = validatePassword(value);
+      setPasswordValidation(validation);
+      
+      // Also re-validate confirm password if it has a value
+      if (formData.confirmPassword) {
+        const confirmError = validateField("confirmPassword", formData.confirmPassword);
+        setFieldErrors(prev => ({ ...prev, confirmPassword: confirmError }));
+      }
+    }
+    
+    // Re-validate confirm password when password changes
+    if (name === "confirmPassword") {
+      const confirmError = validateField("confirmPassword", value);
+      setFieldErrors(prev => ({ ...prev, confirmPassword: confirmError }));
+    }
+  };
+
+  // --- Handle Password Field Focus ---
+  const handlePasswordFocus = () => {
+    setShowPasswordReqs(true);
+  };
+
+  // --- Handle Password Field Blur ---
+  const handlePasswordBlur = () => {
+    // Only hide if password is empty or all requirements are met
+    if (formData.password === "" || Object.values(passwordValidation).every(v => v === true)) {
+      setShowPasswordReqs(false);
+    }
+  };
+
+  // --- Validate All Fields Before Submit ---
+  const validateAllFields = () => {
+    const errors = {
+      firstName: validateField("firstName", formData.firstName),
+      lastName: validateField("lastName", formData.lastName),
+      email: validateField("email", formData.email),
+      password: validateField("password", formData.password),
+      confirmPassword: validateField("confirmPassword", formData.confirmPassword),
+    };
+    
+    setFieldErrors(errors);
+    
+    // Check if any field has an error
+    return !Object.values(errors).some(error => error !== "");
   };
 
   // --- Countdown Timer Effect ---
@@ -156,24 +283,20 @@ export default function Signup() {
     }
   };
 
-  // --- Registration Submit ---
+  // --- Registration Submit with Validation ---
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     console.log("Selected role:", formData.role);
 
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords don't match");
+    // First validate all fields
+    if (!validateAllFields()) {
+      setError("Please fix the errors above before continuing");
       return;
     }
 
     if (!acceptTerms) {
       setError("Please accept the Terms and Conditions");
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters");
       return;
     }
 
@@ -364,8 +487,12 @@ export default function Signup() {
                     placeholder="John"
                     required
                     disabled={loading}
+                    className={fieldErrors.firstName ? styles.input_error : ""}
                   />
                   <span className={styles.input_icon}>👤</span>
+                  {fieldErrors.firstName && (
+                    <span className={styles.field_error}>{fieldErrors.firstName}</span>
+                  )}
                 </div>
                 <div className={styles.input_group}>
                   <label>Last Name</label>
@@ -377,8 +504,12 @@ export default function Signup() {
                     placeholder="Doe"
                     required
                     disabled={loading}
+                    className={fieldErrors.lastName ? styles.input_error : ""}
                   />
                   <span className={styles.input_icon}>👤</span>
+                  {fieldErrors.lastName && (
+                    <span className={styles.field_error}>{fieldErrors.lastName}</span>
+                  )}
                 </div>
               </div>
 
@@ -393,8 +524,12 @@ export default function Signup() {
                   placeholder="john@example.com"
                   required
                   disabled={loading}
+                  className={fieldErrors.email ? styles.input_error : ""}
                 />
                 <span className={styles.input_icon}>📧</span>
+                {fieldErrors.email && (
+                  <span className={styles.field_error}>{fieldErrors.email}</span>
+                )}
               </div>
 
               {/* Phone */}
@@ -421,9 +556,12 @@ export default function Signup() {
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
-                      placeholder="Min 6 characters"
+                      onFocus={handlePasswordFocus}
+                      onBlur={handlePasswordBlur}
+                      placeholder="Create a strong password"
                       required
                       disabled={loading}
+                      className={fieldErrors.password ? styles.input_error : ""}
                     />
                     <button
                       type="button"
@@ -433,6 +571,9 @@ export default function Signup() {
                       <i className={`fa-solid ${showPassword ? "fa-eye" : "fa-eye-slash"}`}></i>
                     </button>
                   </div>
+                  {fieldErrors.password && (
+                    <span className={styles.field_error}>{fieldErrors.password}</span>
+                  )}
                 </div>
                 <div className={styles.input_group}>
                   <label>Confirm Password</label>
@@ -442,9 +583,10 @@ export default function Signup() {
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleChange}
-                      placeholder="Confirm password"
+                      placeholder="Confirm your password"
                       required
                       disabled={loading}
+                      className={fieldErrors.confirmPassword ? styles.input_error : ""}
                     />
                     <button
                       type="button"
@@ -454,24 +596,67 @@ export default function Signup() {
                       <i className={`fa-solid ${showConfirmPassword ? "fa-eye" : "fa-eye-slash"}`}></i>
                     </button>
                   </div>
+                  {fieldErrors.confirmPassword && (
+                    <span className={styles.field_error}>{fieldErrors.confirmPassword}</span>
+                  )}
                 </div>
               </div>
 
-              {/* Password Strength Indicator */}
-              <div className={styles.password_strength}>
-                <div className={styles.strength_bars}>
-                  <div className={`${styles.strength_bar} ${formData.password.length >= 1 ? styles.active : ''}`}></div>
-                  <div className={`${styles.strength_bar} ${formData.password.length >= 4 ? styles.active : ''}`}></div>
-                  <div className={`${styles.strength_bar} ${formData.password.length >= 6 ? styles.active : ''}`}></div>
-                  <div className={`${styles.strength_bar} ${formData.password.length >= 8 ? styles.active : ''}`}></div>
+              {/* Enhanced Password Strength Indicator */}
+              <div className={styles.password_strength_container}>
+                <div className={styles.password_strength}>
+                  <div className={styles.strength_bars_wrapper}>
+                    <div 
+                      className={styles.strength_bars_fill}
+                      style={{ 
+                        width: `${(Object.values(passwordValidation).filter(v => v === true).length / 5) * 100}%`,
+                        backgroundColor: (() => {
+                          const percent = (Object.values(passwordValidation).filter(v => v === true).length / 5);
+                          if (percent <= 0.2) return '#ff4444';
+                          if (percent <= 0.4) return '#ff8844';
+                          if (percent <= 0.6) return '#ffcc44';
+                          if (percent <= 0.8) return '#88cc44';
+                          return '#44ff44';
+                        })()
+                      }}
+                    ></div>
+                  </div>
+                  <span className={styles.strength_label}>
+                    {formData.password.length === 0 && "Enter password"}
+                    {formData.password.length > 0 && 
+                      (() => {
+                        const percent = (Object.values(passwordValidation).filter(v => v === true).length / 5) * 100;
+                        if (percent === 0) return "Very Weak";
+                        if (percent <= 20) return "Weak";
+                        if (percent <= 40) return "Fair";
+                        if (percent <= 60) return "Good";
+                        if (percent <= 80) return "Strong";
+                        return "Very Strong";
+                      })()
+                    }
+                  </span>
                 </div>
-                <span className={styles.strength_label}>
-                  {formData.password.length === 0 && "Enter password"}
-                  {formData.password.length > 0 && formData.password.length < 4 && "Weak"}
-                  {formData.password.length >= 4 && formData.password.length < 6 && "Fair"}
-                  {formData.password.length >= 6 && formData.password.length < 8 && "Good"}
-                  {formData.password.length >= 8 && "Strong"}
-                </span>
+                  
+                {/* Password Requirements List */}
+                {(showPasswordReqs || formData.password.length > 0) && (
+                  <div className={styles.password_requirements}>
+                    <div className={`${styles.req_item} ${passwordValidation.hasMinLength ? styles.req_met : ''}`}>
+                      <span>{passwordValidation.hasMinLength ? '✓' : '○'}</span> At least 6 characters
+                    </div>
+                    <div className={`${styles.req_item} ${passwordValidation.hasUpperCase ? styles.req_met : ''}`}>
+                      <span>{passwordValidation.hasUpperCase ? '✓' : '○'}</span> Uppercase letter (A-Z)
+                    </div>
+                    <div className={`${styles.req_item} ${passwordValidation.hasLowerCase ? styles.req_met : ''}`}>
+                      <span>{passwordValidation.hasLowerCase ? '✓' : '○'}</span> Lowercase letter (a-z)
+                    </div>
+                    <div className={`${styles.req_item} ${passwordValidation.hasNumber ? styles.req_met : ''}`}>
+                      <span>{passwordValidation.hasNumber ? '✓' : '○'}</span> Number (0-9)
+                    </div>
+                    <div className={`${styles.req_item} ${passwordValidation.hasSpecialChar ? styles.req_met : ''}`}>
+                      <span>{passwordValidation.hasSpecialChar ? '✓' : '○'}</span> Special character (!@#$%^&*)
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Terms */}
@@ -506,7 +691,8 @@ export default function Signup() {
                   <span>{success}</span>
                 </div>
               )}
-                            {/* Submit Button */}
+                            
+              {/* Submit Button */}
               <button 
                 type="submit" 
                 className={`${styles.signup_button} ${loading ? styles.loading : ''}`}
@@ -522,23 +708,6 @@ export default function Signup() {
                 {loading && <span className={styles.spinner}></span>}
               </button>
             </form>
-
-            {/* Divider */}
-            {/* <div className={styles.divider}>
-              <span>or continue with</span>
-            </div> */}
-
-            {/* Social Login */}
-            <div className={styles.social_login}>
-              {/* <button className={styles.social_btn} disabled={loading}>
-                <i className="fab fa-google"></i>
-                <span>Google</span>
-              </button>
-              <button className={styles.social_btn} disabled={loading}>
-                <i className="fab fa-github"></i>
-                <span>GitHub</span>
-              </button> */}
-            </div>
 
             {/* Footer */}
             <div className={styles.footer}>

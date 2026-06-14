@@ -584,35 +584,69 @@
 .password_strength {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: -6px;
-  margin-bottom: 6px;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: -4px;
+  margin-bottom: 8px;
+  width: 100%;
 }
 
-.strength_bars {
-  display: flex;
-  gap: 4px;
+.strength_bars_wrapper {
   flex: 1;
+  height: 6px;
+  background-color: #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
-.strength_bar {
-  height: 3px;
-  flex: 1;
-  background: #e2e8f0;
-  border-radius: 3px;
-  transition: all 0.3s ease;
-}
-
-.strength_bar.active {
-  background: linear-gradient(90deg, #10b981, #34d399);
+.strength_bars_fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.3s ease, background-color 0.3s ease;
 }
 
 .strength_label {
   font-size: 10px;
   font-weight: 600;
-  color: #94a3b8;
-  min-width: 70px;
+  color: #64748b;
+  min-width: 80px;
   text-align: right;
+  white-space: nowrap;
+}
+
+/* Password requirements list */
+.password_requirements {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px 12px;
+  padding: 8px 0;
+  font-size: 10px;
+}
+
+.req_item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #94a3b8;
+  transition: color 0.3s ease;
+  font-size: 10px;
+}
+
+.req_item span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  font-size: 10px;
+}
+
+.req_met {
+  color: #10b981;
+}
+
+.req_met span {
+  color: #10b981;
+  font-weight: bold;
 }
 
 /* Terms */
@@ -669,17 +703,6 @@
 .checkbox_wrapper input:checked + .checkmark i {
   opacity: 1;
   transform: scale(1);
-}
-
-.terms_label a {
-  color: #0A5ADB;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.3s ease;
-}
-
-.terms_label a:hover {
-  color: #58A7B5;
 }
 
 /* Messages */
@@ -744,6 +767,7 @@
   position: relative;
   overflow: hidden;
   margin-top: 6px;
+  margin-bottom: 20px;
 }
 
 .signup_button::before {
@@ -801,75 +825,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* Divider */
-.divider {
-  text-align: center;
-  margin: 16px 0;
-  position: relative;
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: calc(50% - 60px);
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
-}
-
-.divider::before { left: 0; }
-.divider::after { right: 0; }
-
-.divider span {
-  background: white;
-  padding: 0 12px;
-  font-size: 11px;
-  color: #94a3b8;
-  font-weight: 600;
-}
-
-/* Social Login */
-.social_login {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.social_btn {
-  flex: 1;
-  padding: 10px;
-  background: white;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-  color: #334155;
-}
-
-.social_btn:hover:not(:disabled) {
-  border-color: #0A5ADB;
-  background: rgba(10, 90, 219, 0.04);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  color: #0A5ADB;
-}
-
-.social_btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.social_btn i {
-  font-size: 16px;
-}
-
 /* Footer */
 .footer {
   text-align: center;
@@ -890,6 +845,43 @@
 
 .footer a:hover {
   color: #58A7B5;
+}
+
+/* ============================================
+   VALIDATION STYLES
+   ============================================ */
+
+/* Input error styling */
+.input_error {
+  border-color: #ef4444 !important;
+}
+
+.input_error:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.08) !important;
+}
+
+/* Field error message */
+.field_error {
+  position: absolute;
+  bottom: -18px;
+  left: 0;
+  font-size: 10px;
+  color: #ef4444;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Adjust input group position for error messages */
+.input_group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+/* Password strength container */
+.password_strength_container {
+  margin-top: -6px;
+  margin-bottom: 12px;
 }
 
 /* ============================================
@@ -1267,7 +1259,7 @@
     gap: 8px;
   }
 
-   .form_section {
+  .form_section {
     padding: 20px 16px;
     animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
   }
@@ -1295,13 +1287,18 @@
     font-size: 13px;
   }
 
-  .social_login {
-    gap: 8px;
+  .password_requirements {
+    grid-template-columns: 1fr;
+    gap: 4px;
   }
 
-  .social_btn {
-    padding: 10px;
-    font-size: 12px;
+  .field_error {
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .input_group {
+    margin-bottom: 22px;
   }
 
   .popup_card {
@@ -1418,7 +1415,7 @@
   }
 
   .input_group {
-    margin-bottom: 10px;
+    margin-bottom: 20px;
   }
 
   .input_group label {
@@ -1438,16 +1435,30 @@
 
   .password_strength {
     margin-top: -4px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
 
-  .strength_bar {
-    height: 2px;
+  .strength_bars_wrapper {
+    height: 5px;
   }
 
   .strength_label {
     font-size: 9px;
-    min-width: 60px;
+    min-width: 70px;
+  }
+
+  .password_requirements {
+    font-size: 9px;
+  }
+
+  .req_item {
+    font-size: 9px;
+    gap: 4px;
+  }
+
+  .field_error {
+    font-size: 9px;
+    bottom: -16px;
   }
 
   .checkbox_wrapper {
@@ -1475,29 +1486,6 @@
     padding: 12px;
     font-size: 13px;
     border-radius: 10px;
-  }
-
-  .divider {
-    margin: 14px 0;
-  }
-
-  .divider span {
-    font-size: 10px;
-  }
-
-  .social_login {
-    gap: 6px;
-    margin-bottom: 14px;
-  }
-
-  .social_btn {
-    padding: 8px;
-    font-size: 11px;
-    border-radius: 10px;
-  }
-
-  .social_btn i {
-    font-size: 14px;
   }
 
   .footer {
