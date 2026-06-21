@@ -6,7 +6,6 @@ import { registerUser, verifyEmail, resendVerificationCode } from "../../api/aut
 
 export default function Signup() {
 
-  // --- Form State ---
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -17,17 +16,14 @@ export default function Signup() {
     role: "student",
   });
 
-  // --- UI Visibility States ---
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // --- Feedback & Loading States ---
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
 
-  // --- Field Validation States ---
   const [fieldErrors, setFieldErrors] = useState({
     firstName: "",
     lastName: "",
@@ -36,7 +32,6 @@ export default function Signup() {
     confirmPassword: "",
   });
 
-  // --- Password Validation States ---
   const [passwordValidation, setPasswordValidation] = useState({
     hasMinLength: false,
     hasUpperCase: false,
@@ -45,12 +40,10 @@ export default function Signup() {
     hasSpecialChar: false,
   });
 
-  // --- Show password requirements flag ---
   const [showPasswordReqs, setShowPasswordReqs] = useState(false);
 
   const navigate = useNavigate();
 
-  // --- Verification Popup States ---
   const [showVerifyPopup, setShowVerifyPopup] = useState(false);
   const [verifyCode, setVerifyCode] = useState("");
   const [verifyLoading, setVerifyLoading] = useState(false);
@@ -59,7 +52,6 @@ export default function Signup() {
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
 
-  // --- Password Validation Function ---
   const validatePassword = (password) => {
     return {
       hasMinLength: password.length >= 6,
@@ -70,7 +62,6 @@ export default function Signup() {
     };
   };
 
-  // --- Validate Single Field ---
   const validateField = (name, value) => {
     switch (name) {
       case "firstName":
@@ -111,52 +102,43 @@ export default function Signup() {
     }
   };
 
-  // --- Input Change Handler with Validation ---
+  // Input Change Handler with Validation 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
     
-    // Clear general errors
     if (error) setError("");
     if (success) setSuccess("");
     
-    // Validate the field
     const fieldError = validateField(name, value);
     setFieldErrors(prev => ({ ...prev, [name]: fieldError }));
     
-    // Special handling for password to update validation indicators
     if (name === "password") {
       const validation = validatePassword(value);
       setPasswordValidation(validation);
       
-      // Also re-validate confirm password if it has a value
       if (formData.confirmPassword) {
         const confirmError = validateField("confirmPassword", formData.confirmPassword);
         setFieldErrors(prev => ({ ...prev, confirmPassword: confirmError }));
       }
     }
     
-    // Re-validate confirm password when password changes
     if (name === "confirmPassword") {
       const confirmError = validateField("confirmPassword", value);
       setFieldErrors(prev => ({ ...prev, confirmPassword: confirmError }));
     }
   };
 
-  // --- Handle Password Field Focus ---
   const handlePasswordFocus = () => {
     setShowPasswordReqs(true);
   };
 
-  // --- Handle Password Field Blur ---
   const handlePasswordBlur = () => {
-    // Only hide if password is empty or all requirements are met
     if (formData.password === "" || Object.values(passwordValidation).every(v => v === true)) {
       setShowPasswordReqs(false);
     }
   };
 
-  // --- Validate All Fields Before Submit ---
   const validateAllFields = () => {
     const errors = {
       firstName: validateField("firstName", formData.firstName),
@@ -168,11 +150,9 @@ export default function Signup() {
     
     setFieldErrors(errors);
     
-    // Check if any field has an error
     return !Object.values(errors).some(error => error !== "");
   };
 
-  // --- Countdown Timer Effect ---
   useEffect(() => {
     let interval;
     if (showVerifyPopup && timer > 0 && !canResend) {
@@ -189,7 +169,6 @@ export default function Signup() {
     return () => clearInterval(interval);
   }, [timer, canResend, showVerifyPopup]);
 
-  // --- Popup Control Logic ---
   const openVerifyPopup = () => {
     setShowVerifyPopup(true);
     setTimer(60);
@@ -206,7 +185,6 @@ export default function Signup() {
     setVerifySuccess("");
   };
 
-  // --- Verification Input Handler ---
   const handleVerifyChange = (e) => {
     const value = e.target.value.replace(/[^0-9]/g, "").slice(0, 6);
     setVerifyCode(value);
@@ -214,7 +192,6 @@ export default function Signup() {
     if (verifySuccess) setVerifySuccess("");
   };
 
-  // --- Email Verification Submit ---
   const handleVerifySubmit = async (e) => {
     e.preventDefault();
 
@@ -257,7 +234,6 @@ export default function Signup() {
     }
   };
 
-  // --- Resend Code Logic ---
   const handleResendVerify = async () => {
     const token = localStorage.getItem("verificationToken");
     if (!token || !canResend || verifyLoading) return;
@@ -283,13 +259,11 @@ export default function Signup() {
     }
   };
 
-  // --- Registration Submit with Validation ---
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     console.log("Selected role:", formData.role);
 
-    // First validate all fields
     if (!validateAllFields()) {
       setError("Please fix the errors above before continuing");
       return;
@@ -317,11 +291,10 @@ export default function Signup() {
 
       const res = await registerUser(payload);
 
-      if (res.verificationToken) {
-        localStorage.setItem("verificationToken", res.verificationToken);
-      }
-
       if (res.isSuccessful || res.success || res.message?.toLowerCase().includes("success")) {
+        if (res.verificationToken) {
+          localStorage.setItem("verificationToken", res.verificationToken);
+        }
         localStorage.setItem("tempEmail", formData.email);
         setSuccess("✅ Account created!");
         setTimeout(() => openVerifyPopup(), 800);
@@ -332,34 +305,41 @@ export default function Signup() {
         const token = res.verificationToken || localStorage.getItem("verificationToken");
 
         if (!token) {
-          setError("⚠️ Email exists but can't resend code. Try logging in.");
+          setError("⚠️ This email is already registered. Please login instead.");
           return;
         }
 
         localStorage.setItem("tempEmail", formData.email);
         localStorage.setItem("verificationToken", token);
-        const res = await resendVerificationCode(token);
-        setSuccess("📩 New code sent!");
-        setTimeout(() => openVerifyPopup(), 800);
+
+        try {
+          const resendRes = await resendVerificationCode(token);
+          if (resendRes?.isSuccessful || resendRes?.message?.toLowerCase().includes("sent")) {
+            setSuccess("📩 New verification code sent!");
+            setTimeout(() => openVerifyPopup(), 800);
+          } else {
+            setError("Could not resend verification code. Please try logging in.");
+          }
+        } catch (resendErr) {
+          setError("Could not resend verification code. Please try logging in.");
+        }
         return;
       }
 
-      setSuccess("✅ Account created!");
-      setTimeout(() => openVerifyPopup(), 800);
+      setError(res.message || "Registration failed");
 
     } catch (err) {
-      const errorMsg = err.message;
-      if (errorMsg.toLowerCase().includes("exist")) {
-        setError("This email is already registered");
+      const errorMsg = err.message || "Registration failed";
+      if (errorMsg.toLowerCase().includes("exist") || errorMsg.toLowerCase().includes("already")) {
+        setError("⚠️ This email is already registered. Please login instead.");
       } else {
-        setError(errorMsg || "Registration failed");
+        setError(errorMsg);
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // --- UI Render ---
   return (
     <div className={styles.signup_page}>
       {/* Background decorative elements */}
@@ -372,6 +352,18 @@ export default function Signup() {
         <div className={styles.shape_2}></div>
         <div className={styles.shape_3}></div>
       </div>
+
+      {/* Back to Home Button - Top Right Corner */}
+      <button 
+        className={styles.back_home_button}
+        onClick={() => navigate('/')}
+        aria-label="Back to Home"
+      >
+        <svg className={styles.home_icon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        </svg>
+        <span className={styles.tooltip}>Back to Home</span>
+      </button>
 
       {/* Main Container - Split Layout */}
       <div className={styles.signup_container}>
@@ -719,7 +711,7 @@ export default function Signup() {
         </div>
       </div>
 
-      {/* --- Verification Modal --- */}
+      {/* Verification Modal */}
       {showVerifyPopup && (
         <div className={styles.popup_overlay} onClick={closeVerifyPopup}>
           <div className={styles.popup_card} onClick={(e) => e.stopPropagation()}>

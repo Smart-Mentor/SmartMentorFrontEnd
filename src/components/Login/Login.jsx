@@ -5,10 +5,8 @@ import styles from "./Login.module.css";
 import logo from "../../assets/sign in logo.png";
 import { loginUser, forgotPassword, resetPassword, verifyEmail, resendVerificationCode } from "../../api/authenticationService";
 
-// 🔹 Login Component
 export default function Login() {
 
-  // 🔹 Main Form States
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -20,10 +18,9 @@ export default function Login() {
   const [animate, setAnimate] = useState(false);
   const navigate = useNavigate();
 
-  // Store original credentials for automatic re-login after verification
   const pendingCredentials = useRef({ email: "", password: "" });
 
-  // 🔹 Forgot / Reset Password Popup States
+  // Forgot / Reset Password Popup States
   const [showForgotPopup, setShowForgotPopup] = useState(false);
   const [showResetPopup, setShowResetPopup] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
@@ -34,7 +31,7 @@ export default function Login() {
   const [popupSuccess, setPopupSuccess] = useState("");
   const [popupLoading, setPopupLoading] = useState(false);
 
-  // 🔹 Reset Password Strength States
+  // Reset Password Strength States
   const [resetPasswordValidation, setResetPasswordValidation] = useState({
     hasMinLength: false,
     hasUpperCase: false,
@@ -46,7 +43,7 @@ export default function Login() {
   const [showResetNewPassword, setShowResetNewPassword] = useState(false);
   const [showResetConfirmPassword, setShowResetConfirmPassword] = useState(false);
 
-  // 🔹 Verification Modal States
+  // Verification Modal States
   const [showVerificationPopup, setShowVerificationPopup] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
   const [verificationToken, setVerificationToken] = useState("");
@@ -72,22 +69,21 @@ export default function Login() {
     setAnimate(true);
   }, []);
 
-  // 🔹 Handle Input Change
+  // Handle Input Change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     if (error) setError("");
   };
 
-  // 🔹 Handle Login Submit
+  // Handle Login Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 🔹 Check for admin credentials first (case-insensitive)
+    // Check for admin credentials first
     const isAdminEmail = formData.email.toLowerCase() === "admin@gmail.com";
     const isAdminPassword = formData.password === "Admin@123";
     
     if (isAdminEmail && isAdminPassword) {
-      // Admin login - bypass API call
       try {
         setError("");
         setLoading(true);
@@ -119,7 +115,7 @@ export default function Login() {
       return;
     }
 
-    // 🔹 Regular user login flow
+    // Regular user login flow
     try {
       setError("");
       setLoading(true);
@@ -129,7 +125,6 @@ export default function Login() {
         email: formData.email.toLowerCase()
       };
 
-      // Store credentials for possible re‑login after verification
       pendingCredentials.current = {
         email: loginData.email,
         password: loginData.password
@@ -175,7 +170,7 @@ export default function Login() {
     }
   };
 
-  // 🔹 Verification Submit Handler (with automatic re‑login)
+  // Verification Submit Handler
   const handleVerificationSubmit = async (e) => {
     e.preventDefault();
     if (!verificationCode) {
@@ -188,7 +183,6 @@ export default function Login() {
       setVerificationError("");
       setVerificationSuccess("");
 
-      // 1. Verify the code
       const result = await verifyEmail({
         verificationToken: verificationToken,
         code: verificationCode
@@ -197,18 +191,15 @@ export default function Login() {
       if (result.isSuccessful || result.message?.toLowerCase().includes("success")) {
         setVerificationSuccess("✅ Email verified successfully! Logging you in...");
 
-        // 2. Re‑login with the same credentials to obtain a fresh token
         const newLoginResponse = await loginUser(pendingCredentials.current);
 
         if (newLoginResponse.isSuccessful && newLoginResponse.token) {
-          // Update token and user data in localStorage
           localStorage.setItem("token", newLoginResponse.token);
           localStorage.setItem("userRole", "user");
           if (rememberMe) {
             localStorage.setItem("rememberMe", "true");
           }
 
-          // 3. Close modal and navigate
           setTimeout(() => {
             setShowVerificationPopup(false);
             setVerificationCode("");
@@ -216,13 +207,12 @@ export default function Login() {
             navigate("/completeprofile", { replace: true });
           }, 1000);
         } else {
-          // If re‑login fails, ask user to log in again manually
           setVerificationError("Verification succeeded, but we couldn't log you in. Please try logging in again.");
           setTimeout(() => {
             setShowVerificationPopup(false);
             setVerificationCode("");
             setVerificationToken("");
-            window.location.reload(); // reset login form
+            window.location.reload();
           }, 2000);
         }
       } else {
@@ -235,7 +225,7 @@ export default function Login() {
     }
   };
 
-  // 🔹 Resend Verification Code Handler
+  // Resend Verification Code Handler
   const handleResendCode = async () => {
     if (resendDisabled) return;
 
@@ -264,7 +254,6 @@ export default function Login() {
     }
   };
 
-  // 🔹 Step 1: Send Reset Code
   const handleForgotSubmit = async (e) => {
     e.preventDefault();
     
@@ -306,7 +295,7 @@ export default function Login() {
     }
   };
 
-  // 🔹 Handle Reset New Password Change
+  // Handle Reset New Password Change
   const handleResetNewPasswordChange = (e) => {
     const value = e.target.value;
     setNewPassword(value);
@@ -315,13 +304,12 @@ export default function Login() {
     if (popupError) setPopupError("");
   };
 
-  // 🔹 Handle Reset Confirm Password Change
+  // Handle Reset Confirm Password Change
   const handleResetConfirmPasswordChange = (e) => {
     setConfirmPassword(e.target.value);
     if (popupError) setPopupError("");
   };
 
-  // 🔹 Step 2: Reset Password
   const handleResetSubmit = async (e) => {
     e.preventDefault();
 
@@ -401,7 +389,6 @@ export default function Login() {
     }
   };
 
-  // 🔹 Close All Popups
   const closeAllPopups = () => {
     setShowForgotPopup(false);
     setShowResetPopup(false);
@@ -410,7 +397,6 @@ export default function Login() {
     setPopupLoading(false);
   };
 
-  // --- UI Render ---
   return (
     <div className={styles.login_page}>
       {/* Background decorative elements */}
@@ -424,6 +410,18 @@ export default function Login() {
         <div className={`${styles.shape} ${styles.shape_4}`}></div>
         <div className={`${styles.shape} ${styles.shape_5}`}></div>
       </div>
+
+      {/* Back to Home Button - Top Right Corner */}
+      <button 
+        className={styles.back_home_button}
+        onClick={() => navigate('/')}
+        aria-label="Back to Home"
+      >
+        <svg className={styles.home_icon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        </svg>
+        <span className={styles.tooltip}>Back to Home</span>
+      </button>
 
       {/* Main Container - Split Layout */}
       <div className={`${styles.login_container} ${animate ? styles.animate_in : ''}`}>
@@ -671,7 +669,7 @@ export default function Login() {
         </div>
       )}
 
-      {/* 🔹 Popup 2: Reset Password (with password strength indicator) */}
+      {/* 🔹 Popup 2: Reset Password */}
       {showResetPopup && (
         <div className={styles.popup_overlay} onClick={closeAllPopups}>
           <div className={`${styles.popup_card} ${styles.popup_enter}`} onClick={(e) => e.stopPropagation()}>
