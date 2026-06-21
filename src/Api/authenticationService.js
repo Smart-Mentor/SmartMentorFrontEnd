@@ -1,9 +1,7 @@
-// 🔥 Base API URL
 const API_BASE_URL = "https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api";
 
-/**
- * 🔹 Helper function to handle API responses
- */
+// Helper function to handle API responses
+
 const handleResponse = async (response) => {
   const text = await response.text();
 
@@ -30,9 +28,7 @@ const handleResponse = async (response) => {
   return data;
 };
 
-/**
- * 🔹 Get authentication token from localStorage
- */
+//  get authentication token from localStorage
 const getAuthToken = () => {
   const token =
     localStorage.getItem("authToken") ||
@@ -47,9 +43,7 @@ const getAuthToken = () => {
   return token;
 };
 
-/**
- * 🔹 Authenticated fetch helper
- */
+// Authenticated fetch helper
 const authFetch = async (endpoint, options = {}) => {
   const token = getAuthToken();
 
@@ -65,14 +59,11 @@ const authFetch = async (endpoint, options = {}) => {
   return handleResponse(response);
 };
 
-// ============================================
-// 🔹 AUTH - Authentication Endpoints
-// ============================================
 
-/**
- * 🔹 Login user
- * POST /api/Auth/login
- */
+// ================= AUTH - Authentication Endpoints =================
+
+
+// Login user
 export const loginUser = async (loginData) => {
   try {
     const response = await fetch(`${API_BASE_URL}/Auth/login`, {
@@ -96,10 +87,7 @@ export const loginUser = async (loginData) => {
   }
 };
 
-/**
- * 🔹 Register new user
- * POST /api/Auth/register
- */
+// Register new user
 export const registerUser = async (userData) => {
   try {
     const response = await fetch(`${API_BASE_URL}/Auth/register`, {
@@ -116,37 +104,7 @@ export const registerUser = async (userData) => {
   }
 };
 
-/**
- * 🔹 Google Login
- * POST /api/Auth/google
- */
-export const googleLogin = async (idToken) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/Auth/google`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ idToken }),
-    });
-
-    const data = await handleResponse(response);
-    
-    if (data.token) {
-      localStorage.setItem('authToken', data.token);
-      localStorage.setItem('userData', JSON.stringify(data.user || {}));
-    }
-    
-    return data;
-  } catch (error) {
-    throw new Error(error.message || "Network error");
-  }
-};
-
-/**
- * 🔹 Forgot Password
- * POST /api/Auth/forgot-password
- */
+// Forgot Password
 export const forgotPassword = async (email) => {
   try {
     const response = await fetch(`${API_BASE_URL}/Auth/forgot-password`, {
@@ -163,10 +121,7 @@ export const forgotPassword = async (email) => {
   }
 };
 
-/**
- * 🔹 Reset Password
- * POST /api/Auth/reset-password
- */
+// Reset Password
 export const resetPassword = async (data) => {
   try {
     const response = await fetch(`${API_BASE_URL}/Auth/reset-password`, {
@@ -183,10 +138,7 @@ export const resetPassword = async (data) => {
   }
 };
 
-/**
- * 🔹 Change Password
- * PUT /api/Auth/change-password
- */
+// Change Password
 export const changePassword = async (passwordData) => {
   try {
     return await authFetch('/Auth/change-password', {
@@ -198,27 +150,16 @@ export const changePassword = async (passwordData) => {
   }
 };
 
-/**
- * 🔹 Get Current User
- * GET /api/Auth/me
- */
+// Get Current User
 export const getCurrentUser = async () => {
   try {
     return await authFetch('/Auth/me', { method: "GET" });
   } catch (error) {
-    if (error.message === "No authentication token found" || error.message.includes("401")) {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userData');
-    }
     throw new Error(error.message || "Network error");
   }
 };
 
-/**
- * 🔹 Verify Email
- * POST /api/Auth/verify-email
- */
+// Verify Email
 export const verifyEmail = async ({ verificationToken, code }) => {
   try {
     const response = await fetch(`${API_BASE_URL}/Auth/verify-email`, {
@@ -235,10 +176,7 @@ export const verifyEmail = async ({ verificationToken, code }) => {
   }
 };
 
-/**
- * 🔹 Resend Verification Code
- * POST /api/Auth/resend-verification-code/{verificationToken}
- */
+// Resend Verification Code
 export const resendVerificationCode = async (verificationToken) => {
   try {
     const response = await fetch(
@@ -254,9 +192,7 @@ export const resendVerificationCode = async (verificationToken) => {
   }
 };
 
-/**
- * 🔹 Logout user
- */
+// Handle Logout
 export const logoutUser = () => {
   localStorage.removeItem('authToken');
   localStorage.removeItem('token');
@@ -265,13 +201,10 @@ export const logoutUser = () => {
   sessionStorage.removeItem('token');
 };
 
-// ============================================
-// 🔹 USER - User Profile Endpoints
-// ============================================
+// ======================== USER - User Profile Endpoints ========================
 
 /**
- * 🔹 Complete User Profile
- * POST /api/User/complete-profile
+ * Complete User Profile
  * Body: { skills: [{skillId, skillLevel}], interestIds: [], careerGoalId }
  */
 export const completeUserProfile = async (profileData) => {
@@ -285,9 +218,7 @@ export const completeUserProfile = async (profileData) => {
   }
 };
 
-/**
- * 🔹 Update user profile
- */
+// Update user profile
 export const updateUserProfile = async (profileData) => {
   try {
     return await authFetch('/Auth/profile', {
@@ -299,10 +230,7 @@ export const updateUserProfile = async (profileData) => {
   }
 };
 
-/**
- * 🔹 Update User Skill Level
- * PATCH /api/User/update-skill-level/{skillId}
- */
+// Update User Skill Level
 export const updateUserSkillLevel = async (skillId) => {
   try {
     return await authFetch(`/User/update-skill-level/${skillId}`, {
@@ -313,10 +241,7 @@ export const updateUserSkillLevel = async (skillId) => {
   }
 };
 
-/**
- * 🔹 Get user profile data (skills, interests, career goal)
- * This endpoint returns the user's detailed profile including their selected skills, interests, and career goal.
- */
+// Get user profile data (skills, interests, career goal)
 export const getUserProfile = async () => {
   try {
     return await authFetch('/User/profile', { method: "GET" });
@@ -325,10 +250,7 @@ export const getUserProfile = async () => {
   }
 };
 
-/**
- * 🔹 Get gap analysis for the user
- * Analyzes the gap between user's current skills and their career goal requirements
- */
+// Get gap analysis
 export const getGapAnalysis = async () => {
   try {
     return await authFetch('/GapAnalysis/gap-analysis', { method: "GET" });
@@ -337,25 +259,7 @@ export const getGapAnalysis = async () => {
   }
 };
 
-/**
- * 🔹 Update user profile (skills, interests, career goal)
- * This endpoint updates the user's detailed profile including their skills, interests, and career goal.
- * 
- * @param {Object} profileData - The profile data to update
- * @param {Array} profileData.skills - Array of skill objects with skillId and skillLevel
- * @param {Array} profileData.interestIds - Array of interest IDs
- * @param {number} profileData.careerGoalId - The career goal ID
- * 
- * @example
- * updateUserProfileData({
- *   skills: [
- *     { skillId: 1, skillLevel: 80 },
- *     { skillId: 2, skillLevel: 65 }
- *   ],
- *   interestIds: [1, 2, 3],
- *   careerGoalId: 5
- * })
- */
+// Update user profile (skills, interests, career goal)
 export const updateUserProfileData = async (profileData) => {
   try {
     return await authFetch('/User/update-profile', {
@@ -367,14 +271,9 @@ export const updateUserProfileData = async (profileData) => {
   }
 };
 
-// ============================================
-// 🔹 SKILL - Skills Endpoints
-// ============================================
+// ================== SKILL - Skills Endpoints ==================
 
-/**
- * 🔹 Get All Skills
- * GET /api/Skill/GetAllSkills
- */
+// Get All Skills
 export const getAllSkills = async () => {
   try {
     return await authFetch('/Skill/GetAllSkills', { method: "GET" });
@@ -383,10 +282,7 @@ export const getAllSkills = async () => {
   }
 };
 
-/**
- * 🔹 Get Skill By ID
- * GET /api/Skill/GetSkillById/{id}
- */
+// Get Skill By ID
 export const getSkillById = async (skillId) => {
   try {
     return await authFetch(`/Skill/GetSkillById/${skillId}`, { method: "GET" });
@@ -395,14 +291,9 @@ export const getSkillById = async (skillId) => {
   }
 };
 
-// ============================================
-// 🔹 INTEREST - Interests Endpoints
-// ============================================
+// ================== INTEREST - Interests Endpoints ==================
 
-/**
- * 🔹 Get All Interests
- * GET /api/Interest/GetAllInterests
- */
+// Get All Interests
 export const getAllInterests = async () => {
   try {
     return await authFetch('/Interest/GetAllInterests', { method: "GET" });
@@ -411,10 +302,7 @@ export const getAllInterests = async () => {
   }
 };
 
-/**
- * 🔹 Get Interest By ID
- * GET /api/Interest/GetInterestById/{id}
- */
+// Get Interest By ID
 export const getInterestById = async (interestId) => {
   try {
     return await authFetch(`/Interest/GetInterestById/${interestId}`, { method: "GET" });
@@ -423,14 +311,9 @@ export const getInterestById = async (interestId) => {
   }
 };
 
-// ============================================
-// 🔹 CAREER GOAL - Career Goals Endpoints
-// ============================================
+// ================== CAREER GOAL - Career Goals Endpoints ==================
 
-/**
- * 🔹 Get All Career Goals
- * GET /api/CareerGoal/GetAllCareerGoals
- */
+// Get All Career Goals
 export const getAllCareerGoals = async () => {
   try {
     return await authFetch('/CareerGoal/GetAllCareerGoals', { method: "GET" });
@@ -439,10 +322,7 @@ export const getAllCareerGoals = async () => {
   }
 };
 
-/**
- * 🔹 Get Career Goal By ID
- * GET /api/CareerGoal/GetCareerGoalById/{id}
- */
+// Get Career Goal By ID
 export const getCareerGoalById = async (careerGoalId) => {
   try {
     return await authFetch(`/CareerGoal/GetCareerGoalById/${careerGoalId}`, { method: "GET" });
@@ -451,149 +331,288 @@ export const getCareerGoalById = async (careerGoalId) => {
   }
 };
 
-/**
- * 🔹 Upload CV
- * POST /api/User/upload-cv
- */
-export const uploadCV = async (formData) => {
+// ================== COMMUNITY - Community Endpoints ==================
+
+// Get all community posts
+export const getCommunityPosts = async () => {
   try {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/User/upload-cv`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
-    return await handleResponse(response);
+    return await authFetch('/Community/posts', { method: "GET" });
   } catch (error) {
-    throw new Error(error.message || "Failed to upload CV");
+    throw new Error(error.message || "Failed to fetch community posts");
   }
 };
 
-// Fetch posts for a specific career goal
+// Get posts by career goal ID
 export const getCommunityPostsByCareerGoal = async (careerGoalId) => {
   try {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/community/career-goals/${careerGoalId}/posts`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    return data;
+    return await authFetch(`/Community/career-goals/${careerGoalId}/posts`, { method: "GET" });
   } catch (error) {
-    console.error('Error fetching community posts:', error);
-    throw error;
+    throw new Error(error.message || "Failed to fetch posts for this career goal");
   }
 };
 
-// ============================================
-// 🔹 COMMUNITY - Community Endpoints
-// ============================================
-
-/**
- * 🔹 Get Posts by Career Goal
- * GET /api/Community/career-goals/{careerGoalId}/posts
- */
-export const getPostsByCareerGoal = async (careerGoalId) => {
-  try {
-    return await authFetch(
-      `/Community/career-goals/${careerGoalId}/posts`,
-      { method: "GET" }
-    );
-  } catch (error) {
-    console.error("Failed to fetch posts:", error);
-    return [];
-  }
-};
-
-/**
- * 🔹 Get Single Post
- * GET /api/Community/posts/{postId}
- */
+// Get a single post by ID
 export const getPostById = async (postId) => {
   try {
-    return await authFetch(
-      `/Community/posts/${postId}`,
-      { method: "GET" }
-    );
+    return await authFetch(`/Community/posts/${postId}`, { method: "GET" });
   } catch (error) {
-    console.error("Failed to fetch post:", error);
-    throw error;
+    throw new Error(error.message || "Failed to fetch post details");
   }
 };
 
-/**
- * 🔹 Create New Post
- * POST /api/Community/posts
- */
-export const createPost = async (postData) => {
+// Create a new post
+export const createCommunityPost = async (postData) => {
   try {
     return await authFetch('/Community/posts', {
       method: "POST",
       body: JSON.stringify(postData),
     });
   } catch (error) {
-    console.error("Failed to create post:", error);
-    throw error;
+    throw new Error(error.message || "Failed to create post");
   }
 };
 
-/**
- * 🔹 Add Comment
- * POST /api/Community/posts/{postId}/comments
- */
-export const addComment = async (postId, content) => {
+// Delete a post by ID
+export const deleteCommunityPost = async (postId) => {
   try {
-    return await authFetch(
-      `/Community/posts/${postId}/comments`,
-      {
-        method: "POST",
-        body: JSON.stringify({ content }),
-      }
-    );
+    return await authFetch(`/Community/posts/${postId}`, { method: "DELETE" });
   } catch (error) {
-    console.error("Failed to add comment:", error);
-    throw error;
+    throw new Error(error.message || "Failed to delete post");
   }
 };
 
-/**
- * 🔹 Like Post
- * POST /api/Community/posts/{postId}/like
- */
+// Add a comment to a post
+export const addCommentToPost = async (postId, content) => {
+  try {
+    return await authFetch(`/Community/posts/${postId}/comments`, {
+      method: "POST",
+      body: JSON.stringify({ content }),
+    });
+  } catch (error) {
+    throw new Error(error.message || "Failed to add comment");
+  }
+};
+
+// Like a post
 export const likePost = async (postId) => {
   try {
-    return await authFetch(
-      `/Community/posts/${postId}/like`,
-      { method: "POST" }
-    );
+    return await authFetch(`/Community/posts/${postId}/like`, { method: "POST" });
   } catch (error) {
-    console.error("Failed to like post:", error);
-    throw error;
+    throw new Error(error.message || "Failed to like post");
   }
 };
 
-/**
- * 🔹 Unlike Post
- * DELETE /api/Community/posts/{postId}/like
- */
+// Unlike a post
 export const unlikePost = async (postId) => {
   try {
-    return await authFetch(
-      `/Community/posts/${postId}/like`,
-      { method: "DELETE" }
-    );
+    return await authFetch(`/Community/posts/${postId}/like`, { method: "DELETE" });
   } catch (error) {
-    console.error("Failed to unlike post:", error);
-    throw error;
+    throw new Error(error.message || "Failed to unlike post");
+  }
+};
+
+// ================== ADMIN - Admin Endpoints ==================
+
+// Get all user profile summaries
+export const adminGetUserProfileSummaries = async () => {
+  try {
+    return await authFetch('/Admin/users/profile-summaries', { method: "GET" });
+  } catch (error) {
+    throw new Error(error.message || "Failed to fetch user profiles");
+  }
+};
+
+// Delete a user by ID
+export const adminDeleteUser = async (userId) => {
+  try {
+    return await authFetch(`/Admin/users/${userId}`, { method: "DELETE" });
+  } catch (error) {
+    throw new Error(error.message || "Failed to delete user");
+  }
+};
+
+// Get user roles
+export const adminGetUserRoles = async (userId) => {
+  try {
+    return await authFetch(`/Admin/users/${userId}/roles`, { method: "GET" });
+  } catch (error) {
+    throw new Error(error.message || "Failed to fetch user roles");
+  }
+};
+
+// Assign role to user
+export const adminAssignRole = async (userId, roleName) => {
+  try {
+    return await authFetch('/Admin/users/assign-role', {
+      method: "POST",
+      body: JSON.stringify({ userId, roleName }),
+    });
+  } catch (error) {
+    throw new Error(error.message || "Failed to assign role");
+  }
+};
+
+// Remove role from user
+export const adminRemoveRole = async (userId, roleName) => {
+  try {
+    return await authFetch('/Admin/users/remove-role', {
+      method: "POST",
+      body: JSON.stringify({ userId, roleName }),
+    });
+  } catch (error) {
+    throw new Error(error.message || "Failed to remove role");
+  }
+};
+
+// Get all skills
+export const adminGetSkills = async () => {
+  try {
+    return await authFetch('/Admin/skills', { method: "GET" });
+  } catch (error) {
+    throw new Error(error.message || "Failed to fetch skills");
+  }
+};
+
+// Create a new skill
+export const adminCreateSkill = async (skillData) => {
+  try {
+    return await authFetch('/Admin/skills', {
+      method: "POST",
+      body: JSON.stringify(skillData),
+    });
+  } catch (error) {
+    throw new Error(error.message || "Failed to create skill");
+  }
+};
+
+// Update an existing skill
+export const adminUpdateSkill = async (skillId, skillData) => {
+  try {
+    return await authFetch(`/Admin/skills/${skillId}`, {
+      method: "PUT",
+      body: JSON.stringify(skillData),
+    });
+  } catch (error) {
+    throw new Error(error.message || "Failed to update skill");
+  }
+};
+
+// Delete a skill
+export const adminDeleteSkill = async (skillId) => {
+  try {
+    return await authFetch(`/Admin/skills/${skillId}`, { method: "DELETE" });
+  } catch (error) {
+    throw new Error(error.message || "Failed to delete skill");
+  }
+};
+
+// Get all interests
+export const adminGetInterests = async () => {
+  try {
+    return await authFetch('/Admin/interests', { method: "GET" });
+  } catch (error) {
+    throw new Error(error.message || "Failed to fetch interests");
+  }
+};
+
+// Create a new interest
+export const adminCreateInterest = async (interestData) => {
+  try {
+    return await authFetch('/Admin/interests', {
+      method: "POST",
+      body: JSON.stringify(interestData),
+    });
+  } catch (error) {
+    throw new Error(error.message || "Failed to create interest");
+  }
+};
+
+// Get all career goals
+export const adminGetCareerGoals = async () => {
+  try {
+    return await authFetch('/Admin/careergoals', { method: "GET" });
+  } catch (error) {
+    throw new Error(error.message || "Failed to fetch career goals");
+  }
+};
+
+// Create a new career goal
+export const adminCreateCareerGoal = async (goalData) => {
+  try {
+    return await authFetch('/Admin/careergoal', {
+      method: "POST",
+      body: JSON.stringify(goalData),
+    });
+  } catch (error) {
+    throw new Error(error.message || "Failed to create career goal");
+  }
+};
+
+// Delete a career goal
+export const adminDeleteCareerGoal = async (careerGoalId) => {
+  try {
+    return await authFetch(`/Admin/career-goals/${careerGoalId}`, { method: "DELETE" });
+  } catch (error) {
+    throw new Error(error.message || "Failed to delete career goal");
+  }
+};
+
+// Remove a skill from a career goal
+export const adminRemoveSkillFromGoal = async (careerGoalId, skillId) => {
+  try {
+    return await authFetch(`/Admin/career-goals/${careerGoalId}/skills/${skillId}`, {
+      method: "DELETE",
+    });
+  } catch (error) {
+    throw new Error(error.message || "Failed to remove skill from career goal");
+  }
+};
+
+// Get all master data (skills, interests, career goals)
+export const adminGetMasterData = async () => {
+  try {
+    return await authFetch('/Admin/MasterData', { method: "GET" });
+  } catch (error) {
+    throw new Error(error.message || "Failed to fetch master data");
+  }
+};
+
+// Assign a skill to a career goal
+export const adminAssignSkillToGoal = async (assignmentData) => {
+  try {
+    return await authFetch('/Admin/career-goals/assign-skill', {
+      method: "POST",
+      body: JSON.stringify(assignmentData),
+    });
+  } catch (error) {
+    throw new Error(error.message || "Failed to assign skill to career goal");
+  }
+};
+
+// Get analytics overview
+export const adminGetAnalyticsOverview = async () => {
+  try {
+    return await authFetch('/Admin/analytics/overview', { method: "GET" });
+  } catch (error) {
+    throw new Error(error.message || "Failed to fetch analytics overview");
+  }
+};
+
+// Get user growth analytics
+export const adminGetUserGrowth = async (params) => {
+  try {
+    const { groupBy, startDate, endDate } = params || {};
+    let endpoint = `/Admin/analytics/user-growth?groupBy=${groupBy || 'week'}`;
+    
+    if (startDate) {
+      endpoint += `&startDate=${startDate}`;
+    }
+    if (endDate) {
+      endpoint += `&endDate=${endDate}`;
+    }
+    
+    return await authFetch(endpoint, { method: "GET" });
+  } catch (error) {
+    throw new Error(error.message || "Failed to fetch user growth data");
   }
 };

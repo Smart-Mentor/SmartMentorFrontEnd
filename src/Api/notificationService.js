@@ -1,11 +1,7 @@
-// services/notificationService.js
-
 const API_BASE_URL = 'https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api';
 
-// Get auth token from localStorage
 const getAuthToken = () => localStorage.getItem('authToken');
 
-// Get current user ID
 export const getCurrentUserId = () => {
   const userInfo = localStorage.getItem('userInfo');
   if (userInfo) {
@@ -19,12 +15,11 @@ export const getCurrentUserId = () => {
   return null;
 };
 
-// Fetch all career goals (IDs: 1-9, 11, 18, 19, 26-35)
 const getAllCareerGoalIds = () => {
   return [
-    ...Array.from({ length: 9 }, (_, i) => i + 1), // 1 to 9
+    ...Array.from({ length: 9 }, (_, i) => i + 1),
     11, 18, 19,
-    ...Array.from({ length: 10 }, (_, i) => i + 26) // 26 to 35
+    ...Array.from({ length: 10 }, (_, i) => i + 26)
   ];
 };
 
@@ -117,7 +112,6 @@ export const fetchUserInfo = async () => {
 
     if (response.ok) {
       const data = await response.json();
-      // Store user info in localStorage
       localStorage.setItem('userInfo', JSON.stringify(data));
       localStorage.setItem('userFirstName', data.firstName || '');
       localStorage.setItem('userLastName', data.lastName || '');
@@ -131,7 +125,6 @@ export const fetchUserInfo = async () => {
   }
 };
 
-// Get current user info from localStorage or API
 export const getCurrentUserInfo = async () => {
   const storedInfo = localStorage.getItem('userInfo');
   if (storedInfo) {
