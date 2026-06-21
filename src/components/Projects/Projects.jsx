@@ -43,7 +43,7 @@ const Projects = () => {
     localStorage.setItem("savedProjects", JSON.stringify(savedProjects));
   }, [savedProjects]);
 
-  // Complete career paths with their specific colors
+  // Complete career paths
   const careerGoals = [
     {
       id: "frontend",
@@ -395,7 +395,7 @@ const Projects = () => {
       "ASEprite": "🎨"
     };
 
-    // Handle partial matches for technologies with versions or variations
+    // Handle partial matches for technologies
     const exactMatch = icons[tech];
     if (exactMatch) return exactMatch;
 
@@ -407,7 +407,6 @@ const Projects = () => {
     if (tech.includes("Storybook")) return "📖";
     if (tech.includes("Chromatic")) return "🎨";
 
-    // Default icon
     return "💻";
   };
 
@@ -546,7 +545,7 @@ const Projects = () => {
           </div>
         </div>
 
-        {/* Level Steps - Mobile Friendly */}
+        {/* Level Steps */}
         <div className={`${styles.level_section} ${animate ? styles.slide_up : ""}`}>
           <div className={styles.level_container}>
             {levelSteps.map((level) => {

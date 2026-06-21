@@ -199,7 +199,7 @@ const ProjectDetails = () => {
           </div>
         </div>
 
-        {/* Video Tutorial Banner - Only show if video exists */}
+        {/* Video Tutorial Banner */}
         {project.videoTutorial && (
           <div className={styles.video_banner} onClick={() => setShowVideoModal(true)}>
             <div className={styles.video_banner_content}>
@@ -303,7 +303,7 @@ const ProjectDetails = () => {
                 </div>
               </div>
 
-              {/* Tips & Common Mistakes - Only show if either exists */}
+              {/* Tips & Common Mistakes */}
               {hasTipsOrMistakes && (
                 <div className={styles.tips_mistakes_grid}>
                   {project.tips && project.tips.length > 0 && (
@@ -335,12 +335,12 @@ const ProjectDetails = () => {
                 </div>
               )}
 
-              {/* Links Card - Only show if there are any links */}
+              {/* Links Card */}
               {hasAnyLinks && (
                 <div className={styles.links_card}>
                   <h3 className={styles.section_title}>🔗 Project Links</h3>
                   <div className={styles.links_grid}>
-                    {/* YouTube Button - RED */}
+                    {/* YouTube Button */}
                     {project.videoTutorial && (
                       <button 
                         onClick={() => setShowVideoModal(true)} 
@@ -350,7 +350,7 @@ const ProjectDetails = () => {
                         <PlayCircleIcon className={styles.link_icon} />
                       </button>
                     )}
-                    {/* Demo Button - BLUE/TEAL */}
+                    {/* Demo Button  */}
                     {project.liveDemo && (
                       <a 
                         href={project.liveDemo} 
@@ -428,7 +428,7 @@ const ProjectDetails = () => {
           {/* Resources Tab */}
           {activeTab === "resources" && (
             <div className={styles.resources_tab}>
-              {/* Learning Resources - Only show if there are resources */}
+              {/* Learning Resources */}
               {hasResources && (
                 <div className={styles.section_card}>
                   <h3 className={styles.section_title}>
@@ -457,7 +457,7 @@ const ProjectDetails = () => {
                 </div>
               )}
 
-              {/* Get Started Card - Only show if there are any actions */}
+              {/* Get Started Card */}
               {(project.videoTutorial || project.liveDemo) && (
                 <div className={styles.get_started_card}>
                   <h3>🎯 Ready to Start?</h3>
@@ -466,7 +466,7 @@ const ProjectDetails = () => {
                     Don't forget to practice along with the video.
                   </p>
                   <div className={styles.get_started_buttons}>
-                    {/* YouTube Button - RED */}
+                    {/* YouTube Button */}
                     {project.videoTutorial && (
                       <button 
                         onClick={() => setShowVideoModal(true)} 
@@ -475,7 +475,7 @@ const ProjectDetails = () => {
                         <YouTubeIcon /> Watch Full Tutorial
                       </button>
                     )}
-                    {/* Demo Button - BLUE/TEAL */}
+                    {/* Demo Button */}
                     {project.liveDemo && (
                       <a 
                         href={project.liveDemo} 

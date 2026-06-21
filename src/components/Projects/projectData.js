@@ -1,4 +1,3 @@
-// projectData.js
 export const projectsDatabase = {
   // Frontend Projects
   "fe-101": {

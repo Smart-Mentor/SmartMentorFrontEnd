@@ -6,7 +6,7 @@
   overflow-x: hidden;
 }
 
-/* Background Blurs - Brand colors */
+/* Background Blurs*/
 .bg_blur_1 {
   position: fixed;
   top: -100px;
@@ -188,7 +188,7 @@
   transform: translateY(-1px);
 }
 
-/* Video Banner - YouTube Theme */
+/* Video Banner */
 .video_banner {
   background: linear-gradient(135deg, rgba(255, 0, 0, 0.08), rgba(255, 0, 0, 0.03));
   border: 1px solid rgba(255, 0, 0, 0.25);
@@ -523,7 +523,7 @@
   flex-wrap: wrap;
 }
 
-/* YouTube Link Button - RED */
+/* YouTube Link Button */
 .youtube_link_btn {
   display: inline-flex;
   align-items: center;
@@ -551,7 +551,7 @@
   transform: translateY(0);
 }
 
-/* Demo Link Button - BLUE/TEAL */
+/* Demo Link Button */
 .demo_link_btn {
   display: inline-flex;
   align-items: center;
@@ -833,7 +833,7 @@
   z-index: 1;
 }
 
-/* Get Started YouTube Button - RED */
+/* Get Started YouTube Button */
 .get_started_youtube_btn {
   display: inline-flex;
   align-items: center;
@@ -860,7 +860,7 @@
   transform: translateY(0);
 }
 
-/* Get Started Demo Button - BLUE/TEAL */
+/* Get Started Demo Button */
 .get_started_demo_btn {
   display: inline-flex;
   align-items: center;
@@ -1254,9 +1254,7 @@
   display: none;
 }
 
-/* Keep ALL your existing CSS exactly as is, but REPLACE these media queries at the bottom */
-
-/* Responsive Design - Modified for stats grid only */
+/* Responsive Design */
 @media (max-width: 1024px) {
   .details_content {
     padding: 24px 20px;
@@ -1373,7 +1371,7 @@
   }
 }
 
-/* Stats Grid - Modified for tablet (600px - 1024px) */
+/* Stats Grid */
 @media (min-width: 600px) and (max-width: 1024px) {
   .stats_grid {
     grid-template-columns: repeat(2, 1fr);
@@ -1389,7 +1387,7 @@
   }
 }
 
-/* Desktop stats grid (keeps original) */
+/* Desktop stats grid */
 @media (min-width: 1025px) {
   .stats_grid {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -1397,7 +1395,6 @@
   }
 }
 
-/* Keep the rest of your existing media queries exactly as they are */
 @media (max-width: 640px) {
   .features_grid {
     grid-template-columns: 1fr;
@@ -1446,5 +1443,3 @@
     font-size: 13px;
   }
 }
-
-/* Keep all your other styles (Loading State, Print Styles, No Resources Message, etc.) exactly as they are */

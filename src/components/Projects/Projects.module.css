@@ -1264,7 +1264,6 @@
   color: #4f46e5;
 }
 
-/* Touch Device Optimizations */
 @media (hover: none) and (pointer: coarse) {
   .career_card:hover,
   .project_card:hover {
