@@ -9,6 +9,7 @@ import TodayIcon from "@mui/icons-material/Today";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import FlagIcon from "@mui/icons-material/Flag";
 import { CAREER_STUDY_PLANS, getCareerData, getCurrentWeekTasks, getTotalWeeks } from "./careerData";
+import { getGapAnalysis } from "../../Api/authenticationService";
 import styles from "./StudyPlanner.module.css";
 
 const StudyPlanner = () => {
@@ -25,12 +26,7 @@ const StudyPlanner = () => {
   const [totalWeeks, setTotalWeeksState] = useState(0);
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Order of days
   const WEEK_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-
-  // API configuration
-  const API_URL = "https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/gapanalysis/gap-analysis";
-  const token = localStorage.getItem("authToken");
 
   useEffect(() => {
     setAnimate(true);
@@ -46,21 +42,14 @@ const StudyPlanner = () => {
       setLoading(true);
       setError(null);
       
-      console.log("Fetching gap analysis from:", API_URL);
+      console.log("Fetching gap analysis from API...");
       
-      const response = await fetch(API_URL, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("No authentication token found. Please login again.");
       }
 
-      const data = await response.json();
+      const data = await getGapAnalysis();
       console.log("Gap analysis data received:", data);
       
       let careerFromAPI = data.careerGoalName || data.careerGoal || data.targetCareer;
@@ -90,7 +79,7 @@ const StudyPlanner = () => {
       
     } catch (err) {
       console.error("Error fetching gap analysis data:", err);
-      setError(err.message);
+      setError(err.message || "Failed to load study plan. Using default career.");
       
       const defaultCareer = "Software Engineer";
       setCareerGoal(defaultCareer);
@@ -594,7 +583,7 @@ const StudyPlanner = () => {
           </div>
         )}
 
-        {/* Weekly Schedule Section - All 7 Days */}
+        {/* Weekly Schedule Section */}
         <div className={`${styles.schedule_section} ${animate ? styles.slide_up : ""}`}>
           <div className={styles.section_header}>
             <div className={styles.section_title_wrapper}>
@@ -643,7 +632,7 @@ const StudyPlanner = () => {
                     </div>
                   </div>
 
-                  {/* Day Tasks with smooth transition wrapper */}
+                  {/* Day Tasks */}
                   <div className={`${styles.day_tasks} ${expandedDays[day.day] ? styles.expanded : ""}`}>
                     <div>
                       {day.tasks.length > 0 ? (

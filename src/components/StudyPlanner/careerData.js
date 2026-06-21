@@ -1,9 +1,5 @@
-// careerData.js - Static career data with weekly study plans for all careers
-// All days (Monday - Sunday) have proper tasks
-// Extended to 4-5 weeks per career for month-long planning
-
 export const CAREER_STUDY_PLANS = {
-  // ==================== JUNIOR BACKEND .NET DEVELOPER ====================
+
   "Junior Backend .NET Developer": {
     title: "Junior Backend .NET Developer",
     description: "Build and maintain RESTful APIs using ASP.NET Core and SQL Server.",
@@ -203,7 +199,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== FULL-STACK .NET DEVELOPER ====================
   "Full-Stack .NET Developer": {
     title: "Full-Stack .NET Developer",
     description: "Develop complete web applications using ASP.NET Core and React.js.",
@@ -403,7 +398,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== FRONTEND REACT DEVELOPER ====================
   "Frontend React Developer": {
     title: "Frontend React Developer",
     description: "Create responsive and interactive user interfaces using React and modern JavaScript.",
@@ -603,7 +597,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== DATA ANALYST ====================
   "Data Analyst": {
     title: "Data Analyst",
     description: "Analyze datasets, generate insights, and build dashboards using Python and SQL.",
@@ -756,7 +749,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== MACHINE LEARNING ENGINEER ====================
   "Machine Learning Engineer": {
     title: "Machine Learning Engineer",
     description: "Develop predictive models and AI solutions using Python and ML frameworks.",
@@ -909,7 +901,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== CLOUD ENGINEER (AZURE) ====================
   "Cloud Engineer (Azure)": {
     title: "Cloud Engineer (Azure)",
     description: "Design and deploy scalable applications on Microsoft Azure.",
@@ -1062,7 +1053,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== DEVOPS ENGINEER ====================
   "DevOps Engineer": {
     title: "DevOps Engineer",
     description: "Automate deployments and manage CI/CD pipelines using Docker and cloud tools.",
@@ -1262,7 +1252,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== CYBERSECURITY ANALYST ====================
   "Cybersecurity Analyst": {
     title: "Cybersecurity Analyst",
     description: "Secure applications and infrastructure by applying modern security practices.",
@@ -1415,7 +1404,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== SENIOR BACKEND .NET DEVELOPER ====================
   "Senior Backend .NET Developer": {
     title: "Senior Backend .NET Developer",
     description: "Lead backend architecture, mentor juniors, and design scalable distributed systems.",
@@ -1568,7 +1556,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== SOFTWARE ARCHITECT ====================
   "Software Architect": {
     title: "Software Architect",
     description: "Design high-level system architecture and make strategic technology decisions.",
@@ -1721,7 +1708,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== MOBILE DEVELOPER (REACT NATIVE) ====================
   "Mobile Developer (React Native)": {
     title: "Mobile Developer (React Native)",
     description: "Build cross-platform mobile apps using React Native and modern JavaScript.",
@@ -1874,7 +1860,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== QA AUTOMATION ENGINEER ====================
   "QA Automation Engineer": {
     title: "QA Automation Engineer",
     description: "Write automated tests and build CI/CD testing pipelines for quality assurance.",
@@ -2027,7 +2012,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== SITE RELIABILITY ENGINEER ====================
   "Site Reliability Engineer": {
     title: "Site Reliability Engineer",
     description: "Ensure system reliability, observability, and incident response at scale.",
@@ -2180,7 +2164,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== DATABASE DEVELOPER ====================
   "Database Developer": {
     title: "Database Developer",
     description: "Design optimized database schemas, stored procedures, and performance tuning.",
@@ -2333,7 +2316,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== TECHNICAL PRODUCT MANAGER ====================
   "Technical Product Manager": {
     title: "Technical Product Manager",
     description: "Bridge engineering and business to deliver impactful technical products.",
@@ -2485,7 +2467,7 @@ export const CAREER_STUDY_PLANS = {
       }
     }
   },
-  // ==================== BLOCKCHAIN DEVELOPER ====================
+
   "Blockchain Developer": {
     title: "Blockchain Developer",
     description: "Build decentralized applications and smart contracts on blockchain platforms.",
@@ -2638,7 +2620,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== EMBEDDED SYSTEMS ENGINEER ====================
   "Embedded Systems Engineer": {
     title: "Embedded Systems Engineer",
     description: "Develop firmware and software for microcontrollers and IoT devices.",
@@ -2791,7 +2772,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== SECURITY ARCHITECT ====================
   "Security Architect": {
     title: "Security Architect",
     description: "Design enterprise security frameworks and threat mitigation strategies.",
@@ -2944,7 +2924,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== PLATFORM ENGINEER ====================
   "Platform Engineer": {
     title: "Platform Engineer",
     description: "Build internal developer platforms and tooling to improve engineering velocity.",
@@ -3097,7 +3076,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== DATA ENGINEER ====================
   "Data Engineer": {
     title: "Data Engineer",
     description: "Build and maintain ETL pipelines, data warehouses, and data infrastructure.",
@@ -3250,7 +3228,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== AI/ML ARCHITECT ====================
   "AI/ML Architect": {
     title: "AI/ML Architect",
     description: "Design end-to-end machine learning systems and MLOps pipelines.",
@@ -3403,7 +3380,6 @@ export const CAREER_STUDY_PLANS = {
     }
   },
 
-  // ==================== FULL-STACK TYPESCRIPT DEVELOPER ====================
   "Full-Stack TypeScript Developer": {
     title: "Full-Stack TypeScript Developer",
     description: "Build type-safe full-stack applications with TypeScript, Node.js, and React.",

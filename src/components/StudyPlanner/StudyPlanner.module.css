@@ -1,4 +1,4 @@
-/* ==================== CONTAINER ==================== */
+/* CONTAINER */
 .study_planner_container {
   min-height: 100vh;
   background: linear-gradient(135deg, #eff6fe 0%, #e8f0fa 100%);
@@ -6,7 +6,7 @@
   overflow-x: hidden;
 }
 
-/* ==================== BACKGROUND BLURS ==================== */
+/* BACKGROUND BLURS */
 .bg_blur_1 {
   position: fixed;
   top: -100px;
@@ -55,7 +55,7 @@
   }
 }
 
-/* ==================== CONTENT ==================== */
+/* CONTENT */
 .study_planner_content {
   padding: 24px;
   max-width: 1400px;
@@ -64,7 +64,7 @@
   z-index: 1;
 }
 
-/* ==================== ANIMATIONS ==================== */
+/* ANIMATIONS */
 @keyframes fadeInUp {
   to {
     opacity: 1;
@@ -108,7 +108,7 @@
   animation: slideUp 0.5s ease-out forwards;
 }
 
-/* ==================== HEADER SECTION ==================== */
+/* HEADER SECTION */
 .header_section {
   display: flex;
   justify-content: space-between;
@@ -168,7 +168,7 @@
   flex-wrap: wrap;
 }
 
-/* ==================== WEEK BADGE ==================== */
+/* WEEK BADGE */
 .week_badge {
   display: flex;
   align-items: center;
@@ -186,7 +186,6 @@
   font-size: 16px;
 }
 
-/* ==================== WEEK RANGE ==================== */
 .week_range {
   font-size: 12px;
   color: #0A5ADB;
@@ -196,7 +195,6 @@
   margin-left: 8px;
 }
 
-/* ==================== WEEK NAVIGATION ==================== */
 .week_navigation {
   display: flex;
   gap: 8px;
@@ -241,7 +239,7 @@
   transform: translateY(-1px);
 }
 
-/* ==================== CAREER INFO CARD ==================== */
+/* CAREER INFO CARD */
 .career_info_card {
   border-radius: 20px;
   padding: 24px;
@@ -315,7 +313,7 @@
   border-radius: 20px;
 }
 
-/* ==================== WEEKLY FOCUS CARD ==================== */
+/* WEEKLY FOCUS CARD */
 .weekly_focus_card {
   background: white;
   border-radius: 16px;
@@ -343,7 +341,7 @@
   color: #0A5ADB;
 }
 
-/* ==================== PROGRESS CARD ==================== */
+/* PROGRESS CARD */
 .progress_card {
   background: white;
   border-radius: 24px;
@@ -452,7 +450,7 @@
   display: inline-block;
 }
 
-/* ==================== SECTION HEADER ==================== */
+/* SECTION HEADER */
 .section_header {
   display: flex;
   justify-content: space-between;
@@ -495,7 +493,7 @@
   color: #0A5ADB;
 }
 
-/* ==================== TODAY'S FOCUS SECTION ==================== */
+/* TODAY'S FOCUS SECTION */
 .today_section {
   background: white;
   border-radius: 24px;
@@ -537,7 +535,7 @@
   background: #f0fdf4;
 }
 
-/* ==================== CHECKBOX ==================== */
+/* CHECKBOX */
 .task_checkbox {
   position: relative;
 }
@@ -566,7 +564,7 @@
   border-color: #10b981;
 }
 
-/* ==================== TASK CONTENT ==================== */
+/* TASK CONTENT */
 .task_content {
   flex: 1;
 }
@@ -647,7 +645,7 @@
   font-size: 10px;
 }
 
-/* ==================== WEEKLY SCHEDULE SECTION ==================== */
+/* WEEKLY SCHEDULE SECTION */
 .schedule_section {
   background: white;
   border-radius: 24px;
@@ -670,7 +668,7 @@
   align-items: start;
 }
 
-/* ==================== DAY CARD ==================== */
+/* DAY CARD */
 .day_card {
   background: #f9f9f9;
   border-radius: 20px;
@@ -746,7 +744,7 @@
   border-radius: 12px;
 }
 
-/* ==================== DAY HEADER ==================== */
+/* DAY HEADER */
 .day_header {
   display: flex;
   justify-content: space-between;
@@ -827,7 +825,7 @@
   flex-shrink: 0;
 }
 
-/* ==================== DAY PROGRESS CIRCLE ==================== */
+/* DAY PROGRESS CIRCLE */
 .day_progress_circle {
   width: 45px;
   height: 45px;
@@ -867,7 +865,7 @@
   transition: transform 0.3s ease;
 }
 
-/* ==================== DAY TASKS - SMOOTH TRANSITION ==================== */
+/* DAY TASKS */
 .day_tasks {
   display: grid;
   grid-template-rows: 0fr;
@@ -933,7 +931,7 @@
   border-bottom: none;
 }
 
-/* ==================== TASK LABEL ==================== */
+/* TASK LABEL */
 .task_label {
   display: flex;
   align-items: flex-start;
@@ -969,7 +967,7 @@
   transform: scale(1.1);
 }
 
-/* ==================== TASK DETAILS ==================== */
+/* TASK DETAILS */
 .task_details {
   flex: 1;
   min-width: 0;
@@ -1014,7 +1012,7 @@
   color: #888;
 }
 
-/* ==================== TASK BADGES ==================== */
+/* TASK BADGES */
 .task_badges {
   display: flex;
   align-items: center;
@@ -1031,7 +1029,7 @@
   font-size: 14px;
 }
 
-/* ==================== DAY FOOTER ==================== */
+/* DAY FOOTER */
 .day_footer {
   display: flex;
   justify-content: space-between;
@@ -1052,7 +1050,7 @@
   gap: 4px;
 }
 
-/* ==================== TIP SECTION ==================== */
+/* TIP SECTION */
 .tip_section {
   background: linear-gradient(135deg, rgba(10, 90, 219, 0.05), rgba(88, 167, 181, 0.05));
   border-radius: 20px;
@@ -1088,7 +1086,7 @@
   line-height: 1.5;
 }
 
-/* ==================== NO TASKS MESSAGE ==================== */
+/* NO TASKS MESSAGE */
 .no_tasks_message {
   padding: 20px;
   text-align: center;
@@ -1096,7 +1094,7 @@
   font-size: 13px;
 }
 
-/* ==================== COMPLETED TASK STYLES ==================== */
+/* COMPLETED TASK STYLES */
 .schedule_task.completed .task_title {
   text-decoration: line-through;
   color: #999;
@@ -1107,7 +1105,7 @@
   color: #999;
 }
 
-/* ==================== RESPONSIVE DESIGN ==================== */
+/* RESPONSIVE DESIGN */
 @media (max-width: 1024px) {
   .study_planner_content {
     padding: 20px;
