@@ -447,7 +447,6 @@ export default function RecommendationCourses() {
 
       let botMsg;
 
-      // If we have courses, show them
       if (courses.length > 0 || projects.length > 0 || faces.length > 0) {
         botMsg = {
           sender: "bot",

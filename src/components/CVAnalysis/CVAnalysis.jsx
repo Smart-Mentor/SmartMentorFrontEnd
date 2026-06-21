@@ -13,7 +13,7 @@ export default function CVAnalysis() {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisData, setAnalysisData] = useState(null);
-  const [analysisMode, setAnalysisMode] = useState(null); // 'file' or 'text'
+  const [analysisMode, setAnalysisMode] = useState(null);
   const chatEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const textInputRef = useRef(null);
