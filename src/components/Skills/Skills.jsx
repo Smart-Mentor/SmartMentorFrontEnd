@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Box, Skeleton, Alert, Button } from "@mui/material";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
 import SchoolIcon from "@mui/icons-material/School";
 import SpeedIcon from "@mui/icons-material/Speed";
 import StarIcon from "@mui/icons-material/Star";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import { getUserProfile, getGapAnalysis } from "../../api/authenticationService";
+import EditIcon from "@mui/icons-material/Edit";
+import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
+import { getUserProfile, getGapAnalysis, updateUserProfileData } from "../../api/authenticationService";
 import styles from "./Skills.module.css";
 
 const SkillsPage = () => {
@@ -15,18 +20,35 @@ const SkillsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // New states for gap analysis
+  // states for gap analysis
   const [recommendedSkills, setRecommendedSkills] = useState([]);
   const [weakSkills, setWeakSkills] = useState([]);
   const [gapAnalysisLoading, setGapAnalysisLoading] = useState(false);
   const [gapAnalysisError, setGapAnalysisError] = useState(null);
 
-  // Consistent level colors matching Profile page
+  // Modal states for updating skill level
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [updateSkillId, setUpdateSkillId] = useState(null);
+  const [updateSkillName, setUpdateSkillName] = useState("");
+  const [updateSkillLevel, setUpdateSkillLevel] = useState(1);
+  const [updateSkillError, setUpdateSkillError] = useState("");
+  const [updateSkillSuccess, setUpdateSkillSuccess] = useState("");
+  const [updating, setUpdating] = useState(false);
+
+  // Modal states for adding recommended skill
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addSkillId, setAddSkillId] = useState(null);
+  const [addSkillName, setAddSkillName] = useState("");
+  const [addSkillLevel, setAddSkillLevel] = useState(1);
+  const [addSkillError, setAddSkillError] = useState("");
+  const [addSkillSuccess, setAddSkillSuccess] = useState("");
+  const [adding, setAdding] = useState(false);
+
   const getLevelColor = (level) => {
     switch(level) {
-      case 1: return "#10b981";  // Beginner - Green
-      case 2: return "#f59e0b";  // Intermediate - Orange
-      case 3: return "#0A5ADB";  // Advanced - Blue
+      case 1: return "#10b981";  
+      case 2: return "#f59e0b";  
+      case 3: return "#0A5ADB";  
       default: return "#999";
     }
   };
@@ -61,9 +83,8 @@ const SkillsPage = () => {
       
       if (profileData.data.skills && profileData.data.skills.length > 0) {
         const formattedSkills = profileData.data.skills.map((skill) => {
-          // Get skill level (1-3) from API
+
           const skillLevel = skill.skillLevel || 1;
-          // Convert to percentage for display (1=33%, 2=66%, 3=100%)
           const percentage = Math.round((skillLevel / 3) * 100);
           
           return {
@@ -91,7 +112,7 @@ const SkillsPage = () => {
     } catch (error) {
       console.error("Failed to fetch user skills:", error);
       setError(error.message || "Failed to load your skills. Please try again.");
-      // Set default skills on error to still show something
+      // Set default skills on error
       setSkills([
         { name: "React", level: 100, skillLevel: 3, color: "#61DAFB", projects: 5, experience: "2 years" },
         { name: "Node.js", level: 66, skillLevel: 2, color: "#68A063", projects: 4, experience: "1.5 years" },
@@ -128,15 +149,15 @@ const SkillsPage = () => {
           demand: skill.demand || `+${Math.floor(Math.random() * 30) + 30}%`,
           color: getSkillColor(skill.skillName || skill.name),
           skillId: skill.skillId,
-          priority: skill.priority || index + 1
+          priority: skill.priority || index + 1,
+          requiredLevel: skill.requiredLevel || 3
         }));
         setRecommendedSkills(formattedRecommended);
       } else {
-        // Empty array when no missing skills
         setRecommendedSkills([]);
       }
       
-      // Process weakSkills for Areas to Improve (keeping data but not displaying)
+      // Process weakSkills for Areas to Improve
       if (gapData.weakSkills && Array.isArray(gapData.weakSkills) && gapData.weakSkills.length > 0) {
         const formattedWeakSkills = gapData.weakSkills.map((skill, index) => {
           // Convert proficiency level to consistent format
@@ -168,13 +189,11 @@ const SkillsPage = () => {
         });
         setWeakSkills(formattedWeakSkills);
       } else {
-        // Empty array when no weak skills
         setWeakSkills([]);
       }
     } catch (error) {
       console.error("Failed to fetch gap analysis:", error);
       setGapAnalysisError(error.message || "Failed to load skill recommendations");
-      // Set empty arrays on error
       setRecommendedSkills([]);
       setWeakSkills([]);
     } finally {
@@ -223,14 +242,139 @@ const SkillsPage = () => {
       const gap = skill.requiredProficiency - skill.currentProficiency;
       return Math.max(0, gap);
     }
-    return 25; // Default gap
+    return 25;
+  };
+
+  // Handle updating skill level
+  const handleUpdateSkillLevel = async () => {
+    if (!updateSkillId) {
+      setUpdateSkillError("Invalid skill");
+      return;
+    }
+
+    try {
+      setUpdating(true);
+      setUpdateSkillError("");
+      setUpdateSkillSuccess("");
+
+      // Get user profile to get current skills
+      const profileData = await getUserProfile();
+      const currentSkills = profileData.data.skills || [];
+      
+      // Update the specific skill level
+      const updatedSkills = currentSkills.map(skill => {
+        if (skill.skillId === updateSkillId) {
+          return {
+            ...skill,
+            skillLevel: updateSkillLevel
+          };
+        }
+        return skill;
+      });
+
+      const interestIds = profileData.data.interests?.map(i => i.interestId) || [];
+      const careerGoalId = profileData.data.careerGoalId || 0;
+
+      const updateData = {
+        skills: updatedSkills,
+        interestIds: interestIds,
+        careerGoalId: careerGoalId
+      };
+
+      await updateUserProfileData(updateData);
+
+      setUpdateSkillSuccess("✅ Skill level updated successfully!");
+      
+      setTimeout(() => {
+        setShowUpdateModal(false);
+        setUpdateSkillId(null);
+        setUpdateSkillName("");
+        setUpdateSkillLevel(1);
+        setUpdateSkillSuccess("");
+        fetchUserSkills();
+        fetchGapAnalysis();
+      }, 1500);
+
+    } catch (err) {
+      setUpdateSkillError(err.message || "Failed to update skill level");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleAddRecommendedSkill = async () => {
+    if (!addSkillId) {
+      setAddSkillError("Invalid skill");
+      return;
+    }
+
+    try {
+      setAdding(true);
+      setAddSkillError("");
+      setAddSkillSuccess("");
+
+      const profileData = await getUserProfile();
+      const currentSkills = profileData.data.skills || [];
+      
+      const newSkill = {
+        skillId: addSkillId,
+        skillLevel: addSkillLevel
+      };
+
+      const updatedSkills = [...currentSkills, newSkill];
+
+      const interestIds = profileData.data.interests?.map(i => i.interestId) || [];
+      const careerGoalId = profileData.data.careerGoalId || 0;
+
+      const updateData = {
+        skills: updatedSkills,
+        interestIds: interestIds,
+        careerGoalId: careerGoalId
+      };
+
+      await updateUserProfileData(updateData);
+
+      setAddSkillSuccess("✅ Skill added successfully!");
+      
+      setTimeout(() => {
+        setShowAddModal(false);
+        setAddSkillId(null);
+        setAddSkillName("");
+        setAddSkillLevel(1);
+        setAddSkillSuccess("");
+        fetchUserSkills();
+        fetchGapAnalysis();
+      }, 1500);
+
+    } catch (err) {
+      setAddSkillError(err.message || "Failed to add skill");
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const openUpdateModal = (skill) => {
+    setUpdateSkillId(skill.skillId);
+    setUpdateSkillName(skill.name);
+    setUpdateSkillLevel(skill.skillLevel);
+    setUpdateSkillError("");
+    setUpdateSkillSuccess("");
+    setShowUpdateModal(true);
+  };
+
+  const openAddModal = (skill) => {
+    setAddSkillId(skill.skillId);
+    setAddSkillName(skill.name);
+    setAddSkillLevel(1);
+    setAddSkillError("");
+    setAddSkillSuccess("");
+    setShowAddModal(true);
   };
 
   const totalSkills = skills.length;
   const averageProficiency = skills.length > 0 ? Math.round(skills.reduce((acc, s) => acc + s.level, 0) / totalSkills) : 0;
   const expertLevel = skills.filter(s => s.skillLevel >= 3).length;
 
-  // Loading component
   if (loading) {
     return (
       <Box component="main" className={styles.skills_container}>
@@ -295,7 +439,7 @@ const SkillsPage = () => {
             </div>
           </div>
 
-          {/* Bottom Grid Skeleton - Only Recommended Skills */}
+          {/* Bottom Grid Skeleton */}
           <div className={styles.bottom_grid_single}>
             <div className={styles.recommended_section}>
               <Skeleton variant="text" width={180} height={28} />
@@ -315,7 +459,6 @@ const SkillsPage = () => {
     );
   }
 
-  // Error component
   if (error && skills.length === 0) {
     return (
       <Box component="main" className={styles.skills_container}>
@@ -473,6 +616,13 @@ const SkillsPage = () => {
                       >
                         {levelLabel}
                       </span>
+                      <button 
+                        className={styles.edit_skill_btn}
+                        onClick={() => openUpdateModal(skill)}
+                        title="Update skill level"
+                      >
+                        <EditIcon />
+                      </button>
                     </div>
                   </div>
                   <div className={styles.progress_bar_container}>
@@ -497,7 +647,7 @@ const SkillsPage = () => {
           </div>
         </div>
 
-        {/* Recommended Skills Section - Full Width */}
+        {/* Recommended Skills Section */}
         <div className={`${styles.recommended_section_full} ${animate ? styles.slide_up : ""}`}>
           <div className={styles.section_header}>
             <div>
@@ -519,6 +669,13 @@ const SkillsPage = () => {
                 <div key={i} className={styles.tag_item}>
                   <div className={styles.tag_content}>
                     <span className={styles.tag_name}>{item.name}</span>
+                    <button 
+                      className={styles.tag_add_btn}
+                      onClick={() => openAddModal(item)}
+                      title={`Add ${item.name}`}
+                    >
+                      <AddIcon />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -535,6 +692,124 @@ const SkillsPage = () => {
           )}
         </div>
       </div>
+
+      {/* Update Skill Modal */}
+      {showUpdateModal && (
+        <div className={styles.modal_overlay} onClick={() => setShowUpdateModal(false)}>
+          <div className={styles.modal_card} onClick={(e) => e.stopPropagation()}>
+            <button className={styles.modal_close} onClick={() => setShowUpdateModal(false)}>
+              <CloseIcon />
+            </button>
+            
+            <div className={styles.modal_header}>
+              <div className={styles.modal_icon_wrapper} style={{ background: '#fff3e3' }}>
+                <EditIcon style={{ color: '#f59e0b' }} />
+              </div>
+              <div>
+                <h3 className={styles.modal_title}>Update Skill Level</h3>
+                <p className={styles.modal_subtitle}>Update your proficiency in <strong>{updateSkillName}</strong></p>
+              </div>
+            </div>
+
+            <div className={styles.modal_body}>
+              <div className={styles.modal_input_group}>
+                <label>Skill Level: {getLevelLabel(updateSkillLevel)}</label>
+                <select
+                  value={updateSkillLevel}
+                  onChange={(e) => setUpdateSkillLevel(parseInt(e.target.value))}
+                  disabled={updating}
+                  className={styles.modal_select}
+                >
+                  <option value={1}>1 - Beginner</option>
+                  <option value={2}>2 - Intermediate</option>
+                  <option value={3}>3 - Advanced</option>
+                </select>
+              </div>
+
+              {updateSkillError && (
+                <div className={styles.modal_error}>
+                  <ErrorIcon />
+                  <span>{updateSkillError}</span>
+                </div>
+              )}
+
+              {updateSkillSuccess && (
+                <div className={styles.modal_success}>
+                  <CheckCircleIcon />
+                  <span>{updateSkillSuccess}</span>
+                </div>
+              )}
+
+              <button 
+                className={styles.modal_submit_btn}
+                onClick={handleUpdateSkillLevel}
+                disabled={updating}
+              >
+                {updating ? "Updating..." : "Update Skill Level"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Recommended Skill Modal */}
+      {showAddModal && (
+        <div className={styles.modal_overlay} onClick={() => setShowAddModal(false)}>
+          <div className={styles.modal_card} onClick={(e) => e.stopPropagation()}>
+            <button className={styles.modal_close} onClick={() => setShowAddModal(false)}>
+              <CloseIcon />
+            </button>
+            
+            <div className={styles.modal_header}>
+              <div className={styles.modal_icon_wrapper} style={{ background: '#d1fae5' }}>
+                <AddIcon style={{ color: '#10b981' }} />
+              </div>
+              <div>
+                <h3 className={styles.modal_title}>Add Recommended Skill</h3>
+                <p className={styles.modal_subtitle}>Add <strong>{addSkillName}</strong> to your skill set</p>
+              </div>
+            </div>
+
+            <div className={styles.modal_body}>
+              <div className={styles.modal_input_group}>
+                <label>Skill Level: {getLevelLabel(addSkillLevel)}</label>
+                <select
+                  value={addSkillLevel}
+                  onChange={(e) => setAddSkillLevel(parseInt(e.target.value))}
+                  disabled={adding}
+                  className={styles.modal_select}
+                >
+                  <option value={1}>1 - Beginner</option>
+                  <option value={2}>2 - Intermediate</option>
+                  <option value={3}>3 - Advanced</option>
+                </select>
+              </div>
+
+              {addSkillError && (
+                <div className={styles.modal_error}>
+                  <ErrorIcon />
+                  <span>{addSkillError}</span>
+                </div>
+              )}
+
+              {addSkillSuccess && (
+                <div className={styles.modal_success}>
+                  <CheckCircleIcon />
+                  <span>{addSkillSuccess}</span>
+                </div>
+              )}
+
+              <button 
+                className={styles.modal_submit_btn}
+                onClick={handleAddRecommendedSkill}
+                disabled={adding}
+              >
+                {adding ? "Adding..." : "Add Skill"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Box>
   );
 };

@@ -8,6 +8,11 @@ import SchoolIcon from "@mui/icons-material/School";
 import TimelineIcon from "@mui/icons-material/Timeline";
 import styles from "./LearningPath.module.css";
 
+import { 
+  getUserProfile, 
+  getGapAnalysis 
+} from "../../api/authenticationService";
+
 export default function LearningPath() {
   const [animate, setAnimate] = useState(false);
   const [expandedSections, setExpandedSections] = useState({});
@@ -23,14 +28,13 @@ export default function LearningPath() {
     fetchUserProfileAndGapAnalysis();
   }, []);
 
-  // Calculate overall progress whenever data changes
+  // Calculate overall progress 
   useEffect(() => {
     if (gapAnalysisData) {
       updateAllProgress();
     }
   }, [gapAnalysisData]);
 
-  // Fetch user profile and then gap analysis
   const fetchUserProfileAndGapAnalysis = async () => {
     try {
       const token = localStorage.getItem('authToken');
@@ -39,56 +43,22 @@ export default function LearningPath() {
         throw new Error('No authentication token found. Please login again.');
       }
 
-      const profileResponse = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/User/profile', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!profileResponse.ok) {
-        if (profileResponse.status === 401) {
-          throw new Error('Session expired. Please login again.');
-        }
-        throw new Error('Failed to fetch user profile');
-      }
-
-      const profileResult = await profileResponse.json();
+      // Fetch user profile
+      const profileResult = await getUserProfile();
       
       if (!profileResult.success) {
         throw new Error(profileResult.message || 'Failed to load user profile');
       }
 
       setUserProfile(profileResult.data);
-      await fetchGapAnalysis(token, profileResult.data.careerGoalName);
+      
+      // Fetch gap analysis data
+      const gapData = await getGapAnalysis();
+      setGapAnalysisData(gapData);
+      setLoading(false);
       
     } catch (err) {
-      setError(err.message);
-      setLoading(false);
-    }
-  };
-
-  // Fetch gap analysis data from API
-  const fetchGapAnalysis = async (token, careerGoalName) => {
-    try {
-      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/GapAnalysis/gap-analysis', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch gap analysis data');
-      }
-
-      const data = await response.json();
-      setGapAnalysisData(data);
-      setLoading(false);
-    } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to load data. Please try again.');
       setLoading(false);
     }
   };
@@ -103,7 +73,6 @@ export default function LearningPath() {
     sections.forEach(section => {
       let sectionCompleted = 0;
       section.skills.forEach(skill => {
-        // Skill is completed if user's level meets or exceeds required level
         const isCompleted = skill.currentLevel && skill.currentLevel >= skill.requiredLevel;
         
         if (isCompleted) {
@@ -167,33 +136,30 @@ export default function LearningPath() {
     }
   };
 
-  // Get progress percentage based on current vs required level
+  // Get progress percentage 
   const getLevelProgress = (currentLevel, requiredLevel) => {
     if (!currentLevel || currentLevel === 0) return 0;
-    // Cap progress at 100% - cannot exceed required level
     return Math.min(100, (currentLevel / requiredLevel) * 100);
   };
 
   // Check if user can upgrade to a higher level
   const canUpgradeLevel = (currentLevel, requiredLevel) => {
-    // Cannot upgrade if already at or above required level
     if (currentLevel >= requiredLevel) return false;
-    // Cannot upgrade beyond required level
     if (currentLevel + 1 > requiredLevel) return false;
     return true;
   };
 
-  // Get the maximum level allowed (cannot exceed required level)
+  // Get the maximum level allowed 
   const getMaxAllowedLevel = (requiredLevel) => {
     return requiredLevel;
   };
 
-  // Get the maximum level to display (3 levels max, but only show up to required level)
+  // Get the maximum level to display 
   const getMaxLevelToShow = (requiredLevel) => {
-    return requiredLevel; // Show only up to the required level
+    return requiredLevel; 
   };
 
-  // Organize skills into categories based on skill level
+  // Organize skills into categories and sections
   const organizeSkillsIntoSections = () => {
     if (!gapAnalysisData) return [];
 
@@ -236,7 +202,7 @@ export default function LearningPath() {
       });
     }
 
-    // Process ready skills (already completed)
+    // Process ready skills 
     if (gapAnalysisData.readySkills) {
       gapAnalysisData.readySkills.forEach(skill => {
         const skillData = {
@@ -605,11 +571,8 @@ export default function LearningPath() {
                                       opacity: isDisabled ? 0.5 : 1
                                     }}
                                     onClick={() => {
-                                      // Only allow upgrade if not disabled and can upgrade
                                       if (!isDisabled && canUpgrade && level === skill.currentLevel + 1) {
-                                        // Here you would make API call to update user's skill level
                                         console.log(`Upgrading ${skill.skillName} to level ${level}`);
-                                        // Update local state or refetch data
                                       }
                                     }}
                                   >

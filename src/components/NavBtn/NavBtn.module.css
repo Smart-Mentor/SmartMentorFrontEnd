@@ -12,7 +12,7 @@
   white-space: nowrap;
 }
 
-/* Primary Variant - Default (transparent) */
+/* Primary Variant */
 .primary {
   background: rgba(10, 90, 219, 0.1);
   color: #0A5ADB;

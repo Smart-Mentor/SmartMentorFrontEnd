@@ -1,13 +1,51 @@
 import { useEffect, useState } from "react";
 import styles from "./MainContent.module.css";
 import { useNavigate } from "react-router-dom";
+import { getCurrentUser } from "../../api/authenticationService";
+
 export default function MainContent() {
   const [isVisible, setIsVisible] = useState(false);
   const [activeFeature, setActiveFeature] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setIsVisible(true);
+    checkAuthStatus();
   }, []);
+
+  const checkAuthStatus = async () => {
+    try {
+      const user = await getCurrentUser();
+      if (user) {
+        setIsAuthenticated(true);
+        const role = user.roles && user.roles.length > 0 ? user.roles[0] : null;
+        setUserRole(role);
+      } else {
+        setIsAuthenticated(false);
+        setUserRole(null);
+      }
+    } catch (error) {
+      setIsAuthenticated(false);
+      setUserRole(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNavigate = () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    
+    if (userRole === 'Admin' || userRole === 'admin') {
+      navigate('/admin/dashboard');
+    } else {
+      navigate('/dashboard');
+    }
+  };
 
   const stats = [
     { number: "10K+", label: "Active Users", icon: "users" },
@@ -69,7 +107,41 @@ export default function MainContent() {
       avatar: "👩‍🔬"
     }
   ];
-const navigate = useNavigate();
+
+  const navigate = useNavigate();
+
+  if (loading) {
+    return (
+      <div className={styles.loading_container}>
+        <div className={styles.loading_spinner}></div>
+      </div>
+    );
+  }
+
+  const getButtonText = () => {
+    if (!isAuthenticated) return 'Start Your Journey';
+    if (userRole === 'Admin' || userRole === 'admin') return 'Go to Admin Dashboard';
+    return 'Go to Dashboard';
+  };
+
+  const getCtaTitle = () => {
+    if (!isAuthenticated) return 'Ready to Start?';
+    if (userRole === 'Admin' || userRole === 'admin') return 'Welcome Admin!';
+    return 'Welcome Back!';
+  };
+
+  const getCtaDesc = () => {
+    if (!isAuthenticated) return 'Join thousands who transformed their careers';
+    if (userRole === 'Admin' || userRole === 'admin') return 'Manage users, courses, and platform analytics';
+    return 'Continue your journey and track your progress';
+  };
+
+  const getCtaButtonText = () => {
+    if (!isAuthenticated) return 'Get Started Free';
+    if (userRole === 'Admin' || userRole === 'admin') return 'Go to Admin Dashboard';
+    return 'Go to Dashboard';
+  };
+
   return (
     <div className={styles.main_content}>
       {/* Animated Background Elements */}
@@ -82,7 +154,6 @@ const navigate = useNavigate();
 
       {/* Hero Section */}
       <section className={`${styles.hero} ${isVisible ? styles.active : ""}`}>
-
         <div className={styles.container}>
           <div className={styles.badge_wrapper}>
             <span className={styles.badge}>
@@ -95,11 +166,11 @@ const navigate = useNavigate();
             </span>
           </div>
           
-<h1 className={styles.title}>
-  Your Smart Mentor for{" "}
-  <span className={styles.highlight}>Career </span>
-  <span style={{ color: '#10B981' }}>Success</span>
-</h1>
+          <h1 className={styles.title}>
+            Your Smart Mentor for{" "}
+            <span className={styles.highlight}>Career </span>
+            <span style={{ color: '#10B981' }}>Success</span>
+          </h1>
           
           <p className={styles.desc}>
             Navigate your career journey with AI-powered guidance,
@@ -107,16 +178,15 @@ const navigate = useNavigate();
           </p>
           
           <div className={styles.buttons}>
-          <button 
-            className={styles.btn_primary}
-            onClick={() => navigate('/dashboard')}
-          >
-            <span>Start Your Journey</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </button>
-
+            <button 
+              className={styles.btn_primary}
+              onClick={handleNavigate}
+            >
+              <span>{getButtonText()}</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </button>
           </div>
           
           <div className={styles.tags}>
@@ -303,17 +373,33 @@ const navigate = useNavigate();
         </div>
         <div className={styles.container}>
           <div className={styles.cta_content}>
-            <h2 className={styles.cta_title}>Ready to Start?</h2>
-            <p className={styles.cta_desc}>Join thousands who transformed their careers</p>
-            <div className={styles.cta_buttons}>
-              <button className={styles.cta_btn}
-              onClick={() => navigate('/dashboard')}>
-                Get Started Free
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </button>
-            </div>
+            {isAuthenticated ? (
+              <>
+                <h2 className={styles.cta_title}>{getCtaTitle()}</h2>
+                <p className={styles.cta_desc}>{getCtaDesc()}</p>
+                <div className={styles.cta_buttons}>
+                  <button className={styles.cta_btn} onClick={handleNavigate}>
+                    {getCtaButtonText()}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className={styles.cta_title}>Ready to Start?</h2>
+                <p className={styles.cta_desc}>Join thousands who transformed their careers</p>
+                <div className={styles.cta_buttons}>
+                  <button className={styles.cta_btn} onClick={() => navigate('/login')}>
+                    Get Started Free
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>

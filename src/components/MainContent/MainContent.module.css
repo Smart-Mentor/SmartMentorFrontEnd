@@ -1,6 +1,4 @@
-/* ============================================
-   BASE STYLES
-   ============================================ */
+/* MAIN CONTENT */
 .main_content {
   min-height: 100vh;
   background: #ffffff;
@@ -49,9 +47,7 @@
   border-radius: 3px;
 }
 
-/* ============================================
-   BACKGROUND ELEMENTS
-   ============================================ */
+/* BACKGROUND ELEMENTS */
 .bg_elements {
   position: fixed;
   top: 0;
@@ -105,9 +101,7 @@
   75% { transform: translate(10px, 10px) rotate(3deg); }
 }
 
-/* ============================================
-   HERO SECTION
-   ============================================ */
+/* HERO SECTION */
 .hero {
   position: relative;
   text-align: center;
@@ -403,9 +397,7 @@
   margin: 0;
 }
 
-/* ============================================
-   STATS SECTION
-   ============================================ */
+/* STATS */
 .stats {
   padding: 80px 0;
   background: linear-gradient(180deg, #f8fafc, #ffffff);
@@ -492,9 +484,7 @@
   font-weight: 500;
 }
 
-/* ============================================
-   SECTION HEADER
-   ============================================ */
+/* SECTION HEADER */
 .section_header {
   text-align: center;
   margin-bottom: 56px;
@@ -530,9 +520,7 @@
   line-height: 1.6;
 }
 
-/* ============================================
-   FEATURES SECTION
-   ============================================ */
+/* FEATURES */
 .features {
   padding: 100px 0;
   background: white;
@@ -666,9 +654,7 @@
   transform: translateX(0);
 }
 
-/* ============================================
-   HOW IT WORKS SECTION
-   ============================================ */
+/* HOW IT WORKS */
 .how {
   padding: 100px 0;
   background: linear-gradient(180deg, #f8fafc, #ffffff);
@@ -810,9 +796,7 @@
   fill: #0A5ADB;
 }
 
-/* ============================================
-   TESTIMONIALS SECTION
-   ============================================ */
+/* TESTIMONIALS */
 .testimonials {
   padding: 100px 0;
   background: white;
@@ -889,9 +873,7 @@
   color: #64748b;
 }
 
-/* ============================================
-   CTA SECTION
-   ============================================ */
+/* CTA SECTION */
 .cta {
   padding: 120px 0;
   background: linear-gradient(135deg, #0A5ADB, #1E40AF);
@@ -1009,9 +991,7 @@
   border-color: rgba(255, 255, 255, 0.5);
 }
 
-/* ============================================
-   RESPONSIVE
-   ============================================ */
+/* RESPONSIVE */
 @media (max-width: 1024px) {
   .title {
     font-size: 52px;
@@ -1462,7 +1442,7 @@
     font-size: 12px;
   }
 }
-/* أرقام الـ Steps - كل رقم بلون */
+
 .step_num {
   background: linear-gradient(135deg, #0A5ADB, #1E40AF);
   color: white;
@@ -1476,25 +1456,21 @@
   transition: transform 0.3s ease;
 }
 
-/* الرقم 01 - أزرق */
 .step_card:nth-child(1) .step_num {
   background: linear-gradient(135deg, #0A5ADB, #3B82F6);
   box-shadow: 0 6px 20px rgba(10, 90, 219, 0.3);
 }
 
-/* الرقم 02 - أخضر */
 .step_card:nth-child(2) .step_num {
   background: linear-gradient(135deg, #10B981, #059669);
   box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
 }
 
-/* الرقم 03 - برتقالي */
 .step_card:nth-child(3) .step_num {
   background: linear-gradient(135deg, #F59E0B, #D97706);
   box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
 }
 
-/* لما hover */
 .step_card:nth-child(1):hover .step_num {
   transform: translateX(-50%) scale(1.1);
   box-shadow: 0 8px 24px rgba(10, 90, 219, 0.4);
@@ -1509,7 +1485,7 @@
   transform: translateX(-50%) scale(1.1);
   box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
 }
-/* الأيقونات - الحالة العادية */
+
 .step_icon_wrapper {
   background: linear-gradient(135deg, rgba(10, 90, 219, 0.1), rgba(88, 167, 181, 0.1));
 }
@@ -1518,7 +1494,6 @@
   stroke: #0A5ADB;
 }
 
-/* STEP 01 - أزرق */
 .step_card:nth-child(1) .step_icon_wrapper {
   background: linear-gradient(135deg, rgba(10, 90, 219, 0.1), rgba(59, 130, 246, 0.1));
 }
@@ -1527,7 +1502,6 @@
   stroke: #0A5ADB;
 }
 
-/* STEP 02 - أخضر */
 .step_card:nth-child(2) .step_icon_wrapper {
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
 }
@@ -1536,7 +1510,6 @@
   stroke: #10B981;
 }
 
-/* STEP 03 - برتقالي */
 .step_card:nth-child(3) .step_icon_wrapper {
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.1));
 }
@@ -1545,11 +1518,6 @@
   stroke: #F59E0B;
 }
 
-/* ============================================
-   HOVER EFFECTS - كل step بلون الرقم
-   ============================================ */
-
-/* Step 01 Hover - أزرق */
 .step_card:nth-child(1):hover .step_icon_wrapper {
   background: linear-gradient(135deg, #0A5ADB, #3B82F6);
   transform: translateY(-8px);
@@ -1559,7 +1527,6 @@
   stroke: white;
 }
 
-/* Step 02 Hover - أخضر */
 .step_card:nth-child(2):hover .step_icon_wrapper {
   background: linear-gradient(135deg, #10B981, #059669);
   transform: translateY(-8px);
@@ -1569,7 +1536,6 @@
   stroke: white;
 }
 
-/* Step 03 Hover - برتقالي */
 .step_card:nth-child(3):hover .step_icon_wrapper {
   background: linear-gradient(135deg, #F59E0B, #D97706);
   transform: translateY(-8px);
@@ -1577,4 +1543,27 @@
 
 .step_card:nth-child(3):hover .step_icon_wrapper svg {
   stroke: white;
+}
+
+/* LOADING STATE */
+.loading_container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+}
+
+.loading_spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #f1f5f9;
+  border-top: 4px solid #0A5ADB;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

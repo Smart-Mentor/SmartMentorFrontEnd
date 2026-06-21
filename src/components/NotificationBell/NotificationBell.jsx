@@ -48,26 +48,8 @@ const NotificationBell = ({ notifications, unreadCount, onMarkAsRead, onMarkAllA
     }
   };
 
-  // Format time for like notifications (uses current time)
-//   const formatLikeTime = (dateString) => {
-//     // Likes use current time (createdAt is set to new Date().toISOString())
-//    const date = new Date(dateString);
-//     const now = new Date();
-//     const diffMs = now - date;
-//     const diffMins = Math.floor(diffMs / 60000);
-//     const diffHours = Math.floor(diffMs / 3600000);
-//     const diffDays = Math.floor(diffMs / 86400000);
-
-//     if (diffMins < 1) return 'Just now';
-//     if (diffMins < 60) return `${diffMins} min ago`;
-//     if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-//     if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-//     return date.toLocaleDateString();
-//   };
-
-  // Format time for comment notifications (uses actual comment timestamp from API)
+  // Format time for comment notifications 
   const formatCommentTime = (dateString) => {
-    // Comments use actual comment.createdAt from API
     const date = parseDate(dateString);
     
     if (isNaN(date.getTime())) return 'Invalid date';

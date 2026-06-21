@@ -238,7 +238,7 @@ export default function Navbar() {
                       </div>
                       <div className={styles.dropdown_divider}></div>
                       
-                      {/* For Admin Users - Only Show Admin Dashboard */}
+                      {/* For Admin Users */}
                       {isAdmin ? (
                         <>
                           <Link to="/admin/dashboard" className={styles.dropdown_item} onClick={() => setIsDropdownOpen(false)}>
@@ -248,7 +248,7 @@ export default function Navbar() {
                         </>
                       ) : (
                         <>
-                          {/* For Regular Users - Show Regular Options */}
+                          {/* For Regular Users */}
                           <Link to="/profile" className={styles.dropdown_item} onClick={() => setIsDropdownOpen(false)}>
                             <span className={styles.dropdown_icon}>👤</span>
                             My Profile
@@ -340,14 +340,12 @@ export default function Navbar() {
               {isLoggedIn ? (
                 <>
                   {isAdmin ? (
-                    // Admin Mobile Menu - Only Admin Dashboard
                     <>
                       <Link to="/admin/dashboard" className={styles.mobile_link} onClick={() => setIsMobileMenuOpen(false)}>
                         <NavBtn name={"Admin Dashboard"} variant="text" fullWidth />
                       </Link>
                     </>
                   ) : (
-                    // Regular User Mobile Menu - All Regular Options
                     <>
                       <Link to="/dashboard" className={styles.mobile_link} onClick={() => setIsMobileMenuOpen(false)}>
                         <NavBtn name={"Dashboard"} variant="text" fullWidth />

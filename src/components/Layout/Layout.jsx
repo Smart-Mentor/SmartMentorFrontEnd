@@ -69,10 +69,10 @@ export default function Layout() {
   }, [navigate, handleDrawerClose]);
 
   const handleLogout = useCallback(() => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('userInfo');
+    localStorage.clear();
+    
+    sessionStorage.clear();
+    
     navigate('/login');
     handleDrawerClose();
   }, [navigate, handleDrawerClose]);
@@ -161,9 +161,12 @@ export default function Layout() {
 
       {/* Logout Button */}
       <div className={styles.logout_section}>
-        <button onClick={handleLogout} className={styles.logout_button}>
-          <i className="fa-solid fa-right-from-bracket"></i>
-          <span>Logout</span>
+        <button 
+          onClick={handleLogout} 
+          className={`${styles.nav_item} ${styles.logout_button}`}
+        >
+          <i className={`fa-solid fa-right-from-bracket ${styles.nav_icon}`}></i>
+          <span className={styles.nav_label}>Logout</span>
         </button>
       </div>
     </div>
@@ -220,7 +223,6 @@ export default function Layout() {
           />
         </div>
         
-        {/* Page Content - Unchanged */}
         <Outlet />
       </main>
     </div>

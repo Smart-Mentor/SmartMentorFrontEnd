@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Box, CircularProgress, Alert, Avatar, Chip, IconButton } from "@mui/material";
-import { getCurrentUser } from "../../api/authenticationService";
+import { 
+  getCurrentUser, 
+  getUserProfile, 
+  getGapAnalysis,
+  getCommunityPosts,
+  getCommunityPostsByCareerGoal
+} from "../../api/authenticationService";
 import TimelineIcon from "@mui/icons-material/Timeline";
 import AnalyticsIcon from "@mui/icons-material/Analytics";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -9,7 +15,6 @@ import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { useNavigate } from "react-router-dom";
 import styles from "./Dashboard.module.css";
 
-// Import AI Agent assets
 import AnalyzeSkills from "../../assets/AnalyzeSkills.png";
 import CareerAdvice from "../../assets/CareerAdvice.png";
 import GenerateRoadmap from "../../assets/GenerateRoadmap.png";
@@ -32,8 +37,11 @@ const Dashboard = () => {
   const [postsLoading, setPostsLoading] = useState(false);
   const [hoveredCard, setHoveredCard] = useState(null);
 
-  const API_URL_GAP = "https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/gapanalysis/gap-analysis";
-  const COMMUNITY_BASE_URL = "https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/community";
+  // Career goal IDs for fetching posts
+  const careerGoalIds = [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 18, 19,
+    ...Array.from({ length: 10 }, (_, i) => i + 26) // 26 to 35
+  ];
 
   // AI Models data
   const aiModels = [
@@ -110,26 +118,14 @@ const Dashboard = () => {
   };
 
   const fetchGapAnalysisData = async () => {
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      console.warn("No auth token found for gap analysis");
-      return;
-    }
-    
     try {
-      const response = await fetch(API_URL_GAP, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        console.warn("No auth token found for gap analysis");
+        return;
       }
-
-      const data = await response.json();
+      
+      const data = await getGapAnalysis();
       setGapData(data);
     } catch (err) {
       console.error("Error fetching gap analysis data:", err);
@@ -144,33 +140,11 @@ const Dashboard = () => {
     }
 
     try {
-      const profileResponse = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/User/profile', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!profileResponse.ok) {
-        throw new Error('Failed to fetch user profile');
-      }
-
-      const profileResult = await profileResponse.json();
+      const profileResult = await getUserProfile();
       
       if (profileResult.success && profileResult.data?.careerGoalName) {
-        const gapResponse = await fetch(API_URL_GAP, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (gapResponse.ok) {
-          const gapResult = await gapResponse.json();
-          setLearningData(gapResult);
-        }
+        const gapResult = await getGapAnalysis();
+        setLearningData(gapResult);
       }
     } catch (err) {
       console.error("Error fetching learning data:", err);
@@ -186,28 +160,12 @@ const Dashboard = () => {
 
     setPostsLoading(true);
     try {
-      const careerGoalIds = [
-      ...Array.from({ length: 9 }, (_, i) => i + 1), // 1 to 9
-      11, 18, 19,
-      ...Array.from({ length: 10 }, (_, i) => i + 26) // 26 to 35
-    ];
-
-      
+      // Fetch posts for all career goals in parallel
       const fetchPromises = careerGoalIds.map(async (careerGoalId) => {
         try {
-          const response = await fetch(`${COMMUNITY_BASE_URL}/career-goals/${careerGoalId}/posts`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          });
-          
-          if (response.ok) {
-            const result = await response.json();
-            if (result.success && Array.isArray(result.data)) {
-              return result.data;
-            }
+          const result = await getCommunityPostsByCareerGoal(careerGoalId);
+          if (result.success && Array.isArray(result.data)) {
+            return result.data;
           }
           return [];
         } catch (err) {
@@ -219,10 +177,12 @@ const Dashboard = () => {
       const allPostsArrays = await Promise.all(fetchPromises);
       const allPosts = allPostsArrays.flat();
       
+      // Remove duplicates
       const uniquePosts = Array.from(
         new Map(allPosts.map(post => [post.postId, post])).values()
       );
       
+      // Sort by date (newest first)
       const sortedPosts = uniquePosts.sort((a, b) => 
         new Date(b.createdAt) - new Date(a.createdAt)
       );
@@ -533,7 +493,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* TWO COLUMN LAYOUT - AI Agents (LEFT) + Community Feed (RIGHT) - SWAPPED */}
+        {/* TWO COLUMN LAYOUT - AI Agents (LEFT) + Community Feed (RIGHT) */}
         <div className={styles.two_column_layout}>
           {/* AI AGENTS SECTION - LEFT column */}
           <div className={`${styles.ai_agents_section} ${animate ? styles.fade_in : ""}`}>
@@ -718,7 +678,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* RECOMMENDED NEXT STEPS - Full width section at bottom */}
+        {/* RECOMMENDED NEXT STEPS */}
         <div className={`${styles.recommended_section} ${animate ? styles.fade_in : ""}`}>
           <div className={styles.section_header}>
             <div className={styles.section_title_wrapper}>

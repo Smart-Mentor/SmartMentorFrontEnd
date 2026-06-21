@@ -687,7 +687,7 @@
   }
 }
 
-/* NavBtn Text Variant - Add to your existing NavBtn styles */
+/* NavBtn Text Variant */
 .nav_btn_text {
   background: transparent;
   color: #1a1a2e;
@@ -711,6 +711,7 @@
 .navbar.scrolled .nav_btn_text {
   color: #1a1a2e;
 }
+
 /* User Avatar with Online Status */
 .user_avatar_wrapper {
   position: relative;
@@ -767,7 +768,7 @@
   }
 }
 
-/* Dropdown Avatar with Online Status */
+/* Dropdown Avatar */
 .dropdown_avatar_wrapper {
   position: relative;
   width: 56px;
