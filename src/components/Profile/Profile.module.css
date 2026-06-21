@@ -2094,10 +2094,10 @@
   border-radius: 12px;
 }
 
-/* Optional: Add hover effect for better UX */
 .summary_skill_item:hover .level_fill {
   opacity: 0.9;
 }
+
 /* Loading spinner for activities */
 .loading_activities {
   display: flex;
@@ -2136,6 +2136,7 @@
   align-items: center;
   gap: 4px;
 }
+
 /* Post preview and career badge */
 .post_preview {
   font-size: 13px;

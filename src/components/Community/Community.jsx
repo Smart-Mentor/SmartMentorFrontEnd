@@ -1,4 +1,3 @@
-// Community.jsx
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -36,20 +35,32 @@ import PeopleIcon from "@mui/icons-material/People";
 import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 import AddIcon from "@mui/icons-material/Add";
 import styles from "./Community.module.css";
+import {
+  getAllCareerGoals,
+  getCommunityPosts,
+  getCommunityPostsByCareerGoal,
+  getPostById,
+  createCommunityPost,
+  deleteCommunityPost,
+  addCommentToPost,
+  likePost,
+  unlikePost,
+  getCurrentUser,
+  getUserProfile,
+} from "../../Api/authenticationService";
 
 const Community = () => {
   const [animate, setAnimate] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const openingPostRef = useRef(null);
-  const [allPosts, setAllPosts] = useState([]); // master list (all posts)
-  const [posts, setPosts] = useState([]); // filtered list for "All Posts" tab
+  const [allPosts, setAllPosts] = useState([]); 
+  const [posts, setPosts] = useState([]); 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [postTitle, setPostTitle] = useState("");
   const [postContent, setPostContent] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [showModalCategoryDropdown, setShowModalCategoryDropdown] =
-    useState(false);
+  const [showModalCategoryDropdown, setShowModalCategoryDropdown] = useState(false);
   const [creating, setCreating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -95,32 +106,20 @@ const Community = () => {
     try {
       const token = getAuthToken();
       if (!token) return;
-      const response = await fetch(
-        "https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/auth/me",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        },
+      const data = await getCurrentUser();
+      setUserInfo({
+        firstName: data.firstName || "",
+        lastName: data.lastName || "",
+        userName: data.userName || "",
+        email: data.email || "",
+        userId: data.userId || "",
+      });
+      localStorage.setItem("userFirstName", data.firstName || "");
+      localStorage.setItem("userLastName", data.lastName || "");
+      localStorage.setItem(
+        "userFullName",
+        `${data.firstName || ""} ${data.lastName || ""}`.trim(),
       );
-      if (response.ok) {
-        const data = await response.json();
-        setUserInfo({
-          firstName: data.firstName || "",
-          lastName: data.lastName || "",
-          userName: data.userName || "",
-          email: data.email || "",
-          userId: data.userId || "",
-        });
-        localStorage.setItem("userFirstName", data.firstName || "");
-        localStorage.setItem("userLastName", data.lastName || "");
-        localStorage.setItem(
-          "userFullName",
-          `${data.firstName || ""} ${data.lastName || ""}`.trim(),
-        );
-      }
     } catch (err) {
       console.error("Failed to fetch user info:", err);
     }
@@ -131,25 +130,9 @@ const Community = () => {
       setUserProfileLoading(true);
       const token = getAuthToken();
       if (!token) throw new Error("Please login to view community posts");
-      const response = await fetch(
-        "https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/User/profile",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
-      if (!response.ok) {
-        if (response.status === 401)
-          throw new Error("Session expired. Please login again.");
-        throw new Error("Failed to fetch user profile");
-      }
-      const data = await response.json();
+      const data = await getUserProfile();
       if (data.success && data.data) {
-        const careerGoalId =
-          data.data.careerGoalId || data.data.careerGoal?.careerGoalId;
+        const careerGoalId = data.data.careerGoalId || data.data.careerGoal?.careerGoalId;
         setUserCareerGoalId(careerGoalId);
         return careerGoalId;
       }
@@ -166,131 +149,17 @@ const Community = () => {
   const fetchCareerGoals = async () => {
     try {
       setCareerGoalsLoading(true);
-      
-      // Hardcoded career goals data
-      const hardcodedCareerGoals = [
-        {
-          id: 1,
-          name: "Junior Backend .NET Developer",
-          description: "Build and maintain RESTful APIs using ASP.NET Core and SQL Server."
-        },
-        {
-          id: 2,
-          name: "Full-Stack .NET Developer",
-          description: "Develop complete web applications using ASP.NET Core and React.js."
-        },
-        {
-          id: 3,
-          name: "Frontend React Developer",
-          description: "Create responsive and interactive user interfaces using React and modern JavaScript."
-        },
-        {
-          id: 4,
-          name: "Data Analyst",
-          description: "Analyze datasets, generate insights, and build dashboards using Python and SQL."
-        },
-        {
-          id: 5,
-          name: "Machine Learning Engineer",
-          description: "Develop predictive models and AI solutions using Python and ML frameworks."
-        },
-        {
-          id: 6,
-          name: "Cloud Engineer (Azure)",
-          description: "Design and deploy scalable applications on Microsoft Azure."
-        },
-        {
-          id: 7,
-          name: "DevOps Engineer",
-          description: "Automate deployments and manage CI/CD pipelines using Docker and cloud tools."
-        },
-        {
-          id: 8,
-          name: "Cybersecurity Analyst",
-          description: "Secure applications and infrastructure by applying modern security practices."
-        },
-        {
-          id: 9,
-          name: "Senior Backend .NET Developer",
-          description: "Lead backend architecture, mentor juniors, and design scalable distributed systems."
-        },
-        {
-          id: 11,
-          name: "Software Architect",
-          description: "Design high-level system architecture and make strategic technology decisions."
-        },
-        {
-          id: 18,
-          name: "Mobile Developer (React Native)",
-          description: "Build cross-platform mobile apps using React Native and modern JavaScript."
-        },
-        {
-          id: 19,
-          name: "QA Automation Engineer",
-          description: "Write automated tests and build CI/CD testing pipelines for quality assurance."
-        },
-        {
-          id: 26,
-          name: "Site Reliability Engineer",
-          description: "Ensure system reliability, observability, and incident response at scale."
-        },
-        {
-          id: 27,
-          name: "Database Developer",
-          description: "Design optimized database schemas, stored procedures, and performance tuning."
-        },
-        {
-          id: 28,
-          name: "Technical Product Manager",
-          description: "Bridge engineering and business to deliver impactful technical products."
-        },
-        {
-          id: 29,
-          name: "Blockchain Developer",
-          description: "Build decentralized applications and smart contracts on blockchain platforms."
-        },
-        {
-          id: 30,
-          name: "Embedded Systems Engineer",
-          description: "Develop firmware and software for microcontrollers and IoT devices."
-        },
-        {
-          id: 31,
-          name: "Security Architect",
-          description: "Design enterprise security frameworks and threat mitigation strategies."
-        },
-        {
-          id: 32,
-          name: "Platform Engineer",
-          description: "Build internal developer platforms and tooling to improve engineering velocity."
-        },
-        {
-          id: 33,
-          name: "Data Engineer",
-          description: "Build and maintain ETL pipelines, data warehouses, and data infrastructure."
-        },
-        {
-          id: 34,
-          name: "AI/ML Architect",
-          description: "Design end-to-end machine learning systems and MLOps pipelines."
-        },
-        {
-          id: 35,
-          name: "Full-Stack TypeScript Developer",
-          description: "Build type-safe full-stack applications with TypeScript, Node.js, and React."
-        }
-      ];
-
-      // Map the hardcoded data to match the expected format
-      const mapped = hardcodedCareerGoals.map((goal) => ({
+      const data = await getAllCareerGoals();
+      const mapped = data.map((goal) => ({
         careerGoalId: goal.id,
         careerGoalName: goal.name,
-        description: goal.description,
+        description: goal.description || "",
       }));
-      
       setCareerGoals(mapped);
     } catch (err) {
-      console.error("Failed to set career goals:", err);
+      console.error("Failed to fetch career goals:", err);
+      setError("Failed to load career goals. Please try again.");
+      setCareerGoals([]);
     } finally {
       setCareerGoalsLoading(false);
     }
@@ -300,22 +169,12 @@ const Community = () => {
     try {
       const token = getAuthToken();
       if (!token) throw new Error("Please login to view community posts");
-      let url = "https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Community/posts";
-      if (careerGoalId)
-        url = `https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Community/career-goals/${careerGoalId}/posts`;
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      if (!response.ok) {
-        if (response.status === 401)
-          throw new Error("Session expired. Please login again.");
-        throw new Error("Failed to fetch posts");
+      let data;
+      if (careerGoalId) {
+        data = await getCommunityPostsByCareerGoal(careerGoalId);
+      } else {
+        data = await getCommunityPosts();
       }
-      const data = await response.json();
       return data.success && data.data ? data.data : [];
     } catch (err) {
       setError(err.message);
@@ -325,20 +184,7 @@ const Community = () => {
 
   const fetchCommentsForPost = async (postId) => {
     try {
-      const token = getAuthToken();
-      const response = await fetch(
-        `https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Community/posts/${postId}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          cache: "no-cache",
-        },
-      );
-      if (!response.ok) return;
-      const data = await response.json();
+      const data = await getPostById(postId);
       if (data.success && data.data?.comments) {
         const sorted = [...data.data.comments].sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
@@ -424,43 +270,22 @@ const Community = () => {
       return { ...prev, [postId]: sorted };
     });
     try {
-      const token = getAuthToken();
-      const response = await fetch(
-        `https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Community/posts/${postId}/comments`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ content: commentText }),
-        },
+      await addCommentToPost(postId, commentText);
+      await fetchCommentsForPost(postId);
+      setAllPosts((prev) =>
+        prev.map((p) =>
+          p.postId === postId
+            ? { ...p, commentCount: (p.commentCount || 0) + 1 }
+            : p,
+        ),
       );
-      if (response.ok) {
-        await fetchCommentsForPost(postId);
-        setAllPosts((prev) =>
-          prev.map((p) =>
-            p.postId === postId
-              ? { ...p, commentCount: (p.commentCount || 0) + 1 }
-              : p,
-          ),
-        );
-        setPosts((prev) =>
-          prev.map((p) =>
-            p.postId === postId
-              ? { ...p, commentCount: (p.commentCount || 0) + 1 }
-              : p,
-          ),
-        );
-      } else {
-        setPostComments((prev) => ({
-          ...prev,
-          [postId]: (prev[postId] || []).filter(
-            (c) => c.commentId !== optimisticComment.commentId,
-          ),
-        }));
-        setInlineCommentText((prev) => ({ ...prev, [postId]: commentText }));
-      }
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.postId === postId
+            ? { ...p, commentCount: (p.commentCount || 0) + 1 }
+            : p,
+        ),
+      );
     } catch (err) {
       setPostComments((prev) => ({
         ...prev,
@@ -474,72 +299,40 @@ const Community = () => {
     }
   };
 
-  useEffect(() => {
-    const openPostId = location?.state?.openPostId;
-    if (!openPostId) return;
-    if (openingPostRef.current === openPostId && postDetailOpen) return;
-    const openPost = async () => {
-      openingPostRef.current = openPostId;
-      const found = posts.find((p) => String(p.postId) === String(openPostId));
-      if (found) {
-        await openPostDetail(found);
-      } else {
-        await fetchPostDetail(openPostId);
-        setPostDetailOpen(true);
-      }
-      navigate(window.location.pathname, { replace: true, state: {} });
-    };
-    openPost();
-  }, [location?.state?.openPostId, posts, postDetailOpen, navigate]);
-
   const handleLike = async (postId, isCurrentlyLiked) => {
     try {
       const token = getAuthToken();
-      const method = isCurrentlyLiked ? "DELETE" : "POST";
-      const response = await fetch(
-        `https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Community/posts/${postId}/like`,
-        {
-          method,
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
-      if (response.ok) {
-        const updateFn = (prev) =>
-          prev.map((post) =>
-            post.postId === postId
-              ? {
-                  ...post,
-                  likeCount: isCurrentlyLiked
-                    ? post.likeCount - 1
-                    : post.likeCount + 1,
-                  isLikedByCurrentUser: !isCurrentlyLiked,
-                }
-              : post,
-          );
-        setAllPosts(updateFn);
-        setPosts(updateFn);
-        if (selectedPost && selectedPost.postId === postId) {
-          setSelectedPost((prev) => ({
-            ...prev,
-            likeCount: isCurrentlyLiked
-              ? prev.likeCount - 1
-              : prev.likeCount + 1,
-            isLikedByCurrentUser: !isCurrentlyLiked,
-          }));
-        }
+      if (isCurrentlyLiked) {
+        await unlikePost(postId);
+      } else {
+        await likePost(postId);
+      }
+      const updateFn = (prev) =>
+        prev.map((post) =>
+          post.postId === postId
+            ? {
+                ...post,
+                likeCount: isCurrentlyLiked
+                  ? post.likeCount - 1
+                  : post.likeCount + 1,
+                isLikedByCurrentUser: !isCurrentlyLiked,
+              }
+            : post,
+        );
+      setAllPosts(updateFn);
+      setPosts(updateFn);
+      if (selectedPost && selectedPost.postId === postId) {
+        setSelectedPost((prev) => ({
+          ...prev,
+          likeCount: isCurrentlyLiked
+            ? prev.likeCount - 1
+            : prev.likeCount + 1,
+          isLikedByCurrentUser: !isCurrentlyLiked,
+        }));
       }
     } catch (err) {
       console.error("Failed to like/unlike post:", err);
     }
-  };
-
-  const openDeleteDialog = (post, event) => {
-    event.stopPropagation();
-    setPostToDelete(post);
-    setDeleteDialogOpen(true);
   };
 
   const handleConfirmDelete = async () => {
@@ -547,35 +340,19 @@ const Community = () => {
     
     setDeleting(true);
     try {
-      const token = getAuthToken();
-      const response = await fetch(
-        `https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Community/posts/${postToDelete.postId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      await deleteCommunityPost(postToDelete.postId);
+      setAllPosts(prev => prev.filter(post => post.postId !== postToDelete.postId));
+      setPosts(prev => prev.filter(post => post.postId !== postToDelete.postId));
       
-      if (response.ok) {
-        setAllPosts(prev => prev.filter(post => post.postId !== postToDelete.postId));
-        setPosts(prev => prev.filter(post => post.postId !== postToDelete.postId));
-        
-        if (selectedPost && selectedPost.postId === postToDelete.postId) {
-          setPostDetailOpen(false);
-          setSelectedPost(null);
-        }
-        
-        setToast({ show: true, message: "Post deleted successfully!", type: "success" });
-        setTimeout(() => setToast({ show: false, message: "", type: "" }), 3000);
-        setDeleteDialogOpen(false);
-        setPostToDelete(null);
-      } else {
-        const errorText = await response.text();
-        throw new Error(errorText || "Failed to delete post");
+      if (selectedPost && selectedPost.postId === postToDelete.postId) {
+        setPostDetailOpen(false);
+        setSelectedPost(null);
       }
+      
+      setToast({ show: true, message: "Post deleted successfully!", type: "success" });
+      setTimeout(() => setToast({ show: false, message: "", type: "" }), 3000);
+      setDeleteDialogOpen(false);
+      setPostToDelete(null);
     } catch (err) {
       console.error("Failed to delete post:", err);
       setToast({ show: true, message: err.message || "Failed to delete post. Please try again.", type: "error" });
@@ -583,11 +360,6 @@ const Community = () => {
     } finally {
       setDeleting(false);
     }
-  };
-
-  const handleCancelDelete = () => {
-    setDeleteDialogOpen(false);
-    setPostToDelete(null);
   };
 
   const handleCreatePost = async () => {
@@ -598,37 +370,19 @@ const Community = () => {
 
     try {
       setCreating(true);
-      const token = getAuthToken();
       const requestBody = {
         title: postTitle,
         content: postContent,
         primaryCareerGoalId: parseInt(selectedCategory),
       };
-
-      const response = await fetch(
-        "https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Community/posts",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestBody),
-        },
-      );
-
-      if (response.ok) {
-        setShowCreateModal(false);
-        setPostTitle("");
-        setPostContent("");
-        setSelectedCategory("");
-        await refreshAllPosts();
-        setToast({ show: true, message: "Post created successfully!", type: "success" });
-        setTimeout(() => setToast({ show: false, message: "", type: "" }), 3000);
-      } else {
-        const errorText = await response.text();
-        throw new Error(errorText || "Failed to create post");
-      }
+      await createCommunityPost(requestBody);
+      setShowCreateModal(false);
+      setPostTitle("");
+      setPostContent("");
+      setSelectedCategory("");
+      await refreshAllPosts();
+      setToast({ show: true, message: "Post created successfully!", type: "success" });
+      setTimeout(() => setToast({ show: false, message: "", type: "" }), 3000);
     } catch (err) {
       console.error("Failed to create post:", err);
       alert(err.message);
@@ -637,54 +391,25 @@ const Community = () => {
     }
   };
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        showModalCategoryDropdown &&
-        !event.target.closest(`.${styles.category_select}`)
-      ) {
-        setShowModalCategoryDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showModalCategoryDropdown]);
-
   const handleAddComment = async () => {
     if (!newComment.trim() || !selectedPost) return;
     const commentContent = newComment.trim();
     setNewComment("");
     setSubmitting(true);
     try {
-      const token = getAuthToken();
-      const response = await fetch(
-        `https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Community/posts/${selectedPost.postId}/comments`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ content: commentContent }),
-        },
-      );
-      if (response.ok) {
-        await fetchPostDetail(selectedPost.postId);
-        const updateFn = (prev) =>
-          prev.map((post) =>
-            post.postId === selectedPost.postId
-              ? { ...post, commentCount: (post.commentCount || 0) + 1 }
-              : post,
-          );
-        setAllPosts(updateFn);
-        setPosts(updateFn);
-      } else {
-        setNewComment(commentContent);
-        const errorText = await response.text();
-        throw new Error(errorText || "Failed to add comment");
-      }
+      await addCommentToPost(selectedPost.postId, commentContent);
+      await fetchPostDetail(selectedPost.postId);
+      const updateFn = (prev) =>
+        prev.map((post) =>
+          post.postId === selectedPost.postId
+            ? { ...post, commentCount: (post.commentCount || 0) + 1 }
+            : post,
+        );
+      setAllPosts(updateFn);
+      setPosts(updateFn);
     } catch (err) {
       console.error("Failed to add comment:", err);
+      setNewComment(commentContent);
       alert(err.message);
     } finally {
       setSubmitting(false);
@@ -694,20 +419,7 @@ const Community = () => {
   const fetchPostDetail = async (postId) => {
     try {
       setPostDetailLoading(true);
-      const token = getAuthToken();
-      const response = await fetch(
-        `https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Community/posts/${postId}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          cache: "no-cache",
-        },
-      );
-      if (!response.ok) throw new Error("Failed to fetch post details");
-      const data = await response.json();
+      const data = await getPostById(postId);
       if (data.success && data.data) {
         if (data.data.comments && Array.isArray(data.data.comments)) {
           data.data.comments.sort(
@@ -831,6 +543,52 @@ const Community = () => {
     0,
   );
 
+  // Opening post from location state
+  useEffect(() => {
+    const openPostId = location?.state?.openPostId;
+    if (!openPostId) return;
+    if (openingPostRef.current === openPostId && postDetailOpen) return;
+    const openPost = async () => {
+      openingPostRef.current = openPostId;
+      const found = posts.find((p) => String(p.postId) === String(openPostId));
+      if (found) {
+        await openPostDetail(found);
+      } else {
+        await fetchPostDetail(openPostId);
+        setPostDetailOpen(true);
+      }
+      navigate(window.location.pathname, { replace: true, state: {} });
+    };
+    openPost();
+  }, [location?.state?.openPostId, posts, postDetailOpen, navigate]);
+
+  // Click outside handler for dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        showModalCategoryDropdown &&
+        !event.target.closest(`.${styles.category_select}`)
+      ) {
+        setShowModalCategoryDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showModalCategoryDropdown]);
+
+  // Delete dialog handlers
+  const openDeleteDialog = (post, event) => {
+    if (event) event.stopPropagation();
+    setPostToDelete(post);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setPostToDelete(null);
+  };
+
+  // Loading state
   if (
     userProfileLoading ||
     careerGoalsLoading ||
@@ -1441,6 +1199,7 @@ const Community = () => {
         </DialogActions>
       </Dialog>
 
+      {/* Post Detail Dialog */}
       <Dialog
         open={postDetailOpen}
         onClose={() => {
@@ -1587,6 +1346,7 @@ const Community = () => {
         )}
       </Dialog>
 
+      {/* Create Post Modal */}
       {showCreateModal && (
         <div
           className={styles.modal_overlay}
@@ -1714,6 +1474,7 @@ const Community = () => {
         </div>
       )}
 
+      {/* Toast notification */}
       {toast.show && (
         <div className={`${styles.toast} ${styles[toast.type]}`}>
           {toast.message}

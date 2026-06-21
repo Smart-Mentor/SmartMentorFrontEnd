@@ -475,119 +475,6 @@
   border-color: #ef4444;
 }
 
-/* .upload_label {
-  cursor: pointer;
-  width: 100%;
-  display: block;
-}
-
-.upload_icon_wrapper {
-  width: 70px;
-  height: 70px;
-  background: rgba(10, 90, 219, 0.1);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 16px;
-}
-
-.upload_icon {
-  font-size: 36px;
-  color: #0A5ADB;
-}
-
-.upload_title {
-  margin-bottom: 8px;
-  color: #1a1a2e;
-}
-
-.upload_hint {
-  color: #666;
-  margin-bottom: 8px;
-}
-
-.upload_format {
-  color: #999;
-}
-
-.file_preview {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.file_icon_wrapper {
-  width: 60px;
-  height: 60px;
-  background: rgba(10, 90, 219, 0.1);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.file_icon {
-  font-size: 32px;
-  color: #0A5ADB;
-}
-
-.file_info {
-  text-align: left;
-}
-
-.file_name {
-  font-weight: 600;
-  color: #1a1a2e;
-  margin-bottom: 4px;
-}
-
-.file_size {
-  font-size: 12px;
-  color: #999;
-}
-
-.remove_file_btn {
-  background: none;
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  padding: 8px 16px;
-  cursor: pointer;
-  color: #ef4444;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.remove_file_btn:hover {
-  background: #ef4444;
-  color: white;
-  border-color: #ef4444;
-}
-
-.error_alert {
-  margin-top: 16px;
-}
-
-.upload_tips {
-  margin-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  justify-content: center;
-}
-
-.tip_item {
-  font-size: 12px;
-  color: #666;
-  padding: 6px 12px;
-  background: #f9f9f9;
-  border-radius: 20px;
-} */
-
 /* Career Grid */
 .career_grid {
   display: grid;
@@ -691,67 +578,6 @@
 .interest_chip:hover {
   transform: translateY(-2px) !important;
 }
-
-/* Languages Section */
-/* .languages_section {
-  margin-bottom: 0;
-}
-
-.languages_grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.language_label {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  cursor: pointer;
-  padding: 10px 16px;
-  border-radius: 14px;
-  transition: all 0.3s ease;
-  background: #f9f9f9;
-}
-
-.language_label:hover {
-  background: #f0f0f0;
-}
-
-.language_label input {
-  display: none;
-}
-
-.checkmark {
-  width: 22px;
-  height: 22px;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  display: inline-block;
-  position: relative;
-  transition: all 0.3s ease;
-}
-
-.language_label input:checked + .checkmark {
-  background: #0A5ADB;
-  border-color: #0A5ADB;
-}
-
-.language_label input:checked + .checkmark::after {
-  content: "✓";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: white;
-  font-size: 12px;
-}
-
-.language_name {
-  font-size: 15px;
-  font-weight: 500;
-  color: #1a1a2e;
-} */
 
 /* Review Section */
 .review_section {
@@ -1143,6 +969,7 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
 /* Skills Filter Bar */
 .skills_filter_bar {
   display: flex;

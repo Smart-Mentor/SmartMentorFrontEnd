@@ -16,7 +16,15 @@ import TabPanel from '@mui/lab/TabPanel';
 import DownloadIcon from "@mui/icons-material/Download";
 import ShareIcon from "@mui/icons-material/Share";
 import { useNavigate } from "react-router-dom";
-import { getCurrentUser, getUserProfile, updateUserProfileData, getCommunityPostsByCareerGoal } from "../../Api/authenticationService";
+import { 
+  getCurrentUser, 
+  getUserProfile, 
+  updateUserProfileData, 
+  getCommunityPostsByCareerGoal,
+  getAllSkills,
+  getAllInterests,
+  getAllCareerGoals
+} from "../../Api/authenticationService";
 import styles from "./Profile.module.css";
 
 // Import images
@@ -26,113 +34,18 @@ import Fundementals from "../../assets/book-open_.png";
 import Community from "../../assets/users_blue.png";
 import Portfolio from "../../assets/File_dock.png";
 
-// ---------- Backend static data (from the provided lists) ----------
-const SKILLS_LIST = [
-  { id: 1, name: "C#", category: " " },
-  { id: 2, name: "ASP.NET Core Web API", category: " " },
-  { id: 3, name: "Entity Framework Core", category: " " },
-  { id: 4, name: "LINQ Queries", category: " " },
-  { id: 5, name: "RESTful API Design", category: " " },
-  { id: 6, name: "Dependency Injection", category: " " },
-  { id: 7, name: "HTML5", category: " " },
-  { id: 8, name: "CSS3", category: " " },
-  { id: 9, name: "JavaScript ES6+", category: " " },
-  { id: 10, name: "React.js Fundamentals", category: " " },
-  { id: 11, name: "Responsive Web Design", category: " " },
-  { id: 12, name: "SQL Server", category: " " },
-  { id: 13, name: "Database Normalization", category: " " },
-  { id: 14, name: "Writing Complex SQL Queries", category: " " },
-  { id: 15, name: "Stored Procedures", category: " " },
-  { id: 16, name: "Python Programming", category: " " },
-  { id: 17, name: "Data Analysis with Pandas", category: " " },
-  { id: 18, name: "Data Visualization", category: " " },
-  { id: 19, name: "Machine Learning Fundamentals", category: " " },
-  { id: 20, name: "Docker Containers", category: " " },
-  { id: 21, name: "CI/CD Pipelines", category: " " },
-  { id: 22, name: "Azure Cloud Basics", category: " " },
-  { id: 23, name: "OWASP Security Principles", category: " " },
-  { id: 24, name: "Authentication & Authorization (JWT)", category: " " },
-  { id: 25, name: "React Hooks", category: " " },
-  { id: 26, name: "State Management (Redux)", category: " " },
-  { id: 27, name: "Tailwind CSS", category: " " },
-  { id: 28, name: "Unit Testing (xUnit)", category: " " },
-  { id: 29, name: "Microservices Architecture", category: " " },
-  { id: 30, name: "SOLID Principles", category: " " },
-  { id: 31, name: "Design Patterns", category: " " },
-  { id: 32, name: "PostgreSQL", category: " " },
-  { id: 33, name: "MongoDB", category: " " },
-  { id: 34, name: "NumPy", category: " " },
-  { id: 35, name: "Scikit-learn", category: " " },
-  { id: 36, name: "TensorFlow", category: " " },
-  { id: 37, name: "Kubernetes", category: " " },
-  { id: 38, name: "Terraform", category: " " },
-  { id: 39, name: "Azure App Services", category: " " },
-  { id: 40, name: "Azure Functions", category: " " },
-  { id: 41, name: "SQL Injection Prevention", category: " " },
-  { id: 42, name: "XSS & CSRF Protection", category: " " },
-  { id: 43, name: "Git & Version Control", category: " " },
-  { id: 44, name: "Agile / Scrum", category: " " },
-  { id: 45, name: "TypeScript", category: " " },
-  { id: 46, name: "Next.js", category: " " },
-  { id: 47, name: "System Design", category: " " },
-  { id: 48, name: "Message Queues (RabbitMQ)", category: " " },
-  { id: 49, name: "OWASP Top 10", category: " " },
-  { id: 50, name: "ETL Pipelines", category: " " },
-  { id: 51, name: "Jupyter Notebooks", category: " " },
-  { id: 52, name: "GitHub Actions", category: " " },
-  { id: 53, name: "Monitoring (Prometheus)", category: " " },
-  { id: 54, name: "React Router", category: " " },
-];
+// Skill level mapping
+const skillLevelMap = {
+  "Beginner": 1,
+  "Intermediate": 2,
+  "Advanced": 3
+};
 
-const INTERESTS_LIST = [
-  { id: 1, name: "Backend Development with .NET" },
-  { id: 2, name: "Frontend Web Development" },
-  { id: 3, name: "Full-Stack Web Applications" },
-  { id: 4, name: "Data Analytics and Visualization" },
-  { id: 5, name: "Artificial Intelligence & Machine Learning" },
-  { id: 6, name: "Cloud Computing (Azure)" },
-  { id: 7, name: "DevOps & Automation" },
-  { id: 8, name: "Cybersecurity & Ethical Hacking" },
-  { id: 9, name: "Software Architecture & System Design" },
-  { id: 10, name: "Mobile App Development (React Native)" },
-  { id: 11, name: "Quality Assurance & Test Automation" },
-  { id: 12, name: "Site Reliability & System Observability" },
-  { id: 13, name: "Database Design & Administration" },
-  { id: 14, name: "Technical Product Management" },
-  { id: 15, name: "Blockchain & Decentralized Applications" },
-  { id: 16, name: "Embedded Systems & IoT" },
-  { id: 17, name: "Security Architecture & Threat Modeling" },
-  { id: 18, name: "Platform Engineering & Internal Tooling" },
-  { id: 19, name: "Data Engineering & ETL Pipelines" },
-  { id: 20, name: "MLOps & AI System Architecture" },
-  { id: 21, name: "TypeScript Full-Stack Development" },
-  { id: 22, name: "Game Development & Interactive Experiences" }
-];
-
-const CAREER_GOALS_LIST = [
-  { id: 1, name: "Junior Backend .NET Developer", description: "Build and maintain RESTful APIs using ASP.NET Core and SQL Server." },
-  { id: 2, name: "Full-Stack .NET Developer", description: "Develop complete web applications using ASP.NET Core and React.js." },
-  { id: 3, name: "Frontend React Developer", description: "Create responsive and interactive user interfaces using React and modern JavaScript." },
-  { id: 4, name: "Data Analyst", description: "Analyze datasets, generate insights, and build dashboards using Python and SQL." },
-  { id: 5, name: "Machine Learning Engineer", description: "Develop predictive models and AI solutions using Python and ML frameworks." },
-  { id: 6, name: "Cloud Engineer (Azure)", description: "Design and deploy scalable applications on Microsoft Azure." },
-  { id: 7, name: "DevOps Engineer", description: "Automate deployments and manage CI/CD pipelines using Docker and cloud tools." },
-  { id: 8, name: "Cybersecurity Analyst", description: "Secure applications and infrastructure by applying modern security practices." },
-  { id: 9, name: "Senior Backend .NET Developer", description: "Lead backend architecture, mentor juniors, and design scalable distributed systems." },
-  { id: 11, name: "Software Architect", description: "Design high-level system architecture and make strategic technology decisions." },
-  { id: 18, name: "Mobile Developer (React Native)", description: "Build cross-platform mobile apps using React Native and modern JavaScript." },
-  { id: 19, name: "QA Automation Engineer", description: "Write automated tests and build CI/CD testing pipelines for quality assurance." },
-  { id: 26, name: "Site Reliability Engineer", description: "Ensure system reliability, observability, and incident response at scale." },
-  { id: 27, name: "Database Developer", description: "Design optimized database schemas, stored procedures, and performance tuning." },
-  { id: 28, name: "Technical Product Manager", description: "Bridge engineering and business to deliver impactful technical products." },
-  { id: 29, name: "Blockchain Developer", description: "Build decentralized applications and smart contracts on blockchain platforms." },
-  { id: 30, name: "Embedded Systems Engineer", description: "Develop firmware and software for microcontrollers and IoT devices." },
-  { id: 31, name: "Security Architect", description: "Design enterprise security frameworks and threat mitigation strategies." },
-  { id: 32, name: "Platform Engineer", description: "Build internal developer platforms and tooling to improve engineering velocity." },
-  { id: 33, name: "Data Engineer", description: "Build and maintain ETL pipelines, data warehouses, and data infrastructure." },
-  { id: 34, name: "AI/ML Architect", description: "Design end-to-end machine learning systems and MLOps pipelines." },
-  { id: 35, name: "Full-Stack TypeScript Developer", description: "Build type-safe full-stack applications with TypeScript, Node.js, and React." }
-];
+const levelColors = {
+  1: "#10b981",
+  2: "#f59e0b",
+  3: "#0A5ADB"
+};
 
 function stringAvatar(name) {
   const names = name.split(" ");
@@ -155,10 +68,15 @@ export default function Profile() {
   const [notification, setNotification] = useState(null);
   const syncTimeoutRef = useRef(null);
 
+  // Data from API
+  const [skillsList, setSkillsList] = useState([]);
+  const [interestsList, setInterestsList] = useState([]);
+  const [careerGoalsList, setCareerGoalsList] = useState([]);
+
   // Backend‑synced profile fields
-  const [careerGoalId, setCareerGoalId] = useState(3);
+  const [careerGoalId, setCareerGoalId] = useState(null);
   const [interestIds, setInterestIds] = useState([]);
-  const [userSkills, setUserSkills] = useState([]); // Array of { skillId, skillLevel }
+  const [userSkills, setUserSkills] = useState([]); 
   
   // Editing states
   const [editingCareer, setEditingCareer] = useState(false);
@@ -191,7 +109,7 @@ export default function Profile() {
 
   // Helper: get skill name by ID
   const getSkillName = (skillId) => {
-    const skill = SKILLS_LIST.find(s => s.id === skillId);
+    const skill = skillsList.find(s => s.id === skillId);
     return skill ? skill.name : `Skill ${skillId}`;
   };
 
@@ -226,15 +144,33 @@ export default function Profile() {
 
   // Helper: get level color
   const getLevelColor = (level) => {
-    switch(level) {
-      case 1: return "#10b981";
-      case 2: return "#f59e0b";
-      case 3: return "#0A5ADB";
-      default: return "#999";
-    }
+    return levelColors[level] || "#999";
   };
 
-  // ---------- Sync to backend (debounced) ----------
+  // Fetch master data from API
+  const fetchMasterData = useCallback(async () => {
+    try {
+      const [skillsData, interestsData, careerGoalsData] = await Promise.all([
+        getAllSkills(),
+        getAllInterests(),
+        getAllCareerGoals()
+      ]);
+
+      const formattedSkills = skillsData.map(skill => ({
+        ...skill,
+        category: " "
+      }));
+
+      setSkillsList(formattedSkills);
+      setInterestsList(interestsData);
+      setCareerGoalsList(careerGoalsData);
+    } catch (err) {
+      console.error("Failed to fetch master data:", err);
+      showNotification("Failed to load skills, interests, or career goals", "error");
+    }
+  }, []);
+
+  // Sync to backend
   const syncProfileToBackend = useCallback(async (showToast = false) => {
     try {
       const payload = {
@@ -269,6 +205,7 @@ export default function Profile() {
 
   useEffect(() => {
     setAnimate(true);
+    fetchMasterData();
     fetchUserData();
   }, []);
 
@@ -290,7 +227,6 @@ export default function Profile() {
   };
 
   const handleAddSkill = (skillId) => {
-    // Check if skill already exists
     if (tempSkills.some(s => s.skillId === skillId)) {
       showNotification("Skill already added!", "error");
       return;
@@ -350,169 +286,168 @@ export default function Profile() {
     );
   };
 
-const fetchUserData = async () => {
-  try {
-    setLoading(true);
-    const userDataRes = await getCurrentUser();
-    const userProfile = await getUserProfile();
+  const fetchUserData = async () => {
+    try {
+      setLoading(true);
+      const userDataRes = await getCurrentUser();
+      const userProfile = await getUserProfile();
 
-    console.log("User Profile Data:", userProfile.data);
-    console.log("Current User Data:", userDataRes);
+      console.log("User Profile Data:", userProfile.data);
+      console.log("Current User Data:", userDataRes);
 
-    // Store the current user ID
-    if (userDataRes.userId) {
-      setCurrentUserId(userDataRes.userId);
-    }
-
-    setUserData({
-      name: userDataRes.fullName || `${userDataRes.firstName || ''} ${userDataRes.lastName || ''}`.trim() || userDataRes.username || userDataRes.name || "Learner",
-      title: userProfile.data.careerGoalName || "Frontend Developer",
-      email: userDataRes.email || "",
-      location: userDataRes.location || userDataRes.city || "Egypt",
-      joined: userDataRes.joinedDate ? new Date(userDataRes.joinedDate).toLocaleString('default', { month: 'long', year: 'numeric' }) : "2026",
-      bio: userDataRes.bio || userDataRes.about || "Passionate developer dedicated to continuous learning and building impactful applications."
-    });
-
-    if (userProfile.data.careerGoalId) {
-      setCareerGoalId(userProfile.data.careerGoalId);
-    } else {
-      const matched = CAREER_GOALS_LIST.find(cg => cg.name === userProfile.data.careerGoalName);
-      if (matched) setCareerGoalId(matched.id);
-    }
-
-    // Set interestIds from backend
-    if (userProfile.data.interestIds && Array.isArray(userProfile.data.interestIds) && userProfile.data.interestIds.length > 0) {
-      console.log("Setting interests from interestIds:", userProfile.data.interestIds);
-      setInterestIds(userProfile.data.interestIds);
-    } else if (userProfile.data.interests && Array.isArray(userProfile.data.interests) && userProfile.data.interests.length > 0) {
-      console.log("Setting interests from interests array:", userProfile.data.interests);
-      const ids = userProfile.data.interests.map(i => i.id || i.interestId).filter(id => id);
-      setInterestIds(ids);
-    } else {
-      console.log("No interests found in API response");
-      setInterestIds([]);
-    }
-
-    // Set skills from backend
-    if (userProfile.data.skills && Array.isArray(userProfile.data.skills) && userProfile.data.skills.length > 0) {
-      console.log("Setting skills from API:", userProfile.data.skills);
-      setUserSkills(userProfile.data.skills);
-    } else {
-      setUserSkills([]);
-    }
-
-    if (userDataRes.progress) {
-      setProgress([
-        { name: "Fundamentals", percentage: userDataRes.progress.fundamentals || 0, color: "#0A5ADB" },
-        { name: "Core Skills", percentage: userDataRes.progress.coreSkills || 0, color: "#58A7B5" },
-        { name: "Advanced", percentage: userDataRes.progress.advanced || 0, color: "#667eea" },
-      ]);
-    }
-
-    if (userProfile.data.projects && userProfile.data.projects.length > 0) {
-      setProjects(userProfile.data.projects.map((project, index) => ({
-        id: index + 1,
-        name: project.name,
-        level: project.level || "Beginner",
-        status: project.status || "Not Started",
-        progress: project.progress || 0,
-        color: getProjectColor(project.status)
-      })));
-    } else {
-      setProjects([
-        { id: 1, name: "Sample Project", level: "Beginner", status: "Not Started", progress: 0, color: "#0A5ADB" }
-      ]);
-    }
-
-    setError(null);
-  } catch (err) {
-    console.error("Failed to fetch user data:", err);
-    setError(err.message || "Failed to load profile data");
-    showNotification("Failed to load profile data", "error");
-  } finally {
-    setLoading(false);
-  }
-};
-
-  // Fetch all posts where current user is the author across all career goals
-const fetchAllUserPosts = useCallback(async (userId) => {
-  if (!userId) {
-    console.log('No user ID provided');
-    return;
-  }
-
-  try {
-    setLoadingPosts(true);
-    const allCareerGoals = CAREER_GOALS_LIST.filter(cg => 
-      [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 18, 19, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35].includes(cg.id)
-    );
-    let allUserPosts = [];
-
-    // Fetch posts from each career goal
-    for (const careerGoal of allCareerGoals) {
-      try {
-        const response = await getCommunityPostsByCareerGoal(careerGoal.id);
-        
-        if (response.success && response.data) {
-          // Filter posts where current user is the author
-          const userAuthoredPosts = response.data.filter(
-            post => post.author.userId === userId
-          );
-          allUserPosts = [...allUserPosts, ...userAuthoredPosts];
-        }
-      } catch (err) {
-        console.error(`Error fetching posts for career goal ${careerGoal.id}:`, err);
-        // Continue with other career goals even if one fails
+      if (userDataRes.userId) {
+        setCurrentUserId(userDataRes.userId);
       }
+
+      setUserData({
+        name: userDataRes.fullName || `${userDataRes.firstName || ''} ${userDataRes.lastName || ''}`.trim() || userDataRes.username || userDataRes.name || "Learner",
+        title: userProfile.data.careerGoalName || "Frontend Developer",
+        email: userDataRes.email || "",
+        location: userDataRes.location || userDataRes.city || "Egypt",
+        joined: userDataRes.joinedDate ? new Date(userDataRes.joinedDate).toLocaleString('default', { month: 'long', year: 'numeric' }) : "2026",
+        bio: userDataRes.bio || userDataRes.about || "Passionate developer dedicated to continuous learning and building impactful applications."
+      });
+
+      if (userProfile.data.careerGoalId) {
+        setCareerGoalId(userProfile.data.careerGoalId);
+      } else if (userProfile.data.careerGoalName) {
+        const matched = careerGoalsList.find(cg => cg.name === userProfile.data.careerGoalName);
+        if (matched) setCareerGoalId(matched.id);
+      }
+
+      // Set interestIds from backend
+      if (userProfile.data.interestIds && Array.isArray(userProfile.data.interestIds) && userProfile.data.interestIds.length > 0) {
+        console.log("Setting interests from interestIds:", userProfile.data.interestIds);
+        setInterestIds(userProfile.data.interestIds);
+      } else if (userProfile.data.interests && Array.isArray(userProfile.data.interests) && userProfile.data.interests.length > 0) {
+        console.log("Setting interests from interests array:", userProfile.data.interests);
+        const ids = userProfile.data.interests.map(i => i.id || i.interestId).filter(id => id);
+        setInterestIds(ids);
+      } else {
+        console.log("No interests found in API response");
+        setInterestIds([]);
+      }
+
+      // Set skills from backend
+      if (userProfile.data.skills && Array.isArray(userProfile.data.skills) && userProfile.data.skills.length > 0) {
+        console.log("Setting skills from API:", userProfile.data.skills);
+        setUserSkills(userProfile.data.skills);
+      } else {
+        setUserSkills([]);
+      }
+
+      if (userDataRes.progress) {
+        setProgress([
+          { name: "Fundamentals", percentage: userDataRes.progress.fundamentals || 0, color: "#0A5ADB" },
+          { name: "Core Skills", percentage: userDataRes.progress.coreSkills || 0, color: "#58A7B5" },
+          { name: "Advanced", percentage: userDataRes.progress.advanced || 0, color: "#667eea" },
+        ]);
+      }
+
+      if (userProfile.data.projects && userProfile.data.projects.length > 0) {
+        setProjects(userProfile.data.projects.map((project, index) => ({
+          id: index + 1,
+          name: project.name,
+          level: project.level || "Beginner",
+          status: project.status || "Not Started",
+          progress: project.progress || 0,
+          color: getProjectColor(project.status)
+        })));
+      } else {
+        setProjects([
+          { id: 1, name: "Sample Project", level: "Beginner", status: "Not Started", progress: 0, color: "#0A5ADB" }
+        ]);
+      }
+
+      setError(null);
+    } catch (err) {
+      console.error("Failed to fetch user data:", err);
+      setError(err.message || "Failed to load profile data");
+      showNotification("Failed to load profile data", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAllUserPosts = useCallback(async (userId) => {
+    if (!userId) {
+      console.log('No user ID provided');
+      return;
     }
 
-    console.log(`Found ${allUserPosts.length} posts authored by user`);
-    setUserPosts(allUserPosts);
+    try {
+      setLoadingPosts(true);
+      const allCareerGoalIds = careerGoalsList.map(cg => cg.id);
+      
+      if (allCareerGoalIds.length === 0) {
+        console.log('No career goals available');
+        setLoadingPosts(false);
+        return;
+      }
 
-    // Convert posts to activity format
-    const postActivities = allUserPosts.map(post => ({
-      id: `post-${post.postId}`,
-      logo: Community,
-      title: post.title,
-      history: new Date(new Date(post.createdAt).getTime() + (3 * 60 * 60 * 1000)).toLocaleString('default', { 
-        month: 'short', 
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      }),
-      type: 'community',
-      likeCount: post.likeCount,
-      commentCount: post.commentCount,
-      isLiked: post.isLikedByCurrentUser,
-      author: `${post.author.firstName} ${post.author.lastName}`,
-      careerGoal: post.primaryCareerGoal?.careerGoalName || 'Unknown',
-      contentPreview: post.contentPreview
-    }));
+      let allUserPosts = [];
 
-    // Sort by date (newest first)
-    postActivities.sort((a, b) => new Date(b.history) - new Date(a.history));
+      // Fetch posts from each career goal
+      for (const goalId of allCareerGoalIds) {
+        try {
+          const response = await getCommunityPostsByCareerGoal(goalId);
+          
+          if (response.success && response.data) {
+            const userAuthoredPosts = response.data.filter(
+              post => post.author?.userId === userId
+            );
+            allUserPosts = [...allUserPosts, ...userAuthoredPosts];
+          }
+        } catch (err) {
+          console.error(`Error fetching posts for career goal ${goalId}:`, err);
+        }
+      }
 
-    // Merge with existing activities or replace community activities
-    setActivities(prevActivities => {
-      const nonCommunityActivities = prevActivities.filter(activity => activity.type !== 'community');
-      return [...postActivities, ...nonCommunityActivities];
-    });
+      console.log(`Found ${allUserPosts.length} posts authored by user`);
+      setUserPosts(allUserPosts);
 
-  } catch (err) {
-    console.error('Failed to fetch user posts:', err);
-    showNotification('Failed to load your community posts', 'error');
-  } finally {
-    setLoadingPosts(false);
-  }
-}, []);
+      // Convert posts to activity format
+      const postActivities = allUserPosts.map(post => ({
+        id: `post-${post.postId}`,
+        logo: Community,
+        title: post.title,
+        history: new Date(new Date(post.createdAt).getTime() + (3 * 60 * 60 * 1000)).toLocaleString('default', { 
+          month: 'short', 
+          day: 'numeric',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        type: 'community',
+        likeCount: post.likeCount,
+        commentCount: post.commentCount,
+        isLiked: post.isLikedByCurrentUser,
+        author: `${post.author?.firstName || ''} ${post.author?.lastName || ''}`.trim(),
+        careerGoal: post.primaryCareerGoal?.careerGoalName || 'Unknown',
+        contentPreview: post.contentPreview
+      }));
 
-// Fetch user's posts from all career goals when userId is available
-useEffect(() => {
-  if (currentUserId && !loading) {
-    fetchAllUserPosts(currentUserId);
-  }
-}, [currentUserId, loading, fetchAllUserPosts]);
+      // Sort by date
+      postActivities.sort((a, b) => new Date(b.history) - new Date(a.history));
+
+      setActivities(prevActivities => {
+        const nonCommunityActivities = prevActivities.filter(activity => activity.type !== 'community');
+        return [...postActivities, ...nonCommunityActivities];
+      });
+
+    } catch (err) {
+      console.error('Failed to fetch user posts:', err);
+      showNotification('Failed to load your community posts', 'error');
+    } finally {
+      setLoadingPosts(false);
+    }
+  }, [careerGoalsList]);
+
+  useEffect(() => {
+    if (currentUserId && !loading && careerGoalsList.length > 0) {
+      fetchAllUserPosts(currentUserId);
+    }
+  }, [currentUserId, loading, careerGoalsList, fetchAllUserPosts]);
 
   const getProjectColor = (status) => {
     switch(status) {
@@ -522,18 +457,9 @@ useEffect(() => {
     }
   };
 
-  const getActivityLogo = (type) => {
-    switch(type) {
-      case "course": return Fundementals;
-      case "community": return Community;
-      case "project": return Portfolio;
-    }
-  };
-
   const saveDataToLocal = () => {
     const dataToSave = {
       userData,
-      stats,
       progress,
       projects,
       userSkills,
@@ -594,11 +520,6 @@ useEffect(() => {
     updatedProgress[index].percentage = limitedPercentage;
     setProgress(updatedProgress);
     saveDataToLocal();
-    
-    const avgProgress = Math.round(updatedProgress.reduce((acc, p) => acc + p.percentage, 0) / updatedProgress.length);
-    setStats(stats.map(s => 
-      s.name === "Courses Completed" ? { ...s, num: Math.floor(avgProgress / 10) } : s
-    ));
   };
 
   const handleShareProfile = () => {
@@ -610,15 +531,15 @@ useEffect(() => {
     ? Math.round(userSkills.reduce((acc, s) => acc + s.skillLevel, 0) / userSkills.length * 100 / 3)
     : 0;
   const completedProjects = projects.filter(p => p.status === "Completed").length;
-  const currentCareerGoal = CAREER_GOALS_LIST.find(cg => cg.id === careerGoalId);
-  const selectedInterests = INTERESTS_LIST.filter(i => interestIds.includes(i.id));
+  const currentCareerGoal = careerGoalsList.find(cg => cg.id === careerGoalId);
+  const selectedInterests = interestsList.filter(i => interestIds.includes(i.id));
 
-  // Group skills by category for better organization
-  const skillsByCategory = SKILLS_LIST.reduce((acc, skill) => {
-    if (!acc[skill.category]) {
-      acc[skill.category] = [];
+  const skillsByCategory = skillsList.reduce((acc, skill) => {
+    const category = skill.category || " ";
+    if (!acc[category]) {
+      acc[category] = [];
     }
-    acc[skill.category].push(skill);
+    acc[category].push(skill);
     return acc;
   }, {});
 
@@ -679,7 +600,6 @@ useEffect(() => {
             <div className={styles.contact_item}>
               <EmailOutlinedIcon />
               <Typography>{userData.email}</Typography>
-              {/* <span className={styles.read_only_badge}>Verified</span> */}
             </div>
             <div className={styles.contact_item}>
               <LocationOnOutlinedIcon />
@@ -722,11 +642,11 @@ useEffect(() => {
                 {editingCareer ? (
                   <div className={styles.edit_section}>
                     <select
-                      value={tempCareerId}
+                      value={tempCareerId || ""}
                       onChange={(e) => setTempCareerId(Number(e.target.value))}
                       className={styles.select_input}
                     >
-                      {CAREER_GOALS_LIST.map(cg => (
+                      {careerGoalsList.map(cg => (
                         <option key={cg.id} value={cg.id}>{cg.name}</option>
                       ))}
                     </select>
@@ -762,7 +682,7 @@ useEffect(() => {
                 {editingInterests ? (
                   <div className={styles.edit_section}>
                     <div className={styles.interests_grid}>
-                      {INTERESTS_LIST.map(interest => (
+                      {interestsList.map(interest => (
                         <button
                           key={interest.id}
                           onClick={() => handleToggleInterest(interest.id)}
@@ -799,52 +719,52 @@ useEffect(() => {
               </div>
 
               {/* Skills Summary Section */}
-                <div className={styles.settings_section}>
-                  <div className={styles.section_header}>
-                    <h4>⚡ Skills Summary</h4>
-                    <button onClick={() => setValue('2')} className={styles.view_all_btn_small}>
-                      Manage All Skills →
-                    </button>
-                  </div>
-                  <div className={styles.skills_summary}>
-                    {userSkills.slice(0, 5).map(skill => {
-                      const skillName = getSkillName(skill.skillId);
-                      return (
-                        <div key={skill.skillId} className={styles.summary_skill_item}>
-                          <div className={styles.summary_skill_header}>
-                            <span className={styles.summary_skill_name}>{skillName}</span>
-                            <span 
-                              className={styles.summary_skill_level}
+              <div className={styles.settings_section}>
+                <div className={styles.section_header}>
+                  <h4>⚡ Skills Summary</h4>
+                  <button onClick={() => setValue('2')} className={styles.view_all_btn_small}>
+                    Manage All Skills →
+                  </button>
+                </div>
+                <div className={styles.skills_summary}>
+                  {userSkills.slice(0, 5).map(skill => {
+                    const skillName = getSkillName(skill.skillId);
+                    return (
+                      <div key={skill.skillId} className={styles.summary_skill_item}>
+                        <div className={styles.summary_skill_header}>
+                          <span className={styles.summary_skill_name}>{skillName}</span>
+                          <span 
+                            className={styles.summary_skill_level}
+                            style={{ 
+                              color: getLevelColor(skill.skillLevel),
+                              background: `rgba(${skill.skillLevel === 1 ? '16, 185, 129' : skill.skillLevel === 2 ? '245, 158, 11' : '10, 90, 219'}, 0.1)`
+                            }}
+                          >
+                            {getLevelLabel(skill.skillLevel)}
+                          </span>
+                        </div>
+                        <div className={styles.level_indicator_container}>
+                          <div className={styles.level_indicator}>
+                            <div 
+                              className={styles.level_fill}
                               style={{ 
-                                color: skill.skillLevel === 1 ? "#10b981" : skill.skillLevel === 2 ? "#f59e0b" : "#0A5ADB",
-                                background: `rgba(${skill.skillLevel === 1 ? '16, 185, 129' : skill.skillLevel === 2 ? '245, 158, 11' : '10, 90, 219'}, 0.1)`
+                                width: `${(skill.skillLevel / 3) * 100}%`,
+                                background: "rgb(77, 141, 243)"
                               }}
-                            >
-                              {getLevelLabel(skill.skillLevel)}
-                            </span>
-                          </div>
-                          <div className={styles.level_indicator_container}>
-                            <div className={styles.level_indicator}>
-                              <div 
-                                className={styles.level_fill}
-                                style={{ 
-                                  width: `${(skill.skillLevel / 3) * 100}%`,
-                                  background: "rgb(77, 141, 243)"  // Same color for all levels
-                                }}
-                              />
-                            </div>
+                            />
                           </div>
                         </div>
-                      );
-                    })}
-                    {userSkills.length > 5 && (
-                      <p className={styles.more_skills}>+{userSkills.length - 5} more skills</p>
-                    )}
-                    {userSkills.length === 0 && (
-                      <p className={styles.empty_message}>No skills added yet. Click "Manage All Skills" to add your skills.</p>
-                    )}
-                  </div>
+                      </div>
+                    );
+                  })}
+                  {userSkills.length > 5 && (
+                    <p className={styles.more_skills}>+{userSkills.length - 5} more skills</p>
+                  )}
+                  {userSkills.length === 0 && (
+                    <p className={styles.empty_message}>No skills added yet. Click "Manage All Skills" to add your skills.</p>
+                  )}
                 </div>
+              </div>
 
               <div className={styles.overview_grid}>
               </div>
@@ -884,11 +804,11 @@ useEffect(() => {
                         {tempSkills.length > 0 ? (
                           <div className={styles.selected_skills_list}>
                             {tempSkills.map(skill => {
-                              const skillInfo = SKILLS_LIST.find(s => s.id === skill.skillId);
+                              const skillInfo = skillsList.find(s => s.id === skill.skillId);
                               return (
                                 <div key={skill.skillId} className={styles.selected_skill_item}>
                                   <div className={styles.selected_skill_info}>
-                                    <span className={styles.selected_skill_name}>{skillInfo?.name}</span>
+                                    <span className={styles.selected_skill_name}>{skillInfo?.name || `Skill ${skill.skillId}`}</span>
                                     <div className={styles.level_selector}>
                                       <button
                                         className={`${styles.level_btn} ${skill.skillLevel === 1 ? styles.active : ''}`}
@@ -930,7 +850,7 @@ useEffect(() => {
                         <div className={styles.skills_categories}>
                           {Object.entries(skillsByCategory).map(([category, skills]) => (
                             <div key={category} className={styles.skill_category}>
-                              <h6>{category}</h6>
+                              <h6>{category === " " ? "All Skills" : category}</h6>
                               <div className={styles.category_skills}>
                                 {skills.map(skill => {
                                   const isSelected = tempSkills.some(s => s.skillId === skill.id);
