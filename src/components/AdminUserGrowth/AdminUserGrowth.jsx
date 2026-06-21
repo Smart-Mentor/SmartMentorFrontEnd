@@ -1,5 +1,5 @@
-// AdminUserGrowth.jsx
 import { useState, useEffect } from "react";
+import { adminGetUserGrowth } from "../../api/authenticationService";
 import styles from "./AdminUserGrowth.module.css";
 
 const AdminUserGrowth = () => {
@@ -12,11 +12,6 @@ const AdminUserGrowth = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState("registrations");
   const [dateError, setDateError] = useState("");
-
-  // Get JWT token from localStorage
-  const getAuthToken = () => {
-    return localStorage.getItem("token");
-  };
 
   // Validate dates
   const validateDates = () => {
@@ -46,45 +41,40 @@ const AdminUserGrowth = () => {
     return new Date(date).toISOString();
   };
 
-  // Fetch user growth data from API
   const fetchUserGrowth = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      const token = getAuthToken();
-      let url = `https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/analytics/user-growth?groupBy=${groupBy}`;
+      const params = {
+        groupBy: groupBy
+      };
       
       if (startDate) {
-        url += `&startDate=${formatDateForAPI(startDate)}`;
+        params.startDate = formatDateForAPI(startDate);
       }
       if (endDate) {
-        url += `&endDate=${formatDateForAPI(endDate)}`;
+        params.endDate = formatDateForAPI(endDate);
       }
       
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success && result.data) {
-          setGrowthData(result.data);
-          setDateError("");
-        } else {
-          setError("Failed to load user growth data.");
-        }
-      } else if (response.status === 401) {
-        setError("Authentication failed. Please log in again.");
+      const result = await adminGetUserGrowth(params);
+      
+      if (result.success && result.data) {
+        setGrowthData(result.data);
+        setDateError("");
       } else {
-        setError("Failed to fetch user growth data.");
+        setError("Failed to load user growth data.");
       }
     } catch (error) {
       console.error("Error fetching user growth:", error);
-      setError("Network error. Please try again.");
+      
+      if (error.message.includes("authentication") || 
+          error.message.includes("token") ||
+          error.message.includes("401")) {
+        setError("Authentication failed. Please log in again.");
+      } else {
+        setError(error.message || "Network error. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -155,7 +145,7 @@ const AdminUserGrowth = () => {
     fetchUserGrowth();
   };
 
-  // Calculate summary statistics from points data
+  // Calculate summary statistics
   const calculateSummaryStats = () => {
     if (!growthData?.points || growthData.points.length === 0) {
       return {
@@ -206,7 +196,6 @@ const AdminUserGrowth = () => {
 
   const stats = calculateSummaryStats();
 
-  // Get max value for chart scaling with padding for number visibility
   const getMaxValue = () => {
     if (!growthData?.points) return 100;
     let maxValue = 0;
@@ -217,7 +206,6 @@ const AdminUserGrowth = () => {
                     point.activeUsers;
       if ((value || 0) > maxValue) maxValue = value || 0;
     });
-    // Add 20% padding to the top for better number visibility
     return maxValue > 0 ? Math.ceil(maxValue * 1.2) : 10;
   };
 
@@ -487,9 +475,6 @@ const AdminUserGrowth = () => {
               }
               const heightPercentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
               
-              // Calculate the position for the number (at the top of the bar)
-              const barHeight = heightPercentage;
-              
               return (
                 <div key={index} className={styles.bar_wrapper}>
                   <div className={styles.bar_container}>
@@ -500,7 +485,7 @@ const AdminUserGrowth = () => {
                     {value > 0 && (
                       <div 
                         className={styles.bar_number}
-                        style={{ bottom: `${barHeight}%` }}
+                        style={{ bottom: `${heightPercentage}%` }}
                       >
                         {value}
                       </div>

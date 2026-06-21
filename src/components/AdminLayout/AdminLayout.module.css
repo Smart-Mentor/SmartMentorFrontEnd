@@ -1,8 +1,3 @@
-/* AdminLayout.module.css */
-/* ============================================ */
-/* ADMIN LAYOUT - FULLY RESPONSIVE FIXED VERSION */
-/* ============================================ */
-
 :root {
   --primary-gradient: linear-gradient(135deg, #0A5ADB, #58A7B5);
   --danger-gradient: linear-gradient(135deg, #dc2626, #ef4444);
@@ -22,9 +17,7 @@
   position: relative;
 }
 
-/* ============================================ */
 /* ANIMATED BACKGROUND BLURS */
-/* ============================================ */
 
 .bg_blur_1,
 .bg_blur_2 {
@@ -64,9 +57,7 @@
   66% { transform: translate(20px, -20px) rotate(-240deg); }
 }
 
-/* ============================================ */
 /* MENU BUTTON - Mobile & Tablet */
-/* ============================================ */
 
 .menu_button {
   position: fixed;
@@ -93,9 +84,7 @@
   transform: scale(1.05);
 }
 
-/* ============================================ */
 /* SIDEBAR - Desktop Default */
-/* ============================================ */
 
 .sidebar {
   width: var(--sidebar-width);
@@ -149,11 +138,9 @@
   width: 30px;
 }
 
-/* ============================================ */
 /* SIDEBAR - Tablet & Mobile States */
-/* ============================================ */
 
-/* Tablet & Mobile - Closed state (hidden off-screen) */
+/* Tablet & Mobile - Closed state */
 .sidebar.mobile_closed {
   transform: translateX(-100%);
   position: fixed;
@@ -165,7 +152,7 @@
   z-index: 1000;
 }
 
-/* Tablet & Mobile - Open state (visible) */
+/* Tablet & Mobile - Open state */
 .sidebar.mobile_open {
   transform: translateX(0);
   position: fixed;
@@ -232,9 +219,7 @@
   pointer-events: none;
 }
 
-/* ============================================ */
 /* SIDEBAR TOGGLE BUTTON - Desktop Only */
-/* ============================================ */
 
 .sidebar_toggle {
   position: absolute;
@@ -271,9 +256,7 @@
   transform: translateY(-50%) rotate(180deg) scale(1.1);
 }
 
-/* ============================================ */
 /* LOGO SECTION */
-/* ============================================ */
 
 .logo {
   text-align: center;
@@ -320,9 +303,7 @@
   transition: var(--transition-default);
 }
 
-/* ============================================ */
 /* NAVIGATION */
-/* ============================================ */
 
 .nav {
   display: flex;
@@ -410,9 +391,7 @@
   color: #0A5ADB;
 }
 
-/* ============================================ */
 /* LOGOUT BUTTON */
-/* ============================================ */
 
 .logout_btn {
   display: flex;
@@ -463,9 +442,7 @@
   transform: rotate(180deg);
 }
 
-/* ============================================ */
 /* MAIN CONTENT AREA */
-/* ============================================ */
 
 .main_content {
   flex: 1;
@@ -504,9 +481,7 @@
   border-radius: 10px;
 }
 
-/* ============================================ */
 /* RESPONSIVE BREAKPOINTS */
-/* ============================================ */
 
 /* Tablet (768px - 1024px) */
 @media (min-width: 768px) and (max-width: 1024px) {
@@ -632,9 +607,7 @@
   }
 }
 
-/* ============================================ */
 /* LOGOUT CONFIRMATION MODAL */
-/* ============================================ */
 
 .modal_overlay {
   position: fixed;
@@ -825,9 +798,7 @@
   }
 }
 
-/* ============================================ */
 /* KEYFRAMES */
-/* ============================================ */
 
 @keyframes fadeIn {
   from {
@@ -863,9 +834,7 @@
   }
 }
 
-/* ============================================ */
 /* UTILITY CLASSES */
-/* ============================================ */
 
 /* Touch-friendly tap targets for mobile */
 @media (max-width: 768px) {

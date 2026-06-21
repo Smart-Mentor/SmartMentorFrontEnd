@@ -478,7 +478,7 @@
   color: #dc2626;
 }
 
-/* Table Section - Full Width (Sidebar Removed) */
+/* Table Section */
 .table_section {
   background: white;
   border-radius: 20px;
@@ -804,7 +804,7 @@
   color: #666;
 }
 
-/* Skills and Interests Badges - Full Display */
+/* Skills and Interests Badges */
 .skills_container {
   display: flex;
   flex-wrap: wrap;
@@ -860,9 +860,7 @@
   word-break: break-all;
 }
 
-/* ============================================ */
 /* RESPONSIVE TAB NAVIGATION */
-/* ============================================ */
 
 .tab_navigation {
   display: flex;
@@ -877,7 +875,7 @@
   -webkit-overflow-scrolling: touch;
 }
 
-/* Hide scrollbar for Chrome/Safari on desktop (keep functionality) */
+/* Hide scrollbar */
 .tab_navigation::-webkit-scrollbar {
   height: 3px;
 }
@@ -1031,7 +1029,7 @@
   }
 }
 
-/* Tab Navigation with scroll indicators (visual hint for scrollable tabs) */
+/* Tab Navigation with scroll indicators */
 @media (max-width: 768px) {
   .tab_navigation {
     scroll-snap-type: x mandatory;
@@ -1063,10 +1061,6 @@
     background: linear-gradient(270deg, rgba(255,255,255,0.95), rgba(255,255,255,0));
   }
 }
-
-/* ============================================ */
-/* MODERN MODAL STYLES */
-/* ============================================ */
 
 /* Modal Overlay */
 .modal_overlay {
@@ -1738,9 +1732,7 @@
   box-shadow: 0 6px 20px rgba(10, 90, 219, 0.35);
 }
 
-/* ============================================ */
-/* RESPONSIVE DESIGN - General */
-/* ============================================ */
+/* RESPONSIVE DESIGN */
 
 /* Tablets and below */
 @media (max-width: 991px) {
@@ -1978,6 +1970,7 @@
     font-size: 10px;
   }
 }
+
 /* Header Top with Logout Button */
 .header_top {
   display: flex;
@@ -2014,12 +2007,12 @@
   font-size: 18px;
 }
 
-/* Add this at the top or bottom of your existing CSS file */
 .dashboard_content {
   width: 100%;
   position: relative;
   z-index: 1;
 }
+
 /* View Skills Button */
 .view_skills_btn {
   padding: 6px 14px;
@@ -2123,6 +2116,7 @@
   gap: 12px;
   flex-wrap: wrap;
 }
+
 /* Remove Skill from Goal Button */
 .remove_skill_goal_btn {
   display: flex;

@@ -1,4 +1,3 @@
-// AdminLayout.jsx
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import PeopleIcon from '@mui/icons-material/People';
@@ -37,19 +36,15 @@ const AdminLayout = () => {
   }, []);
 
   const handleLogout = () => {
-    // Get tokens before clearing for logging (optional)
     const authToken = localStorage.getItem('token');
     const userData = localStorage.getItem('userData');
     
     console.log('Clearing admin tokens:', { authToken: !!authToken, userData: !!userData });
 
-    // Clear ALL localStorage items (like in Navbar)
     localStorage.clear();
     
-    // Clear sessionStorage
     sessionStorage.clear();
     
-    // Specifically remove auth-related items (redundant but thorough)
     localStorage.removeItem('token');
     localStorage.removeItem('authToken');
     localStorage.removeItem('userRole');
@@ -62,25 +57,20 @@ const AdminLayout = () => {
     localStorage.removeItem('adminData');
     localStorage.removeItem('refreshToken');
     
-    // Clear sessionStorage items
     sessionStorage.removeItem('authToken');
     sessionStorage.removeItem('userData');
     sessionStorage.removeItem('token');
     
-    // Update state
     setShowLogoutConfirm(false);
     setIsMobileMenuOpen(false);
     
-    // Remove axios authorization header if axios is used globally
     if (window.axios) {
       delete window.axios.defaults.headers.common["Authorization"];
     }
     
-    // Delete any global token variables
     delete window.authToken;
     delete window.adminToken;
     
-    // Navigate to home page with replace (prevents back button issues)
     navigate("/", { replace: true });
   };
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { adminGetAnalyticsOverview } from "../../api/authenticationService";
 import styles from "./AdminOverview.module.css";
 
 const AnalyticsOverview = () => {
@@ -12,25 +13,28 @@ const AnalyticsOverview = () => {
 
   const fetchAnalytics = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/analytics/overview", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setAnalyticsData(data.data || data);
-      } else if (response.status === 401) {
-        setError("Authentication failed. Please log in again.");
+      setLoading(true);
+      setError(null);
+      
+      const response = await adminGetAnalyticsOverview();
+      
+      if (response && response.data) {
+        setAnalyticsData(response.data);
+      } else if (response) {
+        setAnalyticsData(response);
       } else {
-        setError("Failed to fetch analytics data.");
+        setAnalyticsData({});
       }
     } catch (error) {
       console.error("Error fetching analytics:", error);
-      setError("Network error. Please try again.");
+      
+      if (error.message.includes("authentication") || 
+          error.message.includes("token") ||
+          error.message.includes("401")) {
+        setError("Authentication failed. Please log in again.");
+      } else {
+        setError(error.message || "Failed to fetch analytics data. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -199,7 +203,9 @@ const AnalyticsOverview = () => {
             <div className={styles.table_label}>New Sign-ups (30 days)</div>
             <div className={styles.table_value}>{analyticsData?.newUsersLast30Days?.toLocaleString() || 0}</div>
             <div className={styles.table_trend}>
-              {((analyticsData?.newUsersLast30Days / analyticsData?.totalUsers) * 100).toFixed(1)}% of total
+              {analyticsData?.totalUsers > 0 
+                ? ((analyticsData?.newUsersLast30Days / analyticsData?.totalUsers) * 100).toFixed(1)
+                : 0}% of total
             </div>
           </div>
           <div className={styles.table_row}>

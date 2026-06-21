@@ -18,6 +18,26 @@ import AddIcon from "@mui/icons-material/Add";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import CategoryIcon from "@mui/icons-material/Category";
 import styles from "./AdminDashboard.module.css";
+import {
+  adminGetUserProfileSummaries,
+  adminDeleteUser,
+  adminGetUserRoles,
+  adminAssignRole,
+  adminRemoveRole,
+  adminGetSkills,
+  adminCreateSkill,
+  adminUpdateSkill,
+  adminDeleteSkill,
+  adminGetInterests,
+  adminCreateInterest,
+  adminGetCareerGoals,
+  adminCreateCareerGoal,
+  adminDeleteCareerGoal,
+  adminGetMasterData,
+  adminAssignSkillToGoal,
+  adminRemoveSkillFromGoal,
+  logoutUser
+} from "../../Api/authenticationService";
 
 const AdminDashboard = () => {
   const [animate, setAnimate] = useState(false);
@@ -123,56 +143,43 @@ const AdminDashboard = () => {
     return colors[Math.floor(Math.random() * colors.length)];
   };
 
-  // Get JWT token from localStorage
-  const getAuthToken = () => {
-    return localStorage.getItem('token');
-  };
-
-  // ==================== USER MANAGEMENT ENDPOINTS ====================
+  // ==================== USER MANAGEMENT FUNCTIONS ====================
   
   const fetchUsersFromAPI = async () => {
     try {
-      const token = getAuthToken();
-      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/users/profile-summaries', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success && result.data) {
-          const transformedUsers = result.data.map((user, index) => ({
-            id: user.userId || index,
-            name: `${user.firstName} ${user.lastName}`,
-            skills: user.skills.map(skill => skill.skillName),
-            interests: user.interests.map(interest => interest.interestName),
-            careerGoal: user.careerGoalName || "Not Specified",
-            email: user.email,
-            avatar: `${user.firstName} ${user.lastName}`.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
-            color: getRandomColor(),
-            topSkill: user.skills.length > 0 ? user.skills[0].skillName : "General",
-            careerGoalId: user.careerGoalId,
-            skillsWithLevel: user.skills,
-            interestsWithId: user.interests,
-            careerGoalMessage: user.careerGoalMessage,
-            skillsMessage: user.skillsMessage,
-            interestsMessage: user.interestsMessage
-          }));
-          setUsers(transformedUsers);
-          return transformedUsers;
-        }
-      } else if (response.status === 401) {
-        setAlertTitle("Authentication Error");
-        setAlertMessage("Please log in again to continue.");
-        setShowAlert(true);
+      const result = await adminGetUserProfileSummaries();
+      if (result.success && result.data) {
+        const transformedUsers = result.data.map((user, index) => ({
+          id: user.userId || index,
+          name: `${user.firstName} ${user.lastName}`,
+          skills: user.skills.map(skill => skill.skillName),
+          interests: user.interests.map(interest => interest.interestName),
+          careerGoal: user.careerGoalName || "Not Specified",
+          email: user.email,
+          avatar: `${user.firstName} ${user.lastName}`.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
+          color: getRandomColor(),
+          topSkill: user.skills.length > 0 ? user.skills[0].skillName : "General",
+          careerGoalId: user.careerGoalId,
+          skillsWithLevel: user.skills,
+          interestsWithId: user.interests,
+          careerGoalMessage: user.careerGoalMessage,
+          skillsMessage: user.skillsMessage,
+          interestsMessage: user.interestsMessage
+        }));
+        setUsers(transformedUsers);
+        return transformedUsers;
       }
     } catch (error) {
       console.error('Error fetching user profile summaries:', error);
-      setAlertTitle("Error");
-      setAlertMessage("Failed to fetch user profiles from server.");
-      setShowAlert(true);
+      if (error.message.includes("authentication") || error.message.includes("token")) {
+        setAlertTitle("Authentication Error");
+        setAlertMessage("Please log in again to continue.");
+        setShowAlert(true);
+      } else {
+        setAlertTitle("Error");
+        setAlertMessage("Failed to fetch user profiles from server.");
+        setShowAlert(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -180,37 +187,24 @@ const AdminDashboard = () => {
 
   const deleteUser = async (userId) => {
     try {
-      const token = getAuthToken();
-      const response = await fetch(`https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/users/${userId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      return response.ok;
+      await adminDeleteUser(userId);
+      return true;
     } catch (error) {
       console.error('Error deleting user:', error);
+      if (error.message.includes("authentication") || error.message.includes("token")) {
+        setAlertTitle("Authentication Error");
+        setAlertMessage("Please log in again to continue.");
+        setShowAlert(true);
+      }
       return false;
     }
   };
 
   const fetchUserRoles = async (userId) => {
     try {
-      const token = getAuthToken();
-      const response = await fetch(`https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/users/${userId}/roles`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const roles = await response.json();
-        setUserRoles(roles);
-        return roles;
-      }
-      return [];
+      const roles = await adminGetUserRoles(userId);
+      setUserRoles(roles);
+      return roles;
     } catch (error) {
       console.error('Error fetching user roles:', error);
       return [];
@@ -219,16 +213,8 @@ const AdminDashboard = () => {
 
   const assignRoleToUser = async (userId, roleName) => {
     try {
-      const token = getAuthToken();
-      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/users/assign-role', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ userId, roleName })
-      });
-      return response.ok;
+      await adminAssignRole(userId, roleName);
+      return true;
     } catch (error) {
       console.error('Error assigning role:', error);
       return false;
@@ -237,40 +223,19 @@ const AdminDashboard = () => {
 
   const removeRoleFromUser = async (userId, roleName) => {
     try {
-      const token = getAuthToken();
-      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/users/remove-role', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ userId, roleName })
-      });
-      return response.ok;
+      await adminRemoveRole(userId, roleName);
+      return true;
     } catch (error) {
       console.error('Error removing role:', error);
       return false;
     }
   };
-
-  // ==================== SKILL MANAGEMENT ENDPOINTS ====================
   
   const fetchSkills = async () => {
     try {
-      const token = getAuthToken();
-      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/skills', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const skills = await response.json();
-        setMasterData(prev => ({ ...prev, skills }));
-        return skills;
-      }
-      return [];
+      const skills = await adminGetSkills();
+      setMasterData(prev => ({ ...prev, skills }));
+      return skills;
     } catch (error) {
       console.error('Error fetching skills:', error);
       return [];
@@ -279,16 +244,8 @@ const AdminDashboard = () => {
 
   const createSkill = async (skillData) => {
     try {
-      const token = getAuthToken();
-      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/skills', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(skillData)
-      });
-      return response.ok;
+      await adminCreateSkill(skillData);
+      return true;
     } catch (error) {
       console.error('Error creating skill:', error);
       return false;
@@ -297,16 +254,8 @@ const AdminDashboard = () => {
 
   const updateSkill = async (skillId, skillData) => {
     try {
-      const token = getAuthToken();
-      const response = await fetch(`https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/skills/${skillId}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(skillData)
-      });
-      return response.ok;
+      await adminUpdateSkill(skillId, skillData);
+      return true;
     } catch (error) {
       console.error('Error updating skill:', error);
       return false;
@@ -315,39 +264,19 @@ const AdminDashboard = () => {
 
   const deleteSkill = async (skillId) => {
     try {
-      const token = getAuthToken();
-      const response = await fetch(`https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/skills/${skillId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      return response.ok;
+      await adminDeleteSkill(skillId);
+      return true;
     } catch (error) {
       console.error('Error deleting skill:', error);
       return false;
     }
   };
-
-  // ==================== INTEREST MANAGEMENT ENDPOINTS ====================
   
   const fetchInterests = async () => {
     try {
-      const token = getAuthToken();
-      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/interests', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const interests = await response.json();
-        setMasterData(prev => ({ ...prev, interests }));
-        return interests;
-      }
-      return [];
+      const interests = await adminGetInterests();
+      setMasterData(prev => ({ ...prev, interests }));
+      return interests;
     } catch (error) {
       console.error('Error fetching interests:', error);
       return [];
@@ -356,40 +285,19 @@ const AdminDashboard = () => {
 
   const createInterest = async (interestData) => {
     try {
-      const token = getAuthToken();
-      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/interests', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(interestData)
-      });
-      return response.ok;
+      await adminCreateInterest(interestData);
+      return true;
     } catch (error) {
       console.error('Error creating interest:', error);
       return false;
     }
   };
-
-  // ==================== CAREER GOAL MANAGEMENT ENDPOINTS ====================
   
   const fetchCareerGoals = async () => {
     try {
-      const token = getAuthToken();
-      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/careergoals', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const goals = await response.json();
-        setMasterData(prev => ({ ...prev, careerGoals: goals }));
-        return goals;
-      }
-      return [];
+      const goals = await adminGetCareerGoals();
+      setMasterData(prev => ({ ...prev, careerGoals: goals }));
+      return goals;
     } catch (error) {
       console.error('Error fetching career goals:', error);
       return [];
@@ -398,16 +306,8 @@ const AdminDashboard = () => {
 
   const createCareerGoal = async (goalData) => {
     try {
-      const token = getAuthToken();
-      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/careergoal', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(goalData)
-      });
-      return response.ok;
+      await adminCreateCareerGoal(goalData);
+      return true;
     } catch (error) {
       console.error('Error creating career goal:', error);
       return false;
@@ -416,15 +316,8 @@ const AdminDashboard = () => {
 
   const deleteCareerGoal = async (careerGoalId) => {
     try {
-      const token = getAuthToken();
-      const response = await fetch(`https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/career-goals/${careerGoalId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      return response.ok;
+      await adminDeleteCareerGoal(careerGoalId);
+      return true;
     } catch (error) {
       console.error('Error deleting career goal:', error);
       return false;
@@ -433,67 +326,36 @@ const AdminDashboard = () => {
 
   const removeSkillFromGoal = async (careerGoalId, skillId) => {
     try {
-      const token = getAuthToken();
-      const response = await fetch(`https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/career-goals/${careerGoalId}/skills/${skillId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      return response.ok;
+      await adminRemoveSkillFromGoal(careerGoalId, skillId);
+      return true;
     } catch (error) {
       console.error('Error removing skill from career goal:', error);
       return false;
     }
   };
-
-  // ==================== MASTER DATA ENDPOINT ====================
   
   const fetchMasterData = async () => {
     try {
-      const token = getAuthToken();
-      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/MasterData', {
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+      const data = await adminGetMasterData();
+      setMasterData({
+        skills: data.skills || [],
+        interests: data.interests || [],
+        careerGoals: data.careerGoals || []
       });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setMasterData({
-          skills: data.skills || [],
-          interests: data.interests || [],
-          careerGoals: data.careerGoals || []
-        });
-      }
     } catch (error) {
       console.error('Error fetching master data:', error);
     }
   };
-
-  // ==================== SKILL-GOAL ASSIGNMENT ENDPOINT ====================
   
   const assignSkillToGoal = async (assignmentData) => {
     try {
-      const token = getAuthToken();
-      const response = await fetch('https://smartmentor-hbhba0cjf3fbgaeg.germanywestcentral-01.azurewebsites.net/api/Admin/career-goals/assign-skill', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(assignmentData)
-      });
-      return response.ok;
+      await adminAssignSkillToGoal(assignmentData);
+      return true;
     } catch (error) {
       console.error('Error assigning skill to goal:', error);
       return false;
     }
   };
-
-  // ==================== INITIALIZATION ====================
   
   useEffect(() => {
     setAnimate(true);
@@ -1216,7 +1078,6 @@ const AdminDashboard = () => {
           </tbody>
         </table>
       </div>
-
     </div>
   );
 

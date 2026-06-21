@@ -1,5 +1,3 @@
-/* AdminUserGrowth.module.css - Complete Updated Version with Numbers at Top of Bars */
-
 :root {
   --primary-color: #2563eb;
   --primary-dark: #1d4ed8;
@@ -496,7 +494,7 @@
   border-radius: 10px;
 }
 
-/* Chart Bar Styles - Numbers at Top of Bars */
+/* Chart Bar Styles */
 .bar_wrapper {
   flex: 1;
   min-width: 80px;
@@ -552,7 +550,7 @@
   background: linear-gradient(180deg, #f87171, #dc2626);
 }
 
-/* Number positioned directly at the top of each bar */
+/* Number positioned at the top of each bar */
 .bar_number {
   position: absolute;
   left: 50%;
@@ -591,7 +589,7 @@
   border-top: 8px solid #1f2937;
 }
 
-/* For very short bars, ensure numbers are still visible */
+/* ensure numbers are still visible for short bars */
 .bar_number[style*="bottom: 0%"],
 .bar_number[style*="bottom: 1%"],
 .bar_number[style*="bottom: 2%"],
@@ -1157,7 +1155,6 @@
   }
 }
 
-/* Ensure all containers allow overflow for numbers */
 .chart_section,
 .chart_header,
 .chart_container,
@@ -1166,7 +1163,6 @@
   overflow: visible;
 }
 
-/* Additional spacing for the chart area */
 .chart_bars_container {
   overflow-x: auto;
   overflow-y: visible;
